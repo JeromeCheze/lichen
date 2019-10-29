@@ -8,7 +8,7 @@
 | ---------- | ----------- | -------- | ------------------------------------------------------------ |
 | type       | String      | `'line'` | Type of chart (`'line'`, `'heatmap'`, `timing`)              |
 | area       | Boolean     | `false`  | Show area or not                                             |
-| categories | **Various** | `null`   | List of category name ([Explanation here](#catgories-format)) |
+| categories | **Various** | `null`   | List of category name ([Explanation here](#categories-format)) |
 | fixedMin   | Number      | `null`   | Fixed min value                                              |
 | fixedMax   | Number      | `null`   | Fixed max value                                              |
 | title      | String      | `''`     | Title of the chart                                           |
@@ -106,7 +106,7 @@ The data option is an Object in that form :
 
 ### Heatmap chart
 
-The data option is 2 dimensional matrix. The 1st dimension is for the X axis where the start value is defined by `xStart` and the end is implied with `xStep`. The 2nd dimension is for the Y axis where the start value is defined by `yStart` and the end value by `yEnd`. The value itself is mapped to the given color scale which limit values are set by `zStart` and `zEnd`. 
+The data option is 2 dimensional matrix. The 1st dimension is for the X axis where the start value is defined by `xStart` and the end is implied with `xStep`. The 2nd dimension is for the Y axis where the start value is defined by `yStart` and the end value by `yEnd`. The value itself is mapped to the given color scale which limit values are set by `zStart` and `zEnd`.
 
 
 
