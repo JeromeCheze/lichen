@@ -6,9 +6,9 @@
 
 | Name       | Type        | Default  | Description                                                  |
 | ---------- | ----------- | -------- | ------------------------------------------------------------ |
-| type       | String      | `'line'` | Type of chart (`'line'`, `'heatmap'`)                        |
+| type       | String      | `'line'` | Type of chart (`'line'`, `'heatmap'`, `timing`)              |
 | area       | Boolean     | `false`  | Show area or not                                             |
-| categories | <String[]>  | `null`   | List of category name                                        |
+| categories | **Various** | `null`   | List of category name ([Explanation here](#catgories-format)) |
 | fixedMin   | Number      | `null`   | Fixed min value                                              |
 | fixedMax   | Number      | `null`   | Fixed max value                                              |
 | title      | String      | `''`     | Title of the chart                                           |
@@ -71,6 +71,9 @@
 | afterDraw  | Function |         | Called after draw                                            |
 | synCharts  | Function |         | Must return a list of *Lichen* instances that will be synced together. |
 
+
+## [Categories format](#categories-format)
+For type `heatmap`, categories are an array of strings. For type `timing`, categories are an array of object that must includes the keys `key` (which value is related to the data) and `label` that allow to set an explicit description.
 
 
 ## [Data format](#data-format)
