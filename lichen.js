@@ -289,11 +289,17 @@ export default class Lichen {
           y2 = this.getYValue(ev.clientY - pos.y)
       if ((Math.abs(x1 - x2) / this.opt.xStep) > 10) {
         redraw = true
-        this.setDispBounds({ xStart: Math.min(x1, x2), xEnd: Math.max(x1, x2) })
+        this.setDispBounds({
+          xStart: Math.max(Math.min(x1, x2), this.opt.xStart),
+          xEnd: Math.min(Math.max(x1, x2), this.opt.xEnd)
+        })
       }
       if (this.opt.type == 'heatmap' && Math.abs(y1 - y2) > 0) {
         redraw = true
-        this.setDispBounds({ yStart: Math.min(y1, y2), yEnd: Math.max(y1, y2) })
+        this.setDispBounds({
+          yStart: Math.max(Math.min(y1, y2), this.opt.yStart),
+          yEnd: Math.min(Math.max(y1, y2), this.opt.yEnd)
+        })
       }
       if (redraw) {
         this.draw()
@@ -312,14 +318,6 @@ export default class Lichen {
             // do not share yStart and yEnd when chart type is line to prevent issues when syncing with heatmap
             chart.disp[k] = v
           }
-          // if (this.opt.type == 'line') {
-          //   if (['xStart', 'xEnd'].indexOf(k) >= 0) {
-          //     // do not share yStart and yEnd when chart type is line to prevent issues when syncing with heatmap
-          //     chart.disp[k] = v
-          //   }
-          // } else {
-          //   chart.disp[k] = v
-          // }
           redraw = true
         }
       }
@@ -333,13 +331,12 @@ export default class Lichen {
     if (this.action.noMouse) {
       return
     }
-    if (this.opt.crosshair) {
-      this.updateCrosshairAndTooltip(null)
-    }
-    if (this.action.mouse != null) {
-      let ctx = this.ctx2
-      ctx.clearRect(0, 0, this.opt.width, this.opt.height)
-      this.action.mouse = null
+    if (this.action.mouse == null) {
+      if (this.opt.crosshair) {
+        this.updateCrosshairAndTooltip(null)
+      }
+    } else {
+      this.handleMouseUp(ev)
     }
   }
 
