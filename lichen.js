@@ -716,7 +716,7 @@ export default class Lichen {
       let yPos = yValues._.yPos
       boxY = yPos > (o.height / 2) ? yPos - m - boxHeight : yPos + m
     } else {
-      boxY = (o.height - boxHeight) / 2
+      boxY = (o.height - boxHeight - o.xAxisHeight) / 2
     }
     ctx.font = `bold ${o.fontSize}px sans-serif`
     let txtTime = new Date(o.xStart + o.xStep * i).toISOString().replace(/[TZ]/g, ' ')
