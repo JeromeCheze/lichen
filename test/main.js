@@ -53,22 +53,22 @@ window.chart = new Lichen(container, {
   }
 })
 
-let animation = setInterval (() => {
-  window.chart.addData([Math.floor(Math.random() * 1e8 * Math.random())*10], false)
+let animation = setInterval(() => {
+  window.chart.addData([Math.floor(Math.random() * 1e8 * Math.random()) * 10], false)
 }, STEP)
 
 window.STOP = false
-let t1 = new Date ().getTime()
+let t1 = new Date().getTime()
 let refresh = () => {
-  let t2 = new Date ().getTime()
-  if ((t2-t1) > 50) {
+  let t2 = new Date().getTime()
+  if ((t2 - t1) > 50) {
     window.chart.draw()
-    t1 = new Date ().getTime()
+    t1 = new Date().getTime()
   }
   if (window.STOP) {
     clearInterval(animation)
   } else {
-    requestAnimationFrame (refresh)
+    requestAnimationFrame(refresh)
   }
 }
-requestAnimationFrame (refresh)
+requestAnimationFrame(refresh)

@@ -646,8 +646,8 @@ export default class Lichen {
         let pos = this.getXPos(vLine.x)
         let yPos = (
           vLine.position === 'top' ? pad
-          : vLine.position === 'middle' ? (o.height - o.xAxisHeight) / 2
-            : (o.height - o.xAxisHeight) - pad
+            : vLine.position === 'middle' ? (o.height - o.xAxisHeight) / 2
+              : (o.height - o.xAxisHeight) - pad
         )
         ctx.textBaseline = vLine.position
         ctx.strokeStyle = vLine.color
