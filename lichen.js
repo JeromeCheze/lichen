@@ -71,6 +71,8 @@ let defaultOptions = {
   data: [] // { <key>: { color, data }, ... } NOTE: colorScale not available with multi series
 }
 
+let vLineDefault = { name: '', color: 'black', width: 1, display: true, position: 'top' }
+
 export default class Lichen {
   constructor (container, opt) {
     this.container = container
@@ -109,6 +111,9 @@ export default class Lichen {
       disp: Object.assign({}, this.disp)
     }
     this.initCanvas()
+    this.opt.vLines = this.opt.vLines.map(vLine => {
+      return Object.assign(JSON.parse(JSON.stringify(vLineDefault)), vLine)
+    })
     this.draw()
   }
 
@@ -629,7 +634,7 @@ export default class Lichen {
   }
 
   addVLine (vline, redraw = true) {
-    this.opt.vLines.push(Object.assign({ name: '', color: 'black', width: 1, display: true, position: 'top' }, vline))
+    this.opt.vLines.push(Object.assign(vLineDefault, vline))
     if (redraw) {
       this.draw()
     }
@@ -649,6 +654,11 @@ export default class Lichen {
             : vLine.position === 'middle' ? (o.height - o.xAxisHeight) / 2
               : (o.height - o.xAxisHeight) - pad
         )
+        let clearRectYPos = (
+          vLine.position === 'top' ? yPos - pad / 2
+            : vLine.position === 'middle' ? yPos - (o.fontSize + pad) / 2
+              : yPos - o.fontSize - pad / 2
+        )
         ctx.textBaseline = vLine.position
         ctx.strokeStyle = vLine.color
         ctx.fillStyle = vLine.color
@@ -657,6 +667,8 @@ export default class Lichen {
         ctx.moveTo(pos + 0.5, 0)
         ctx.lineTo(pos + 0.5, o.height - o.xAxisHeight)
         ctx.stroke()
+        let textSize = ctx.measureText(vLine.name)
+        ctx.clearRect(pos + pad / 2, clearRectYPos, textSize.width + pad, o.fontSize + pad)
         ctx.fillText(vLine.name, pos + pad, yPos)
       }
     }

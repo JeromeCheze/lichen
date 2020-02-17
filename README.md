@@ -4,23 +4,25 @@
 
 ### Main options
 
-| Name       | Type        | Default  | Description                                                  |
-| ---------- | ----------- | -------- | ------------------------------------------------------------ |
-| type       | String      | `'line'` | Type of chart (`'line'`, `'heatmap'`, `timing`)              |
-| area       | Boolean     | `false`  | Show area or not                                             |
-| categories | **Various** | `null`   | List of category name ([Explanation here](#categories-format)) |
-| fixedMin   | Number      | `null`   | Fixed min value                                              |
-| fixedMax   | Number      | `null`   | Fixed max value                                              |
-| title      | String      | `''`     | Title of the chart                                           |
-| crosshair  | Boolean     | `false`  | Show crosshair or not                                        |
-| xStart     | Number      | `null`   | **Required**, start time of the data [ms since epoch]        |
-| xStep      | Number      | `null`   | **Required**, duration between two samples [ms]              |
-| yStart     | Number      | `null`   | **Required for heatmap**, start of the Y axis                |
-| yEnd       | Number      | `null`   | **Required for heatmap**, end of the Y axis                  |
-| zStart     | Number      | `null`   | **Required for heatmap**, start of the Z axis                |
-| zEnd       | Number      | `null`   | **Required for heatmap**, end of the Z axis                  |
-| debounce   | Boolean     | `null`   | Do not compute intermediate visualization on interaction, use image transformation instead for better performance (useful for heatmap) |
-| data       | **Various** | `[]`     | The type of the data depends from the type of the charts ([explanation here](#data-format)) |
+| Name            | Type        | Default  | Description                                                  |
+| --------------- | ----------- | -------- | ------------------------------------------------------------ |
+| type            | String      | `'line'` | Type of chart (`'line'`, `'heatmap'`, `timing`)              |
+| area            | Boolean     | `false`  | Show area or not                                             |
+| categories      | **Various** | `null`   | List of category name ([Explanation here](#categories-format)) |
+| fixedMin        | Number      | `null`   | Fixed min value                                              |
+| fixedMax        | Number      | `null`   | Fixed max value                                              |
+| title           | String      | `''`     | Title of the chart                                           |
+| crosshair       | Boolean     | `false`  | Show crosshair or not                                        |
+| yAxisPowerOfTen | Boolean     | `true`   | Format y axis ticks with power of ten                        |
+| xStart          | Number      | `null`   | **Required**, start time of the data [ms since epoch]        |
+| xStep           | Number      | `null`   | **Required**, duration between two samples [ms]              |
+| yStart          | Number      | `null`   | **Required for heatmap**, start of the Y axis                |
+| yEnd            | Number      | `null`   | **Required for heatmap**, end of the Y axis                  |
+| zStart          | Number      | `null`   | **Required for heatmap**, start of the Z axis                |
+| zEnd            | Number      | `null`   | **Required for heatmap**, end of the Z axis                  |
+| debounce        | Boolean     | `null`   | Do not compute intermediate visualization on interaction, use image transformation instead for better performance (useful for heatmap) |
+| vLines          | Array       | `[]`     | List of vLines ([explanation here](#vline-format))           |
+| data            | **Various** | `[]`     | The type of the data depends from the type of the charts ([explanation here](#data-format)) |
 
 
 
@@ -32,6 +34,7 @@
 | categoryTooltipValues | Boolean  | `true`  | Show values of each category in tooltip for category heatmap, otherwise only the datetime is shown. |
 | TooltipFormatter      | Function |         | Format the given value                                       |
 | units                 | String   | `''`    | Set units that appear in tooltip                             |
+| displayDateInTooltip  | Boolean  | `true`  | Display date in tooltip                                      |
 
 
 
@@ -70,18 +73,31 @@
 | beforeDraw | Function |         | Called before draw. If it returns `false` the draw is aborted. |
 | afterDraw  | Function |         | Called after draw                                            |
 | synCharts  | Function |         | Must return a list of *Lichen* instances that will be synced together. |
+| onDblClick | Function |         | Called on double click on chart. If it returns `true`, it will reset the zoom (action by defaut). |
 
 
 ## [Categories format](#categories-format)
 For type `heatmap`, categories are an array of strings. For type `timing`, categories are an array of object that must includes the keys `key` (which value is related to the data) and `label` that allow to set an explicit description.
 
+## [vLine format](#vline-format)
+
+The vLine option is an Array of Object in that form:
+```javascript
+{
+    x: <xValue>, // required
+    name: '',
+    color: 'black'
+    width: 1,
+    display: true,
+    position: 'top' // other values: 'middle', 'bottom'
+}
+```
 
 ## [Data format](#data-format)
 
 ### Single serie line chart
 
 The data option is an Array of number (<Number[]>).
-
 
 
 ### Multi series line chart

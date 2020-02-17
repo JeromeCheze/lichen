@@ -31,7 +31,7 @@ let container = document.querySelector('#chart')
 // })
 
 let data = []
-const STEP = 5
+const STEP = 10
 
 window.chart = new Lichen(container, {
   title: 'test',
@@ -48,9 +48,14 @@ window.chart = new Lichen(container, {
     let i = this.getIndexFromXValue(xValue)
     let xPos = this.getXPosFromIndex(i)
     let x = this.getXValue(xPos)
-    this.addVLine({ x, name: 'PROUT' })
+    this.addVLine({ x, name: 'PROUT', position: 'top' })
     return true
-  }
+  },
+  vLines: [
+    { x: 2000, position: 'top', name: 'TOP' },
+    { x: 4000, position: 'middle', name: 'MIDDLE' },
+    { x: 6000, position: 'bottom', name: 'BOTTOM' }
+  ]
 })
 
 let animation = setInterval(() => {
