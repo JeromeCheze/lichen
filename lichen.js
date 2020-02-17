@@ -39,9 +39,13 @@ let defaultOptions = {
   categoryMargin: 1,
 
   tooltip: false, // ignored in type heatmap
+  yAxisPowerOfTen: true,
+  displayDateInTooltip: true,
   categoryTooltipValues: true,
   tooltipFormatter: x => x, // ignored in type heatmap
   units: '', // ignored in type heatmap
+
+  vLines: [], // [{ x: <xValue>, name: '<name>', color: '<color>', width: '<width>', display: true, position: 'top|middle|bottom' }, ...]
 
   /*  time axis */
   xStart: null,
@@ -59,6 +63,8 @@ let defaultOptions = {
 
   beforeDraw: function () { return true },
   afterDraw: function () {},
+
+  onDblClick: function (xValue) { return true },
 
   syncCharts: function () { return [] },
 
@@ -385,7 +391,7 @@ export default class Lichen {
     }
   }
 
-  handleDblClick (ev) {
+  resetZoom () {
     this.setDispBounds({
       xStart: this.opt.xStart,
       xEnd: this.opt.xEnd,
@@ -393,6 +399,14 @@ export default class Lichen {
       yEnd: this.opt.yEnd
     })
     this.draw()
+  }
+
+  handleDblClick (ev) {
+    let pos = this.ctx2.canvas.getBoundingClientRect()
+    let xValue = this.getXValue(ev.clientX - pos.x)
+    if (this.opt.onDblClick.call(this, xValue)) {
+      this.resetZoom()
+    }
   }
 
   handleTouchStart (ev) {
@@ -602,6 +616,53 @@ export default class Lichen {
     return result
   }
 
+  addData (data, redraw = false) {
+    if (this.opt.type === 'line') {
+      if (this.opt.data instanceof Array) {
+        this.opt.data = this.opt.data.concat(data)
+        this.opt.xEnd = this.disp.xEnd = this.opt.xStart + this.getDataLength() * this.opt.xStep
+      }
+    }
+    if (redraw) {
+      this.draw()
+    }
+  }
+
+  addVLine (vline, redraw = true) {
+    this.opt.vLines.push(Object.assign({ name: '', color: 'black', width: 1, display: true, position: 'top' }, vline))
+    if (redraw) {
+      this.draw()
+    }
+  }
+
+  drawVLines () {
+    let o = this.opt
+    let ctx = this.ctx
+    let pad = 4
+    ctx.save()
+    ctx.font = `${o.fontSize}px sans-serif`
+    for (let vLine of o.vLines) {
+      if (vLine.display && vLine.x >= this.disp.xStart && vLine.x <= this.disp.xEnd) {
+        let pos = this.getXPos(vLine.x)
+        let yPos = (
+          vLine.position === 'top' ? pad
+          : vLine.position === 'middle' ? (o.height - o.xAxisHeight) / 2
+            : (o.height - o.xAxisHeight) - pad
+        )
+        ctx.textBaseline = vLine.position
+        ctx.strokeStyle = vLine.color
+        ctx.fillStyle = vLine.color
+        ctx.lineWidth = vLine.width
+        ctx.beginPath()
+        ctx.moveTo(pos + 0.5, 0)
+        ctx.lineTo(pos + 0.5, o.height - o.xAxisHeight)
+        ctx.stroke()
+        ctx.fillText(vLine.name, pos + pad, yPos)
+      }
+    }
+    ctx.restore()
+  }
+
   drawCrosshair (xValue) {
     if (!this.opt.crosshair) {
       return
@@ -705,7 +766,7 @@ export default class Lichen {
     }
 
     // compute box position and size
-    let [m, b, p, f] = [8, 1, 3, o.fontSize]// [margin, border, padding, fontSize]
+    let [m, b, p, f] = [8, 1, 3, o.fontSize] // [margin, border, padding, fontSize]
     let nbSeries = Object.keys(yValues).length
     let boxHeight = 2 * b + (1 + nbSeries) * f + (2 + nbSeries) * p
     let boxY
@@ -716,7 +777,8 @@ export default class Lichen {
       boxY = (o.height - boxHeight - o.xAxisHeight) / 2
     }
     ctx.font = `bold ${o.fontSize}px sans-serif`
-    let txtTime = new Date(o.xStart + o.xStep * i).toISOString().replace(/[TZ]/g, ' ')
+    let tooltipDate = new Date(o.xStart + o.xStep * i)
+    let txtTime = o.displayDateInTooltip ? tooltipDate.toISOString().replace(/[TZ]/g, ' ') : tooltipDate.toISOString().slice(11, -1)
     let boxWidth = 2 * b + 2 * p + Math.max(
       ctx.measureText(txtTime).width,
       Math.max.apply(null, Object.values(yValues).map(x => ctx.measureText(`${x.key}${x.strValue}`).width))
@@ -814,7 +876,7 @@ export default class Lichen {
     let i = 0
     let a = scales[0]
     let d = new Date()
-    let tickInterval = 40 * (this.disp.xEnd - this.disp.xStart) / width
+    let tickInterval = 80 * (this.disp.xEnd - this.disp.xStart) / width
     while (tickInterval < scales[i]) {
       a = scales[i++]
     }
@@ -884,9 +946,10 @@ export default class Lichen {
         ctx.fillStyle = o.textColor
         ctx.fillRect(xPos - 4, yPos, 4, 1)
         let tickText = (
-          pow > 4 ? (y / 1e6).toFixed(Math.abs(6 - pow)) + 'e6'
-            : pow >= 3 ? (y / 1e3).toFixed(Math.abs(3 - pow)) + 'e3'
-              : y.toFixed(2)
+          o.yAxisPowerOfTen === false ? y.toFixed(2)
+            : pow > 4 ? (y / 1e6).toFixed(Math.abs(6 - pow)) + 'e6'
+              : pow >= 3 ? (y / 1e3).toFixed(Math.abs(3 - pow)) + 'e3'
+                : y.toFixed(2)
         )
         ctx.fillText(tickText, xPos - 8, yPos)
       }
@@ -1184,6 +1247,7 @@ export default class Lichen {
       ctx.stroke()
     }
     ctx.restore()
+    this.drawVLines()
   }
 
   debounce () {
