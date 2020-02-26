@@ -44,6 +44,8 @@ let defaultOptions = {
   categoryTooltipValues: true,
   tooltipFormatter: x => x, // ignored in type heatmap
   units: '', // ignored in type heatmap
+  reverseXZoom: false,
+  reverseYZoom: false,
 
   vLines: [], // [{ x: <xValue>, name: '<name>', color: '<color>', width: '<width>', display: true, position: 'top|middle|bottom' }, ...]
 
@@ -389,9 +391,9 @@ export default class Lichen {
       delta = this.action.wheelDelta
       this.action.wheelDelta = 0
       if (ev.ctrlKey || ev.metaKey) {
-        Math.sign(delta) > 0 ? this.yZoom(0.8) : this.yZoom(1.2)
+        Math.sign(delta) > 0 ? this.yZoom(this.opt.reverseYZoom ? 1.2 : 0.8) : this.yZoom(this.opt.reverseYZoom ? 0.8 : 1.2)
       } else {
-        Math.sign(delta) > 0 ? this.xZoom(0.8) : this.xZoom(1.2)
+        Math.sign(delta) > 0 ? this.xZoom(this.opt.reverseXZoom ? 1.2 : 0.8) : this.xZoom(this.opt.reverseXZoom ? 0.8 : 1.2)
       }
     }
   }
