@@ -14,6 +14,8 @@
 | title           | String      | `''`     | Title of the chart                                           |
 | crosshair       | Boolean     | `false`  | Show crosshair or not                                        |
 | yAxisPowerOfTen | Boolean     | `true`   | Format y axis ticks with power of ten                        |
+| reverseXZoom    | Boolean     | `false`  | Reverse wheel interaction for x zoom                         |
+| reverseYZoom    | Boolean     | `false`  | Reverse wheel interaction for y zoom                         |
 | xStart          | Number      | `null`   | **Required**, start time of the data [ms since epoch]        |
 | xStep           | Number      | `null`   | **Required**, duration between two samples [ms]              |
 | yStart          | Number      | `null`   | **Required for heatmap**, start of the Y axis                |
