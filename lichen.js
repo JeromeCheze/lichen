@@ -64,7 +64,7 @@ let defaultOptions = {
   beforeDraw: function () { return true },
   afterDraw: function () {},
 
-  onDblClick: function (xValue) { return true },
+  onDblClick: function (lichenInstance, xValue) { return true },
 
   syncCharts: function () { return [] },
 
@@ -76,7 +76,7 @@ let vLineDefault = { name: '', color: 'black', width: 1, display: true, position
 export default class Lichen {
   constructor (container, opt) {
     this.container = container
-    this.opt = Object.assign({}, defaultOptions)
+    this.opt = Object.assign({ vLines: [] }, defaultOptions)
     Object.assign(this.opt, opt)
     this.opt.xEnd = this.opt.xStart + this.getDataLength() * this.opt.xStep
     // if (this.opt.categories == null) {
@@ -409,7 +409,7 @@ export default class Lichen {
   handleDblClick (ev) {
     let pos = this.ctx2.canvas.getBoundingClientRect()
     let xValue = this.getXValue(ev.clientX - pos.x)
-    if (this.opt.onDblClick.call(this, xValue)) {
+    if (this.opt.onDblClick(this, xValue)) {
       this.resetZoom()
     }
   }
@@ -634,7 +634,8 @@ export default class Lichen {
   }
 
   addVLine (vline, redraw = true) {
-    this.opt.vLines.push(Object.assign(vLineDefault, vline))
+    let vLineClone = Object.assign({}, vLineDefault)
+    this.opt.vLines.push(Object.assign(vLineClone, vline))
     if (redraw) {
       this.draw()
     }
