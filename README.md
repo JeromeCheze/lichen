@@ -73,7 +73,7 @@
 | beforeDraw | Function |         | Called before draw. If it returns `false` the draw is aborted. |
 | afterDraw  | Function |         | Called after draw                                            |
 | synCharts  | Function |         | Must return a list of *Lichen* instances that will be synced together. |
-| onDblClick | Function |         | Called on double click on chart. If it returns `true`, it will reset the zoom (action by defaut). |
+| onDblClick | Function |         | Called on double click on chart. If it returns `true`, it will reset the zoom (action by defaut). Given argument: lichenInstance, xValue |
 
 
 ## [Categories format](#categories-format)
