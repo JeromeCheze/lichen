@@ -8,6 +8,7 @@
 | --------------- | ----------- | -------- | ------------------------------------------------------------ |
 | type            | String      | `'line'` | Type of chart (`'line'`, `'heatmap'`, `timing`)              |
 | area            | Boolean     | `false`  | Show area or not                                             |
+| stacked         | Boolean     | `false`  | Stack data or not                                            |
 | categories      | **Various** | `null`   | List of category name ([Explanation here](#categories-format)) |
 | fixedMin        | Number      | `null`   | Fixed min value                                              |
 | fixedMax        | Number      | `null`   | Fixed max value                                              |
@@ -65,6 +66,9 @@
 | gridColor      | String | `rgba(136, 136, 136, 0.1)` | The grid color                                               |
 | categoryHeight | Number | `15`                       | The height for one category (not recommended to be less than `fontSize`) |
 | categoryMargin | Number | `1`                        | The margin between two categories                            |
+| areaFillOpacity| Number | `1`                        | The opacity of fill color for area                           |
+| titleFontSize  | Number | `14`                       | The title font size                                          |
+| legendFontSize | Number | `12`                       | The legend font size                                         |
 
 
 
