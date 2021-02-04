@@ -1175,7 +1175,7 @@ export default class Lichen {
     let minValue = null
     let maxValue = null
     let groupValue = {}
-    let data = o.data instanceof Array ? { _: { data: o.data } } : o.data
+    let data = o.data instanceof Array ? { _: { data: o.data, enabled: true } } : o.data
     for (let i = iStart; i < iEnd; i += xValuesPerPixel) {
       for (let [k, v] of Object.entries(data)) {
         if (!v.enabled) {
