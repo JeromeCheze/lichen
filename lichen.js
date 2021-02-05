@@ -1009,9 +1009,10 @@ export default class Lichen {
         ctx.fillRect(xPos - 4, yPos, 4, 1)
         let tickText = (
           o.yAxisPowerOfTen === false ? y.toFixed(2)
-            : pow > 4 ? (y / 1e6).toFixed(Math.abs(6 - pow)) + 'e6'
-              : pow >= 3 ? (y / 1e3).toFixed(Math.abs(3 - pow)) + 'e3'
-                : y.toFixed(2)
+            : pow >= 9 ? (y / 1e9).toFixed(0) + 'e9'
+              : pow >= 6 ? (y / 1e6).toFixed(0) + 'e6'
+                : pow >= 3 ? (y / 1e3).toFixed(0) + 'e3'
+                  : y.toFixed(2)
         )
         ctx.fillText(tickText, xPos - 8, yPos)
       }
