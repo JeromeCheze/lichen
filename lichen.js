@@ -580,13 +580,16 @@ export default class Lichen {
           cursor: 'pointer'
         })
         let valueLabel = document.createElement('span')
+        Object.assign(valueLabel.style, { cursor: 'pointer' })
         valueLabel.innerHTML = k
-        colorBox.addEventListener('click', ev => {
+        const toggleSerieHandler = ev => {
           v.enabled = !v.enabled
           colorBox.style.background = v.enabled ? v.color : '#ddd'
           valueLabel.style.color = v.enabled ? '#000' : '#888'
           this.draw()
-        })
+        }
+        colorBox.addEventListener('click', ev => toggleSerieHandler)
+        valueLabel.addEventListener('click', ev => toggleSerieHandler)
         legendContainer.appendChild(colorBox)
         legendContainer.appendChild(valueLabel)
       }
@@ -775,12 +778,17 @@ export default class Lichen {
     let yValues = {}
     let keys = Object.keys(data)
     for (let [keyIndex, k] of keys.entries()) {
+      if (!data[k].enabled) {
+        continue
+      }
       let yValue = data[k].data[i]
       let yPos = yValue != null && o.type !== 'timing' ? this.getYPos(yValue) : null
       if (yPos != null && o.stacked) {
         let yPosValue = yValue
         for (let j = keyIndex + 1; j < keys.length; j++) {
-          yPosValue += data[keys[j]].data[i]
+          if (data[keys[j]].enabled) {
+            yPosValue += data[keys[j]].data[i]
+          }
         }
         yPos = this.getYPos(yPosValue)
       }
@@ -1225,11 +1233,11 @@ export default class Lichen {
       maxValue = o.fixedMax
     }
     let amplitude = maxValue - minValue
-    if (amplitude < 1) {
-      amplitude = 1
+    if (amplitude < 0.1) {
+      amplitude = 0.1
     }
-    this.disp.yStart = minValue - amplitude * 0.2
-    this.disp.yEnd = maxValue + amplitude * 0.2
+    this.disp.yStart = minValue - amplitude * 0.1
+    this.disp.yEnd = maxValue + amplitude * 0.1
 
     this.drawYAxis()
 
