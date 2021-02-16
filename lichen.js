@@ -1237,8 +1237,8 @@ export default class Lichen {
     if (amplitude < 0.1) {
       amplitude = 0.1
     }
-    this.disp.yStart = minValue - amplitude * 0.1
-    this.disp.yEnd = maxValue + amplitude * 0.1
+    this.disp.yStart = o.fixedMin != null ? minValue : minValue - amplitude * 0.1
+    this.disp.yEnd = o.fixedMax != null ? maxValue : maxValue + amplitude * 0.1
 
     this.drawYAxis()
 
