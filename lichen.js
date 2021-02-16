@@ -1227,10 +1227,10 @@ export default class Lichen {
         }
       }
     }
-    if (o.fixedMin) {
+    if (o.fixedMin != null) {
       minValue = o.fixedMin
     }
-    if (o.fixedMax) {
+    if (o.fixedMax != null) {
       maxValue = o.fixedMax
     }
     let amplitude = maxValue - minValue
