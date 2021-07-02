@@ -938,7 +938,7 @@ export default class Lichen {
     let i = 0
     let a = scales[0]
     let d = new Date()
-    let tickInterval = 80 * (this.disp.xEnd - this.disp.xStart) / width
+    let tickInterval = 60 * (this.disp.xEnd - this.disp.xStart) / width
     while (tickInterval < scales[i]) {
       a = scales[i++]
     }
