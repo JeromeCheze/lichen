@@ -26,6 +26,8 @@
 | debounce        | Boolean     | `null`   | Do not compute intermediate visualization on interaction, use image transformation instead for better performance (useful for heatmap) |
 | vLines          | Array       | `[]`     | List of vLines ([explanation here](#vline-format))           |
 | data            | **Various** | `[]`     | The type of the data depends from the type of the charts ([explanation here](#data-format)) |
+| syncScale       | Boolean     | `false`  | Sync Y scale with other charts returned by the method `'syncCharts'` |
+| displayStats    | Boolean     | `false`  | Display max, min, avg and rms values. Works for single serie of type `'line'` (or `'area'`) |
 
 
 

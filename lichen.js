@@ -5,6 +5,7 @@ let defaultOptions = {
   area: false, // ignored in type heatmap and with multi series
   stacked: false, // ignored in type heatmap
   categories: null, // ignored in type line
+  syncScale: false, // used to sync Y scale with other charts returned by the method syncCharts
 
   fixedMin: null, // ignored in type heatmap
   fixedMax: null, // ignored in type heatmap
@@ -43,6 +44,7 @@ let defaultOptions = {
   categoryMargin: 1,
 
   tooltip: false, // ignored in type heatmap
+  displayStats: false, // works for single serie of type line (or area)
   yAxisPowerOfTen: true,
   displayDateInTooltip: true,
   categoryTooltipValues: true,
@@ -98,6 +100,13 @@ export default class Lichen {
       zStart: this.opt.zStart,
       zEnd: this.opt.zEnd
     }
+    this.dispStats = {
+      min: null,
+      max: null,
+      avg: null,
+      rms: null
+    }
+    this.groupValue = {}
     this.action = {
       noMouse: false,
       wheelDelta: null,
@@ -242,7 +251,7 @@ export default class Lichen {
   }
 
   updateCrosshairAndTooltip (xPos) {
-    let xValue = this.getXValue(xPos)
+    let xValue = xPos != null ? this.getXValue(xPos) : null
     if (this.opt.crosshair) {
       this.drawCrosshair(xValue)
       for (let chart of this.opt.syncCharts()) {
@@ -252,7 +261,7 @@ export default class Lichen {
         chart.drawCrosshair(xValue)
       }
     }
-    if (this.opt.tooltip) {
+    if (this.opt.tooltip && xPos != null) {
       this.drawTooltip(xValue)
     }
   }
@@ -530,10 +539,14 @@ export default class Lichen {
     }
     this.container.innerHTML = ''
     let titleContainer = document.createElement('div')
+    let statsContainer = document.createElement('span')
+    this.dispStats.container = statsContainer
     let canvasContainer = document.createElement('div')
     let mainCanvas = document.createElement('canvas')
     let actionCanvas = document.createElement('canvas')
     titleContainer.innerHTML = o.title
+    titleContainer.appendChild(statsContainer)
+    Object.assign(statsContainer.style, {float: 'right', fontSize: '10px'})
     Object.assign(this.container.style, { background: 'white' })
     Object.assign(titleContainer.style, { padding: '10px', textAlign: 'center', fontSize: `${o.titleFontSize}px` })
     Object.assign(canvasContainer.style, { position: 'relative', width: `${o.width}px`, height: `${o.height}px` })
@@ -582,14 +595,17 @@ export default class Lichen {
         let valueLabel = document.createElement('span')
         Object.assign(valueLabel.style, { cursor: 'pointer' })
         valueLabel.innerHTML = k
+        if (v.title != null) {
+          valueLabel.title = v.title
+        }
         const toggleSerieHandler = ev => {
           v.enabled = !v.enabled
           colorBox.style.background = v.enabled ? v.color : '#ddd'
           valueLabel.style.color = v.enabled ? '#000' : '#888'
           this.draw()
         }
-        colorBox.addEventListener('click', ev => toggleSerieHandler)
-        valueLabel.addEventListener('click', ev => toggleSerieHandler)
+        colorBox.addEventListener('click', toggleSerieHandler)
+        valueLabel.addEventListener('click', toggleSerieHandler)
         legendContainer.appendChild(colorBox)
         legendContainer.appendChild(valueLabel)
       }
@@ -771,10 +787,13 @@ export default class Lichen {
     }
     let ctx = this.ctx2
     let i = this.getIndexFromXValue(xValue)
+    if (i < 0) {
+      return
+    }
     let xPos = this.getXPosFromIndex(i)
 
     // prepare yValues and handle multi series
-    let data = o.data instanceof Array ? { _: { data: o.data } } : o.data
+    let data = o.data instanceof Array ? { _: { data: o.data, enabled: true } } : o.data
     let yValues = {}
     let keys = Object.keys(data)
     for (let [keyIndex, k] of keys.entries()) {
@@ -1166,14 +1185,12 @@ export default class Lichen {
     ctx.restore()
   }
 
-  drawLine () {
+  drawLine (skipDataPreparation = false) {
     let ctx = this.ctx
-
-    // process data
     let o = this.opt
     let iStart = Math.max(0, this.getIndexFromXValue(this.disp.xStart) - 2)
     let iEnd = Math.min(this.getDataLength(), this.getIndexFromXValue(this.disp.xEnd) + 2)
-    let width = this.opt.width - this.opt.yAxisWidth
+    let width = o.width - o.yAxisWidth
     let height = this.opt.height - this.opt.xAxisHeight
     let xValuesPerPixel = (this.disp.xEnd - this.disp.xStart) / (width * o.xStep)
     let xStep = 1
@@ -1181,64 +1198,108 @@ export default class Lichen {
       xStep = 1 / xValuesPerPixel
       xValuesPerPixel = 1
     }
-    let minValue = null
-    let maxValue = null
-    let groupValue = {}
-    let data = o.data instanceof Array ? { _: { data: o.data, enabled: true } } : o.data
-    for (let i = iStart; i < iEnd; i += xValuesPerPixel) {
-      for (let [k, v] of Object.entries(data)) {
-        if (!v.enabled) {
-          continue
+    if (!skipDataPreparation) {
+      // process data
+      let minValue = null
+      let maxValue = null
+      let groupValue = {}
+      let count = 0
+      let sum = 0
+      let sq_sum = 0
+      let data = o.data instanceof Array ? { _: { data: o.data, enabled: true } } : o.data
+      for (let i = iStart; i < iEnd; i += xValuesPerPixel) {
+        for (let [k, v] of Object.entries(data)) {
+          if (!v.enabled) {
+            continue
+          }
+          if (groupValue[k] == null) {
+            groupValue[k] = []
+          }
+          let g = v.data.slice(i, i + xValuesPerPixel).filter(x => x != null)
+          if (g.length === 0) {
+            groupValue[k].push(null)
+            continue
+          }
+          let groupMin = null
+          let groupMax = null
+          for (let v of g) {
+            groupMin = groupMin == null ? v : Math.min(groupMin, v)
+            groupMax = groupMax == null ? v : Math.max(groupMax, v)
+            sq_sum += v * v
+            sum += v
+            count++
+          }
+          minValue = minValue == null ? groupMin : Math.min(minValue, groupMin)
+          maxValue = maxValue == null ? groupMax : Math.max(maxValue, groupMax)
+          groupValue[k].push([groupMin, groupMax])
         }
-        if (groupValue[k] == null) {
-          groupValue[k] = []
-        }
-        let g = v.data.slice(i, i + xValuesPerPixel).filter(x => x != null)
-        if (g.length === 0) {
-          groupValue[k].push(null)
-          continue
-        }
-        let groupMin = null
-        let groupMax = null
-        for (let v of g) {
-          groupMin = groupMin == null ? v : Math.min(groupMin, v)
-          groupMax = groupMax == null ? v : Math.max(groupMax, v)
-        }
-        minValue = minValue == null ? groupMin : Math.min(minValue, groupMin)
-        maxValue = maxValue == null ? groupMax : Math.max(maxValue, groupMax)
-        groupValue[k].push([groupMin, groupMax])
       }
-    }
-    if (o.stacked) {
-      let keys = Object.keys(groupValue)
-      for (let [keyIndex, k] of keys.entries()) {
-        for (let [i, g] of groupValue[k].entries()) {
-          if (g != null) {
-            let [stackedValueMin, stackedValueMax] = g
-            for (let j = keyIndex + 1; j < keys.length; j++) {
-              let currGroup = groupValue[keys[j]][i]
-              stackedValueMin += currGroup[0]
-              stackedValueMax += currGroup[1]
-              maxValue = Math.max(maxValue, stackedValueMax)
+  
+      let avg = sum / count
+      if (Object.keys(data).length === 1) {
+        this.dispStats.min = minValue
+        this.dispStats.max = maxValue
+        this.dispStats.avg = avg
+        this.dispStats.rms = Math.sqrt((sq_sum - 2 * avg * sum + count * avg * avg) / count)
+      }
+  
+      if (o.stacked) {
+        let keys = Object.keys(groupValue)
+        for (let [keyIndex, k] of keys.entries()) {
+          for (let [i, g] of groupValue[k].entries()) {
+            if (g != null) {
+              let [stackedValueMin, stackedValueMax] = g
+              for (let j = keyIndex + 1; j < keys.length; j++) {
+                let currGroup = groupValue[keys[j]][i]
+                stackedValueMin += currGroup[0]
+                stackedValueMax += currGroup[1]
+                maxValue = Math.max(maxValue, stackedValueMax)
+              }
+              g[0] = stackedValueMin
+              g[1] = stackedValueMax
             }
-            g[0] = stackedValueMin
-            g[1] = stackedValueMax
           }
         }
       }
+      if (o.fixedMin != null) {
+        minValue = o.fixedMin
+      }
+      if (o.fixedMax != null) {
+        maxValue = o.fixedMax
+      }
+      let amplitude = maxValue - minValue
+      if (amplitude < 0.1) {
+        amplitude = 0.1
+      }
+      this.disp.yStart = o.fixedMin != null ? minValue : minValue - amplitude * 0.1
+      this.disp.yEnd = o.fixedMax != null ? maxValue : maxValue + amplitude * 0.1
+      this.groupValue = groupValue
     }
-    if (o.fixedMin != null) {
-      minValue = o.fixedMin
+    if (o.syncScale) {
+      let maxAmp = this.dispStats.max - this.dispStats.min
+      let wait = false
+      // check that all charts are ready
+      for (let chart of o.syncCharts()) {
+        if (chart == this) {
+          continue
+        }
+        if (chart.dispStats.min == null || chart.dispStats.max == null) {
+          wait = true
+          break
+        }
+        maxAmp = Math.max(maxAmp, chart.dispStats.max - chart.dispStats.min)
+      }
+      if (wait) {
+        console.log(o.title, 'Not all charts are ready, waiting 50 ms...')
+        setTimeout(() => {
+          this.drawLine(true)
+        }, 50)
+        return
+      }
+      let mid = (this.dispStats.min + this.dispStats.max) / 2
+      this.disp.yStart = mid - maxAmp / 2 - maxAmp * 0.1
+      this.disp.yEnd = mid + maxAmp / 2 + maxAmp * 0.1
     }
-    if (o.fixedMax != null) {
-      maxValue = o.fixedMax
-    }
-    let amplitude = maxValue - minValue
-    if (amplitude < 0.1) {
-      amplitude = 0.1
-    }
-    this.disp.yStart = o.fixedMin != null ? minValue : minValue - amplitude * 0.1
-    this.disp.yEnd = o.fixedMax != null ? maxValue : maxValue + amplitude * 0.1
 
     this.drawYAxis()
 
@@ -1278,7 +1339,7 @@ export default class Lichen {
 
     // draw area
     if (o.area) {
-      for (let [k, v] of Object.entries(groupValue)) {
+      for (let [k, v] of Object.entries(this.groupValue)) {
         if (data[k].color != null) {
           if (data[k].color.indexOf('rgb') === 0) {
             ctx.fillStyle = data[k].color.replace('rgb', 'rgba').replace(')', `, ${o.areaFillOpacity})`)
@@ -1316,7 +1377,7 @@ export default class Lichen {
       }
     }
 
-    for (let [k, v] of Object.entries(groupValue)) {
+    for (let [k, v] of Object.entries(this.groupValue)) {
       // set fixed color for mutil series
       if (!(o.data instanceof Array)) {
         ctx.strokeStyle = o.data[k].color
@@ -1386,6 +1447,11 @@ export default class Lichen {
     img.src = ctx.canvas.toDataURL()
   }
 
+  displayStats () {
+    let s = this.dispStats
+    s.container.innerHTML = `MAX: ${s.max.toExponential(3)} | MIN: ${s.min.toExponential(3)} | AVG: ${s.avg.toExponential(3)} | RMS: ${s.rms.toExponential(3)}`
+  }
+
   draw () {
     let o = this.opt
     let d = this.debounceOpt
@@ -1396,29 +1462,32 @@ export default class Lichen {
         d.init = true
       }
       // if beforeDraw returns false the draw is not done.
-      if (this.opt.beforeDraw.call(this) !== false) {
+      if (o.beforeDraw.call(this) !== false) {
         let ctx = this.ctx
         ctx.clearRect(0, 0, o.width, o.height)
         this.drawXAxis()
-        if (this.opt.categories == null && this.opt.type !== 'line') {
+        if (o.categories == null && o.type !== 'line') {
           // for type line, drawYAxis is called in the middle of drawLine
           this.drawYAxis()
         }
         ctx.save()
-        if (this.opt.type === 'line') {
+        if (o.type === 'line') {
           this.drawLine()
-        } else if (this.opt.type === 'heatmap') {
+          if (o.displayStats && this.dispStats.avg != null) {
+            this.displayStats()
+          }
+        } else if (o.type === 'heatmap') {
           if (o.categories == null) {
             this.drawHeatmap()
           } else {
             this.drawCategoryHeatmap()
           }
-        } else if (this.opt.type === 'timing') {
+        } else if (o.type === 'timing') {
           this.drawTimingChart()
         }
         ctx.restore()
       }
-      this.opt.afterDraw.call(this)
+      o.afterDraw.call(this)
     }
   }
 }
