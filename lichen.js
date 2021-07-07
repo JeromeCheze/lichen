@@ -1193,6 +1193,7 @@ export default class Lichen {
     let width = o.width - o.yAxisWidth
     let height = this.opt.height - this.opt.xAxisHeight
     let xValuesPerPixel = (this.disp.xEnd - this.disp.xStart) / (width * o.xStep)
+    let data = o.data instanceof Array ? { _: { data: o.data, enabled: true } } : o.data
     let xStep = 1
     if (xValuesPerPixel <= 1) {
       xStep = 1 / xValuesPerPixel
@@ -1206,7 +1207,6 @@ export default class Lichen {
       let count = 0
       let sum = 0
       let sq_sum = 0
-      let data = o.data instanceof Array ? { _: { data: o.data, enabled: true } } : o.data
       for (let i = iStart; i < iEnd; i += xValuesPerPixel) {
         for (let [k, v] of Object.entries(data)) {
           if (!v.enabled) {
