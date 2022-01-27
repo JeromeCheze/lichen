@@ -1031,9 +1031,9 @@ export default class Lichen {
             : pow >= 9 ? (y / 1e9).toFixed(0) + 'e9'
               : pow >= 6 ? (y / 1e6).toFixed(0) + 'e6'
                 : pow >= 3 ? (y / 1e3).toFixed(0) + 'e3'
-                  : pow <= 9 ? (y * 1e9).toFixed(0) + 'e-9'
-                    : pow <= 6 ? (y * 1e6).toFixed(0) + 'e-6'
-                      : pow <= 3 ? (y * 1e3).toFixed(0) + 'e-3'
+                  : pow <= -9 ? (y * 1e9).toFixed(0) + 'e-9'
+                    : pow <= -6 ? (y * 1e6).toFixed(0) + 'e-6'
+                      : pow <= -3 ? (y * 1e3).toFixed(0) + 'e-3'
                         : y.toFixed(2)
         )
         ctx.fillText(tickText, xPos - 8, yPos)
