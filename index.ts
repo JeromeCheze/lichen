@@ -1,17 +1,9 @@
 /* LIghtweight CHart ENgine (LiChEn) */
 
-let defaultOptions = {
-  type: 'line', // || 'heatmap' || 'timing'
-  area: false, // ignored in type heatmap and with multi series
-  stacked: false, // ignored in type heatmap
-  categories: null, // ignored in type line
-  syncScale: false, // used to sync Y scale with other charts returned by the method syncCharts
+import { LichenHeatmapData, LichenDisplayBounds, LichenInstanceOptions, LichenMultiLineData, LichenOptions, StringIndexedObject, VLine, LichenColorScale } from './types'
 
-  fixedMin: null, // ignored in type heatmap
-  fixedMax: null, // ignored in type heatmap
-
-  title: '',
-  colorScale: [
+export const COLORMAPS: {[name: string]: LichenColorScale} = {
+  parula: [
     [0.000, [53, 42, 135]],
     [0.125, [3, 99, 224]],
     [0.250, [20, 133, 212]],
@@ -22,7 +14,73 @@ let defaultOptions = {
     [0.875, [252, 207, 47]],
     [1.000, [249, 251, 14]]
   ],
-  color: null,
+  viridis: [
+    [0, [68, 1, 84]],
+    [0.125, [71, 44, 123]],
+    [0.25, [58, 82, 139]],
+    [0.375, [45, 111, 142]],
+    [0.5, [32, 144, 140]],
+    [0.625, [39, 173, 128]],
+    [0.75, [91, 200, 98]],
+    [0.875, [170, 219, 50]],
+    [1, [253, 231, 36]]
+  ],
+  plasma: [
+    [0, [12, 7, 134]],
+    [0.125, [76, 2, 161]],
+    [0.25, [126, 3, 167]],
+    [0.375, [165, 31, 151]],
+    [0.5, [203, 71, 119]],
+    [0.625, [229, 107, 92]],
+    [0.75, [247, 147, 65]],
+    [0.875, [253, 195, 40]],
+    [1, [239, 248, 33]]
+  ],
+  inferno: [
+    [0, [0, 0, 3]],
+    [0.125, [32, 12, 74]],
+    [0.25, [87, 15, 109]],
+    [0.375, [133, 32, 106]],
+    [0.5, [187, 55, 84]],
+    [0.625, [227, 88, 50]],
+    [0.75, [249, 140, 9]],
+    [0.875, [248, 201, 49]],
+    [1, [252, 254, 164]]
+  ],
+  magma: [
+    [0, [0, 0, 3]],
+    [0.125, [28, 16, 70]],
+    [0.25, [80, 18, 123]],
+    [0.375, [126, 36, 129]],
+    [0.5, [182, 54, 121]],
+    [0.625, [229, 80, 99]],
+    [0.75, [251, 134, 96]],
+    [0.875, [254, 194, 134]],
+    [1, [251, 252, 191]]
+  ],
+  cividis: [
+    [0, [0, 34, 77]],
+    [0.125, [26, 56, 111]],
+    [0.25, [67, 78, 107]],
+    [0.375, [94, 98, 110]],
+    [0.5, [124, 123, 120]],
+    [0.625, [154, 147, 118]],
+    [0.75, [186, 172, 108]],
+    [0.875, [220, 200, 88]],
+    [1, [253, 231, 55]]
+  ]
+}
+
+const defaultOptions: LichenOptions = {
+  xStart: -1,
+  xStep: -1,
+  type: 'line', // || 'heatmap' || 'timing'
+  area: false, // ignored in type heatmap and with multi series
+  stacked: false, // ignored in type heatmap
+  syncScale: false, // used to sync Y scale with other charts returned by the method syncCharts
+
+  title: '',
+  colorScale: COLORMAPS.inferno,
   areaFillOpacity: 0.5,
   logarithmicColorScale: true, // ignored in type line
   drawColorScale: true, // ignored in type line
@@ -30,7 +88,7 @@ let defaultOptions = {
   crosshair: false, // ignored in type heatmap
 
   /* style */
-  width: null, // optional
+  background: 'transparent',
   height: 200, // ignored in category mode
   xAxisHeight: 30,
   yAxisWidth: 120,
@@ -48,45 +106,84 @@ let defaultOptions = {
   yAxisPowerOfTen: true,
   displayDateInTooltip: true,
   categoryTooltipValues: true,
-  tooltipFormatter: x => x, // ignored in type heatmap
+  tooltipFormatter: (x: number) => `${x}`, // ignored in type heatmap
   units: '', // ignored in type heatmap
   reverseXZoom: false,
   reverseYZoom: false,
 
-  vLines: [], // [{ x: <xValue>, name: '<name>', color: '<color>', width: '<width>', display: true, position: 'top|middle|bottom' }, ...]
-
-  /*  time axis */
-  xStart: null,
-  xStep: null,
-
-  /* y axis */
-  yStart: null,
-  yEnd: null,
-
-  /* value */
-  zStart: null,
-  zEnd: null,
+  vLines: [] as VLine[], // [{ x: <xValue>, name: '<name>', color: '<color>', width: '<width>', display: true, position: 'top|middle|bottom' }, ...]
 
   debounce: false,
 
   beforeDraw: function () { return true },
   afterDraw: function () {},
 
-  onDblClick: function (lichenInstance, xValue) { return true },
+  onDblClick: function () { return true },
 
   syncCharts: function () { return [] },
 
   data: [] // { <key>: { color, data }, ... } NOTE: colorScale not available with multi series
 }
 
-let vLineDefault = { name: '', color: 'black', width: 1, display: true, position: 'top' }
+const vLineDefault = { name: '', color: 'black', width: 1, display: true, position: 'top' }
 
-export default class Lichen {
-  constructor (container, opt) {
+export class Lichen {
+  container: HTMLElement;
+  opt: LichenInstanceOptions;
+  disp: LichenDisplayBounds;
+  dispStats: {
+    min: number | null;
+    max: number | null;
+    avg: number | null;
+    rms: number | null;
+    container: HTMLElement | null;
+  };
+
+  groupValue: {
+    [index: string]: ([number, number] | null)[];
+  };
+
+  action: {
+    noMouse: boolean;
+    wheelDelta: number | null;
+    mouse: { x: number, y: number } | null;
+    dbl: {
+      threshold: number;
+      time: number;
+      count: number;
+    },
+    touches: {
+      [id: number]: { x: number, y: number };
+    }
+  };
+
+  debounceOpt: {
+    timer: number | null,
+    locked: boolean;
+    refresh: boolean;
+    init: boolean;
+    disp: LichenDisplayBounds;
+  };
+
+  bindEvents: {
+    [event: string]: { el: HTMLElement, handler: (ev: Event) => void };
+  };
+
+  ctx: CanvasRenderingContext2D | null;
+  ctx2: CanvasRenderingContext2D | null;
+  ctx3: CanvasRenderingContext2D | null;
+
+  constructor (container: HTMLElement, opt: LichenOptions) {
     this.container = container
-    this.opt = Object.assign({ vLines: [] }, defaultOptions)
+    this.opt = Object.assign({}, defaultOptions) as LichenInstanceOptions
     Object.assign(this.opt, opt)
     this.opt.xEnd = this.opt.xStart + this.getDataLength() * this.opt.xStep
+    if (this.opt.categories != null && this.opt.type === 'heatmap') {
+      if (this.opt.categories.length !== this.opt.data.length) {
+        console.error(this.opt)
+        throw new Error('[Lichen] categrories length != data length')
+      }
+    }
     // if (this.opt.categories == null) {
     //   this.opt.xEnd = this.opt.xStart + this.opt.data.length * this.opt.xStep
     // } else {
@@ -104,7 +201,8 @@ export default class Lichen {
       min: null,
       max: null,
       avg: null,
-      rms: null
+      rms: null,
+      container: null
     }
     this.groupValue = {}
     this.action = {
@@ -125,6 +223,10 @@ export default class Lichen {
       init: false,
       disp: Object.assign({}, this.disp)
     }
+    this.bindEvents = {}
+    this.ctx = null
+    this.ctx2 = null
+    this.ctx3 = null
     this.initCanvas()
     this.opt.vLines = this.opt.vLines.map(vLine => {
       return Object.assign(JSON.parse(JSON.stringify(vLineDefault)), vLine)
@@ -133,76 +235,87 @@ export default class Lichen {
   }
 
   getDataLength () {
-    let d = this.opt.data
-    return (
-      this.opt.type === 'timing' ? d.length
-        : this.opt.type === 'line' ? (d instanceof Array ? d.length : d[Object.keys(d)[0]].data.length)
-          : this.opt.categories == null ? d.length
-            : d[0].length
-    )
+    const o = this.opt
+    const d = o.data
+    return (o.type === 'timing'
+      ? d.length
+      : o.type === 'line'
+        ? d instanceof Array
+          ? d.length
+          : d instanceof Object && d[Object.keys(d)[0]].data.length
+        : o.categories != null
+          ? d instanceof Array && d[0]! instanceof Array && d[0].length
+          : d.length) as number
+    // return (
+    //   this.opt.type === 'timing' ? d.length
+    //     : this.opt.type === 'line' ? (d instanceof Array ? d.length : d[Object.keys(d)[0]].data.length)
+    //       : this.opt.categories == null ? d.length
+    //         : d[0].length
+    // )
   }
 
-  getIndexFromXValue (x) {
-    return Math.round(this.getRatio(x, this.opt.xStart, this.opt.xEnd) * this.getDataLength())
+  getIndexFromXValue (x: number) {
+    return Math.round(this.getRatio(x, this.opt.xStart, this.opt.xEnd!) * this.getDataLength())
   }
 
-  getIndexFromYValue (y) {
-    return Math.floor(this.getRatio(y, this.opt.yStart, this.opt.yEnd) * this.opt.data[0].length)
+  getIndexFromYValue (y: number) {
+    const d = this.opt.data as (number | null)[][]
+    return Math.floor(this.getRatio(y, this.opt.yStart!, this.opt.yEnd!) * d[0].length)
   }
 
-  getXPos (x) {
-    let w = this.opt.width - this.opt.yAxisWidth
+  getXPos (x: number) {
+    const w = this.opt.width - this.opt.yAxisWidth
     return Math.floor(this.opt.yAxisWidth + w * this.getRatio(x, this.disp.xStart, this.disp.xEnd))
   }
 
-  getYPos (y) {
-    let h = this.opt.height - this.opt.xAxisHeight
-    return Math.floor(h - h * this.getRatio(y, this.disp.yStart, this.disp.yEnd))
+  getYPos (y: number) {
+    const h = this.opt.height - this.opt.xAxisHeight
+    return Math.floor(h - h * this.getRatio(y, this.disp.yStart!, this.disp.yEnd!))
   }
 
-  getXPosFromIndex (i) {
+  getXPosFromIndex (i: number) {
     if (i < 0 || i >= this.getDataLength()) {
       return null
     }
-    let xPos = this.getXPos(this.opt.xStart + this.opt.xStep * i)
+    const xPos = this.getXPos(this.opt.xStart + this.opt.xStep * i)
     return xPos >= this.opt.yAxisWidth ? xPos : null
   }
 
-  getXValue (xPos) {
+  getXValue (xPos: number) {
     return this.disp.xStart + (this.disp.xEnd - this.disp.xStart) * this.getRatio(xPos, this.opt.yAxisWidth, this.opt.width)
   }
 
-  getYValue (yPos) {
-    return this.disp.yEnd - (this.disp.yEnd - this.disp.yStart) * this.getRatio(yPos, 0, this.opt.height - this.opt.xAxisHeight)
+  getYValue (yPos: number) {
+    return this.disp.yEnd! - (this.disp.yEnd! - this.disp.yStart!) * this.getRatio(yPos, 0, this.opt.height - this.opt.xAxisHeight)
   }
 
-  getRatio (value, min, max) {
+  getRatio (value: number, min: number, max: number) {
     return (value - min) / (max - min)
   }
 
-  toRGB (color) {
+  toRGB (color: [number, number, number]) {
     return `rgb(${Math.floor(color[0])},${Math.floor(color[1])},${Math.floor(color[2])})`
   }
 
-  handleMouseDown (ev) {
+  handleMouseDown (ev: MouseEvent) {
     if (this.action.noMouse) {
       return
     }
-    let pos = this.ctx2.canvas.getBoundingClientRect()
-    // let x = ev.clientX - pos.x
+    const pos = this.ctx2!.canvas.getBoundingClientRect()
+    // const x = ev.clientX - pos.x
     // console.log(new Date(this.getXValue(x)).toISOString());
     this.action.mouse = { x: ev.clientX - pos.x, y: ev.clientY - pos.y }
     // console.log(this.action.mouse);
   }
 
-  handleMouseMove (ev) {
-    let a = this.action
+  handleMouseMove (ev: MouseEvent) {
+    const a = this.action
     if (a.noMouse) {
       return
     }
-    let pos = this.ctx2.canvas.getBoundingClientRect()
-    let x2 = ev.clientX - pos.x
-    let y2 = ev.clientY - pos.y
+    const pos = this.ctx2!.canvas.getBoundingClientRect()
+    const x2 = ev.clientX - pos.x
+    const y2 = ev.clientY - pos.y
 
     if (a.mouse == null) { // not dragging
       this.updateCrosshairAndTooltip(x2)
@@ -214,14 +327,14 @@ export default class Lichen {
       // reset crosshair (and also tooltip at the same because a clearRect is used)
       this.updateCrosshairAndTooltip(null)
     }
-    let x1 = a.mouse.x
-    let y1 = a.mouse.y
+    const x1 = a.mouse.x
+    const y1 = a.mouse.y
 
     if (ev.shiftKey) { // selecting area
-      let ctx = this.ctx2
+      const ctx = this.ctx2!
       ctx.save()
-      let xMin = Math.max(this.opt.yAxisWidth, Math.min(x1, x2))
-      let xMax = Math.max(x1, x2)
+      const xMin = Math.max(this.opt.yAxisWidth, Math.min(x1, x2))
+      const xMax = Math.max(x1, x2)
       ctx.clearRect(0, 0, this.opt.width, this.opt.height)
       if (this.opt.type === 'timing' || this.opt.type === 'line' || (this.opt.type === 'heatmap' && this.opt.categories != null)) {
         ctx.fillStyle = 'rgba(0, 171, 255, 0.2)'
@@ -250,11 +363,11 @@ export default class Lichen {
     }
   }
 
-  updateCrosshairAndTooltip (xPos) {
-    let xValue = xPos != null ? this.getXValue(xPos) : null
+  updateCrosshairAndTooltip (xPos: (number | null)) {
+    const xValue = xPos != null ? this.getXValue(xPos) : null
     if (this.opt.crosshair) {
       this.drawCrosshair(xValue)
-      for (let chart of this.opt.syncCharts()) {
+      for (const chart of this.opt.syncCharts()) {
         if (chart === this) {
           continue
         }
@@ -266,11 +379,11 @@ export default class Lichen {
     }
   }
 
-  xPanning (value) {
+  xPanning (value: number) {
     let redraw = false
     if (Math.abs(value) >= 5) {
       // panning along x axis
-      let xValue = this.getXValue(0) - this.getXValue(value)
+      const xValue = this.getXValue(0) - this.getXValue(value)
       this.setDispBounds({
         xStart: Math.max(this.opt.xStart, this.disp.xStart + xValue),
         xEnd: Math.min(this.opt.xEnd, this.disp.xEnd + xValue)
@@ -280,22 +393,22 @@ export default class Lichen {
     return redraw
   }
 
-  yPanning (value) {
+  yPanning (value: number) {
     let redraw = false
     if (Math.abs(value) >= 5) {
       // panning along y axis
-      let yValue = this.getYValue(0) - this.getYValue(value)
+      const yValue = this.getYValue(0) - this.getYValue(value)
       this.setDispBounds({
-        yStart: Math.max(this.opt.yStart, this.disp.yStart + yValue),
-        yEnd: Math.min(this.opt.yEnd, this.disp.yEnd + yValue)
+        yStart: Math.max(this.opt.yStart!, this.disp.yStart! + yValue),
+        yEnd: Math.min(this.opt.yEnd!, this.disp.yEnd! + yValue)
       })
       redraw = true
     }
     return redraw
   }
 
-  handleMouseUp (ev) {
-    let a = this.action
+  handleMouseUp (ev: MouseEvent) {
+    const a = this.action
     if (a.noMouse) {
       return
     }
@@ -303,15 +416,15 @@ export default class Lichen {
       // nothing to do if not dragging
       return
     }
-    let ctx = this.ctx2
+    const ctx = this.ctx2!
     ctx.clearRect(0, 0, this.opt.width, this.opt.height)
     if (ev.shiftKey) {
       let redraw = false
-      let pos = this.ctx2.canvas.getBoundingClientRect()
-      let x1 = this.getXValue(a.mouse.x)
-      let x2 = this.getXValue(ev.clientX - pos.x)
-      let y1 = this.getYValue(a.mouse.y)
-      let y2 = this.getYValue(ev.clientY - pos.y)
+      const pos = ctx.canvas.getBoundingClientRect()
+      const x1 = this.getXValue(a.mouse.x)
+      const x2 = this.getXValue(ev.clientX - pos.x)
+      const y1 = this.getYValue(a.mouse.y)
+      const y2 = this.getYValue(ev.clientY - pos.y)
       if ((Math.abs(x1 - x2) / this.opt.xStep) > 10) {
         redraw = true
         this.setDispBounds({
@@ -322,8 +435,8 @@ export default class Lichen {
       if (this.opt.type === 'heatmap' && Math.abs(y1 - y2) > 0) {
         redraw = true
         this.setDispBounds({
-          yStart: Math.max(Math.min(y1, y2), this.opt.yStart),
-          yEnd: Math.min(Math.max(y1, y2), this.opt.yEnd)
+          yStart: Math.max(Math.min(y1, y2), this.opt.yStart!),
+          yEnd: Math.min(Math.max(y1, y2), this.opt.yEnd!)
         })
       }
       if (redraw) {
@@ -333,11 +446,18 @@ export default class Lichen {
     a.mouse = null
   }
 
-  setDispBounds (dispBounds) {
+  setDispBounds (dispBounds: {
+    'xStart'?: number;
+    'xEnd'?: number;
+    'yStart'?: number;
+    'yEnd'?: number;
+    'zStart'?: number;
+    'zEnd'?: number;
+  }) {
     Object.assign(this.disp, dispBounds)
-    for (let chart of this.opt.syncCharts()) {
+    for (const chart of this.opt.syncCharts()) {
       let redraw = false
-      for (let [k, v] of Object.entries(dispBounds)) {
+      for (const [k, v] of Object.entries(dispBounds)) {
         if (chart.disp[k] !== v) {
           if (['xStart', 'xEnd'].indexOf(k) >= 0) {
             // do not share yStart and yEnd when chart type is line to prevent issues when syncing with heatmap
@@ -352,7 +472,7 @@ export default class Lichen {
     }
   }
 
-  handleMouseLeave (ev) {
+  handleMouseLeave (ev: MouseEvent) {
     if (this.action.noMouse) {
       return
     }
@@ -365,33 +485,35 @@ export default class Lichen {
     }
   }
 
-  xZoom (zoomLevel) {
-    let halfSpan = (this.disp.xEnd - this.disp.xStart) / 2
-    let center = this.disp.xStart + halfSpan
-    let newXStart = Math.max(this.opt.xStart, center - zoomLevel * halfSpan)
-    let newXEnd = Math.min(this.opt.xEnd, center + zoomLevel * halfSpan)
+  xZoom (zoomLevel: number) {
+    const halfSpan = (this.disp.xEnd - this.disp.xStart) / 2
+    const center = this.disp.xStart + halfSpan
+    const newXStart = Math.max(this.opt.xStart, center - zoomLevel * halfSpan)
+    const newXEnd = Math.min(this.opt.xEnd, center + zoomLevel * halfSpan)
     if ((newXEnd - newXStart) > (10 * this.opt.xStep)) {
       this.setDispBounds({ xStart: newXStart, xEnd: newXEnd })
       this.draw()
     }
   }
 
-  yZoom (zoomLevel) {
-    let halfSpan = (this.disp.yEnd - this.disp.yStart) / 2
-    let center = this.disp.yStart + halfSpan
+  yZoom (zoomLevel: number) {
+    const halfSpan = (this.disp.yEnd! - this.disp.yStart!) / 2
+    const center = this.disp.yStart! + halfSpan
     this.setDispBounds({
-      yStart: Math.max(this.opt.yStart, center - zoomLevel * halfSpan),
-      yEnd: Math.min(this.opt.yEnd, center + zoomLevel * halfSpan)
+      yStart: Math.max(this.opt.yStart!, center - zoomLevel * halfSpan),
+      yEnd: Math.min(this.opt.yEnd!, center + zoomLevel * halfSpan)
     })
     this.draw()
   }
 
-  handleWheel (ev) {
+  handleWheel (ev: WheelEvent) {
     if (ev.shiftKey) {
       ev.preventDefault()
       let delta = (
-        Math.abs(ev.deltaY) > 1 ? ev.deltaY
-          : Math.abs(ev.deltaX) > 1 ? ev.deltaX
+        Math.abs(ev.deltaY) > 1
+          ? ev.deltaY
+          : Math.abs(ev.deltaX) > 1
+            ? ev.deltaX
             : 0
       )
       if (this.action.wheelDelta == null) {
@@ -421,44 +543,44 @@ export default class Lichen {
     this.draw()
   }
 
-  handleDblClick (ev) {
-    let pos = this.ctx2.canvas.getBoundingClientRect()
-    let xValue = this.getXValue(ev.clientX - pos.x)
+  handleDblClick (ev: MouseEvent | Touch) {
+    const pos = this.ctx2!.canvas.getBoundingClientRect()
+    const xValue = this.getXValue(ev.clientX - pos.x)
     if (this.opt.onDblClick(this, xValue)) {
       this.resetZoom()
     }
   }
 
-  handleTouchStart (ev) {
+  handleTouchStart (ev: TouchEvent) {
     this.action.noMouse = true
-    let pos = this.ctx2.canvas.getBoundingClientRect()
-    let a = this.action
-    let now = new Date().getTime()
+    const pos = this.ctx2!.canvas.getBoundingClientRect()
+    const a = this.action
+    const now = new Date().getTime()
     if ((now - a.dbl.time) > a.dbl.threshold) {
       a.dbl.time = now
       a.dbl.count = 0
     }
     a.dbl.count++
-    for (let t of ev.changedTouches) {
+    for (const t of ev.changedTouches) {
       if (Object.keys(a.touches).length < 2) {
         a.touches[t.identifier] = { x: t.clientX - pos.x, y: t.clientY - pos.y }
       }
     }
-    let toucheKeys = Object.keys(a.touches)
+    const toucheKeys = Object.keys(a.touches).map(x => parseInt(x))
     if (toucheKeys.length < 2) {
       this.updateCrosshairAndTooltip(a.touches[toucheKeys[0]].x)
     }
   }
 
-  handleTouchMove (ev) {
-    let pos = this.ctx2.canvas.getBoundingClientRect()
-    let a = this.action
-    let toucheKeys = Object.keys(a.touches)
+  handleTouchMove (ev: TouchEvent) {
+    const pos = this.ctx2!.canvas.getBoundingClientRect()
+    const a = this.action
+    const toucheKeys = Object.keys(a.touches).map(x => parseInt(x))
     if (toucheKeys.length < 2) {
       // update crosshair and tooltip
-      let t = ev.changedTouches[0]
-      let xPos = t.clientX - pos.x
-      // let xValue = this.getXValue(xPos)
+      const t = ev.changedTouches[0]
+      const xPos = t.clientX - pos.x
+      // const xValue = this.getXValue(xPos)
       a.touches[toucheKeys[0]] = { x: xPos, y: t.clientY - pos.y }
       this.updateCrosshairAndTooltip(xPos)
     } else {
@@ -468,23 +590,23 @@ export default class Lichen {
       if (this.opt.crosshair) {
         this.updateCrosshairAndTooltip(null)
       }
-      let tValues = Object.entries(a.touches).map(t => ({
-        id: t[0],
+      const tValues = Object.entries(a.touches).map(t => ({
+        id: parseInt(t[0]),
         x1: t[1].x,
         y1: t[1].y,
         x2: t[1].x,
         y2: t[1].y
       }))
-      for (let t of ev.changedTouches) {
-        let tVal = tValues.find(x => x.id === t.identifier)
-        tVal.x2 = t.clientX - pos.x
-        tVal.y2 = t.clientY - pos.y
+      for (const t of ev.changedTouches) {
+        const tVal = tValues.find(x => x.id === t.identifier)
+        tVal!.x2 = t.clientX - pos.x
+        tVal!.y2 = t.clientY - pos.y
       }
-      let pinchX = Math.abs((tValues[1].x1 - tValues[0].x1) / (tValues[1].x2 - tValues[0].x2))
-      let pinchY = Math.abs((tValues[1].y1 - tValues[0].y1) / (tValues[1].y2 - tValues[0].y2))
-      let panX = ((tValues[0].x2 - tValues[0].x1) + (tValues[1].x2 - tValues[1].x1)) / 2
-      let panY = ((tValues[0].y2 - tValues[0].y1) + (tValues[1].y2 - tValues[1].y1)) / 2
-      let overwriteTouch = { x: false, y: false }
+      const pinchX = Math.abs((tValues[1].x1 - tValues[0].x1) / (tValues[1].x2 - tValues[0].x2))
+      const pinchY = Math.abs((tValues[1].y1 - tValues[0].y1) / (tValues[1].y2 - tValues[0].y2))
+      const panX = ((tValues[0].x2 - tValues[0].x1) + (tValues[1].x2 - tValues[1].x1)) / 2
+      const panY = ((tValues[0].y2 - tValues[0].y1) + (tValues[1].y2 - tValues[1].y1)) / 2
+      const overwriteTouch = { x: false, y: false }
       let redraw = false
       if (Math.abs(pinchX - 1) > 0.2) {
         overwriteTouch.x = true
@@ -502,7 +624,7 @@ export default class Lichen {
         overwriteTouch.y = true
         redraw = true
       }
-      for (let t of tValues) {
+      for (const t of tValues) {
         if (overwriteTouch.x) {
           a.touches[t.id].x = t.x2
         }
@@ -516,12 +638,12 @@ export default class Lichen {
     }
   }
 
-  handleTouchEnd (ev) {
-    let a = this.action
+  handleTouchEnd (ev: TouchEvent) {
+    const a = this.action
     if (a.dbl.count === 2) {
-      this.handleDblClick()
+      this.handleDblClick(ev.touches[0])
     }
-    for (let t of ev.changedTouches) {
+    for (const t of ev.changedTouches) {
       if (a.touches[t.identifier]) {
         delete a.touches[t.identifier]
       }
@@ -529,25 +651,25 @@ export default class Lichen {
   }
 
   initCanvas () {
-    let o = this.opt
+    const o = this.opt
     if (o.width == null) {
       o.width = this.container.clientWidth - 10
     }
     if (o.categories != null) {
-      let n = o.categories.length
+      const n = o.categories.length
       o.height = o.xAxisHeight + n * o.categoryHeight + (n + 1) * o.categoryMargin
     }
     this.container.innerHTML = ''
-    let titleContainer = document.createElement('div')
-    let statsContainer = document.createElement('span')
+    const titleContainer = document.createElement('div')
+    const statsContainer = document.createElement('span')
     this.dispStats.container = statsContainer
-    let canvasContainer = document.createElement('div')
-    let mainCanvas = document.createElement('canvas')
-    let actionCanvas = document.createElement('canvas')
+    const canvasContainer = document.createElement('div')
+    const mainCanvas = document.createElement('canvas')
+    const actionCanvas = document.createElement('canvas')
     titleContainer.innerHTML = o.title
     titleContainer.appendChild(statsContainer)
-    Object.assign(statsContainer.style, {float: 'right', fontSize: '10px'})
-    Object.assign(this.container.style, { background: 'white' })
+    Object.assign(statsContainer.style, { float: 'right', fontSize: '10px' })
+    Object.assign(this.container.style, { background: o.background })
     Object.assign(titleContainer.style, { padding: '10px', textAlign: 'center', fontSize: `${o.titleFontSize}px` })
     Object.assign(canvasContainer.style, { position: 'relative', width: `${o.width}px`, height: `${o.height}px` })
     Object.assign(mainCanvas.style, { position: 'absolute', top: 0, left: 0 })
@@ -561,68 +683,79 @@ export default class Lichen {
     this.ctx = mainCanvas.getContext('2d')
     this.ctx2 = actionCanvas.getContext('2d')
     this.bindEvents = {
-      'mousedown': { el: actionCanvas, handler: ev => this.handleMouseDown(ev) },
-      'mouseup': { el: actionCanvas, handler: ev => this.handleMouseUp(ev) },
-      'mousemove': { el: actionCanvas, handler: ev => this.handleMouseMove(ev) },
-      'mouseleave': { el: actionCanvas, handler: ev => this.handleMouseLeave(ev) },
-      'wheel': { el: actionCanvas, handler: ev => this.handleWheel(ev) },
-      'dblclick': { el: actionCanvas, handler: ev => this.handleDblClick(ev) },
-      'touchstart': { el: actionCanvas, handler: ev => this.handleTouchStart(ev) },
-      'touchend': { el: actionCanvas, handler: ev => this.handleTouchEnd(ev) },
-      'touchmove': { el: actionCanvas, handler: ev => this.handleTouchMove(ev) }
+      mousedown: { el: actionCanvas, handler: (ev) => this.handleMouseDown(ev as MouseEvent) },
+      mouseup: { el: actionCanvas, handler: ev => this.handleMouseUp(ev as MouseEvent) },
+      mousemove: { el: actionCanvas, handler: ev => this.handleMouseMove(ev as MouseEvent) },
+      mouseleave: { el: actionCanvas, handler: ev => this.handleMouseLeave(ev as MouseEvent) },
+      wheel: { el: actionCanvas, handler: ev => this.handleWheel(ev as WheelEvent) },
+      dblclick: { el: actionCanvas, handler: ev => this.handleDblClick(ev as MouseEvent) },
+      touchstart: { el: actionCanvas, handler: ev => this.handleTouchStart(ev as TouchEvent) },
+      touchend: { el: actionCanvas, handler: ev => this.handleTouchEnd(ev as TouchEvent) },
+      touchmove: { el: actionCanvas, handler: ev => this.handleTouchMove(ev as TouchEvent) }
     }
-    for (let [k, v] of Object.entries(this.bindEvents)) {
+    for (const [k, v] of Object.entries(this.bindEvents)) {
       v.el.addEventListener(k, v.handler)
     }
     if (o.type === 'heatmap' && o.drawColorScale) {
-      let colorCanvas = document.createElement('canvas')
+      const colorCanvas = document.createElement('canvas')
       Object.assign(colorCanvas, { width: o.width, height: 40 })
       this.container.appendChild(colorCanvas)
       this.ctx3 = colorCanvas.getContext('2d')
       this.drawColorScale()
     }
     if (!(o.data instanceof Array)) {
-      let legendContainer = document.createElement('div')
-      Object.assign(legendContainer.style, { textAlign: 'center', fontSize: `${o.legendFontSize}px` })
-      for (let [k, v] of Object.entries(o.data)) {
+      const legendContainer = document.createElement('div')
+      Object.assign(legendContainer.style, { display: 'flex', flexFlow: 'row wrap', justifyContent: 'center', fontSize: `${o.legendFontSize}px` })
+      for (const [k, v] of Object.entries(o.data)) {
         v.enabled = true
-        let colorBox = document.createElement('span')
+        const valueContainer = document.createElement('div')
+        const colorBox = document.createElement('span')
         Object.assign(colorBox.style, {
-          border: `1px solid ${o.textColor}`, borderRadius: '4px',
-          background: v.color, padding: '0 15px', margin: '5px 5px 5px 25px',
+          border: `1px solid ${o.textColor}`,
+          borderRadius: '4px',
+          background: v.color,
+          padding: '0 15px',
+          margin: '5px 5px 5px 25px',
           cursor: 'pointer'
         })
-        let valueLabel = document.createElement('span')
+        const valueLabel = document.createElement('span')
         Object.assign(valueLabel.style, { cursor: 'pointer' })
         valueLabel.innerHTML = k
         if (v.title != null) {
           valueLabel.title = v.title
         }
-        const toggleSerieHandler = ev => {
+        const toggleSerieHandler = () => {
           v.enabled = !v.enabled
-          colorBox.style.background = v.enabled ? v.color : '#ddd'
-          valueLabel.style.color = v.enabled ? '#000' : '#888'
+          colorBox.style.background = v.enabled ? v.color! : '#ddd'
+          valueLabel.style.color = v.enabled ? 'inherit' : '#888'
           this.draw()
         }
         colorBox.addEventListener('click', toggleSerieHandler)
         valueLabel.addEventListener('click', toggleSerieHandler)
-        legendContainer.appendChild(colorBox)
-        legendContainer.appendChild(valueLabel)
+
+        valueContainer.appendChild(colorBox)
+        valueContainer.appendChild(valueLabel)
+        legendContainer.appendChild(valueContainer)
       }
       this.container.appendChild(legendContainer)
     }
   }
 
   destroy () {
-    for (let [k, v] of Object.entries(this.bindEvents)) {
+    const syncCharts = this.opt.syncCharts()
+    const syncIndex = syncCharts.indexOf(this)
+    if (syncIndex >= 0) {
+      syncCharts.splice(syncIndex, 1)
+    }
+    for (const [k, v] of Object.entries(this.bindEvents)) {
       v.el.removeEventListener(k, v.handler)
     }
     this.container.innerHTML = ''
   }
 
-  getColor (value) {
-    let min = this.opt.zStart
-    let max = this.opt.zEnd
+  getColor (value: number) {
+    let min = this.opt.zStart!
+    let max = this.opt.zEnd!
     if (this.opt.logarithmicColorScale) {
       if (value !== 0) {
         value = Math.log2(value)
@@ -634,9 +767,9 @@ export default class Lichen {
         max = Math.log2(max)
       }
     }
-    let cs = this.opt.colorScale
+    const cs = this.opt.colorScale!
     // v = this.getRatio(v, this.opt.zStart, this.opt.zEnd)
-    let v = this.getRatio(value, min, max)
+    const v = this.getRatio(value, min, max)
 
     if (v <= cs[0][0]) {
       return this.toRGB(cs[0][1])
@@ -647,33 +780,34 @@ export default class Lichen {
     while (cs[i][0] < v) {
       i++
     }
-    let color = []
-    let r = this.getRatio(v, cs[i - 1][0], cs[i][0])
+    const color = []
+    const r = this.getRatio(v, cs[i - 1][0], cs[i][0])
     for (let j = 0; j < cs[0][1].length; j++) {
       color.push(cs[i - 1][1][j] + r * (cs[i][1][j] - cs[i - 1][1][j]))
     }
-    return this.toRGB(color)
+    return this.toRGB(color as [number, number, number])
   }
 
   getGradient () {
-    let result = [
-      [0, this.getColor(this.disp.yStart)]
+    const result: [number, string][] = [
+      [0, this.getColor(this.disp.yStart!)]
     ]
-    for (let c of this.opt.colorScale) {
-      let v = this.opt.zStart + (this.opt.zEnd - this.opt.zStart) * c[0]
-      if (v > this.disp.yStart && v < this.disp.yEnd) {
-        result.push([this.getRatio(v, this.disp.yStart, this.disp.yEnd), this.toRGB(c[1])])
+    for (const c of this.opt.colorScale!) {
+      const v = this.opt.zStart! + (this.opt.zEnd! - this.opt.zStart!) * c[0]
+      if (v > this.disp.yStart! && v < this.disp.yEnd!) {
+        result.push([this.getRatio(v, this.disp.yStart!, this.disp.yEnd!), this.toRGB(c[1])])
       }
     }
-    result.push([1, this.getColor(this.disp.yEnd)])
+    result.push([1, this.getColor(this.disp.yEnd!)])
     // console.log(result);
     return result
   }
 
-  addData (data, redraw = false) {
+  addData (data: (number | null)[], redraw = false) {
     if (this.opt.type === 'line') {
       if (this.opt.data instanceof Array) {
-        this.opt.data = this.opt.data.concat(data)
+        const currData = this.opt.data as (number | null)[]
+        this.opt.data = currData.concat(data)
         this.opt.xEnd = this.disp.xEnd = this.opt.xStart + this.getDataLength() * this.opt.xStep
       }
     }
@@ -682,8 +816,8 @@ export default class Lichen {
     }
   }
 
-  addVLine (vline, redraw = true) {
-    let vLineClone = Object.assign({}, vLineDefault)
+  addVLine (vline: VLine, redraw = true) {
+    const vLineClone = Object.assign({}, vLineDefault)
     this.opt.vLines.push(Object.assign(vLineClone, vline))
     if (redraw) {
       this.draw()
@@ -691,48 +825,52 @@ export default class Lichen {
   }
 
   drawVLines () {
-    let o = this.opt
-    let ctx = this.ctx
-    let pad = 4
+    const o = this.opt
+    const ctx = this.ctx!
+    const pad = 4
     ctx.save()
     ctx.font = `${o.fontSize}px sans-serif`
-    for (let vLine of o.vLines) {
+    for (const vLine of o.vLines) {
       if (vLine.display && vLine.x >= this.disp.xStart && vLine.x <= this.disp.xEnd) {
-        let pos = this.getXPos(vLine.x)
-        let yPos = (
-          vLine.position === 'top' ? pad
-            : vLine.position === 'middle' ? (o.height - o.xAxisHeight) / 2
+        const pos = this.getXPos(vLine.x)
+        const yPos = (
+          vLine.position === 'top'
+            ? pad
+            : vLine.position === 'middle'
+              ? (o.height - o.xAxisHeight) / 2
               : (o.height - o.xAxisHeight) - pad
         )
-        let clearRectYPos = (
-          vLine.position === 'top' ? yPos - pad / 2
-            : vLine.position === 'middle' ? yPos - (o.fontSize + pad) / 2
+        const clearRectYPos = (
+          vLine.position === 'top'
+            ? yPos - pad / 2
+            : vLine.position === 'middle'
+              ? yPos - (o.fontSize + pad) / 2
               : yPos - o.fontSize - pad / 2
         )
         ctx.textBaseline = vLine.position
-        ctx.strokeStyle = vLine.color
-        ctx.fillStyle = vLine.color
-        ctx.lineWidth = vLine.width
+        ctx.strokeStyle = vLine.color!
+        ctx.fillStyle = vLine.color!
+        ctx.lineWidth = vLine.width!
         ctx.beginPath()
         ctx.moveTo(pos + 0.5, 0)
-        ctx.lineTo(pos + 0.5, o.height - o.xAxisHeight)
+        ctx.lineTo(pos + 0.5, o.height! - o.xAxisHeight!)
         ctx.stroke()
-        let textSize = ctx.measureText(vLine.name)
-        ctx.clearRect(pos + pad / 2, clearRectYPos, textSize.width + pad, o.fontSize + pad)
-        ctx.fillText(vLine.name, pos + pad, yPos)
+        const textSize = ctx.measureText(vLine.name!)
+        ctx.clearRect(pos + pad / 2, clearRectYPos, textSize.width + pad, o.fontSize! + pad)
+        ctx.fillText(vLine.name!, pos + pad, yPos)
       }
     }
     ctx.restore()
   }
 
-  drawCrosshair (xValue) {
+  drawCrosshair (xValue: number | null) {
     if (!this.opt.crosshair) {
       return
     }
-    let ctx = this.ctx2
+    const ctx = this.ctx2!
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
     if (xValue != null && xValue >= this.disp.xStart) {
-      let xPos = this.getXPosFromIndex(this.getIndexFromXValue(xValue))
+      const xPos = this.getXPosFromIndex(this.getIndexFromXValue(xValue))
       if (xPos != null) {
         ctx.fillStyle = this.opt.textColor
         ctx.fillRect(xPos, 0, 1, this.opt.height - this.opt.xAxisHeight)
@@ -740,73 +878,74 @@ export default class Lichen {
     }
   }
 
-  drawCategoryTooltip (xValue) {
-    let o = this.opt
-    let ctx = this.ctx2
-    let i = this.getIndexFromXValue(xValue)
-    let xPos = this.getXPosFromIndex(i)
+  drawCategoryTooltip (xValue: number) {
+    const o = this.opt
+    const ctx = this.ctx2!
+    const i = this.getIndexFromXValue(xValue)
+    const xPos = this.getXPosFromIndex(i)
     if (xPos == null) {
       return
     }
-    let [m, b, p, f] = [8, 1, 3, o.fontSize]// [margin, border, padding, fontSize]
-    let txt = [
+    const [m, b, p, f] = [8, 1, 3, o.fontSize]// [margin, border, padding, fontSize]
+    const txt = [
       new Date(o.xStart + o.xStep * i).toISOString().replace(/[TZ]/g, ' ')
     ]
     if (o.categoryTooltipValues) {
-      for (let [index, category] of o.categories.entries()) {
-        let value = o.data[index][i]
-        txt.push(`${category}: ${value == null ? '' : o.tooltipFormatter(value)}`)
+      const data = o.data as (number | null)[][]
+      for (const [index, category] of o.categories!.entries()) {
+        const value = data[index][i]
+        txt.push(`${category}: ${value == null ? '' : o.tooltipFormatter!(value)}`)
       }
     }
-    let boxHeight = 2 * b + txt.length * (p + f) + p
-    let boxY = Math.max(0, (o.height - o.xAxisHeight - boxHeight) / 2)
+    const boxHeight = 2 * b + txt.length * (p + f) + p
+    const boxY = Math.max(0, (o.height - o.xAxisHeight - boxHeight) / 2)
     ctx.save()
     ctx.font = `${o.fontSize}px sans-serif`
-    let boxWidth = 2 * b + 2 * p + Math.max.apply(null, txt.map(t => ctx.measureText(t).width))
-    let boxX = xPos > o.yAxisWidth + o.width / 2 ? xPos - m - boxWidth : xPos + m
+    const boxWidth = 2 * b + 2 * p + Math.max.apply(null, txt.map(t => ctx.measureText(t).width))
+    const boxX = xPos > o.yAxisWidth + o.width / 2 ? xPos - m - boxWidth : xPos + m
     ctx.strokeStyle = o.textColor
     ctx.fillStyle = 'white'
     ctx.fillRect(boxX, boxY, boxWidth, boxHeight)
     ctx.strokeRect(boxX, boxY, boxWidth, boxHeight)
     ctx.fillStyle = o.textColor
     let currY = boxY + p + f
-    for (let t of txt) {
+    for (const t of txt) {
       ctx.fillText(t, boxX + b + p, currY)
       currY += p + f
     }
     ctx.restore()
   }
 
-  drawTooltip (xValue) {
-    let o = this.opt
+  drawTooltip (xValue: number | null) {
+    const o = this.opt
     if (xValue == null || (o.type === 'heatmap' && o.categories == null)) {
       return
     }
     if (o.type === 'heatmap' && o.categories != null) {
       return this.drawCategoryTooltip(xValue)
     }
-    let ctx = this.ctx2
-    let i = this.getIndexFromXValue(xValue)
+    const ctx = this.ctx2!
+    const i = this.getIndexFromXValue(xValue)
     if (i < 0) {
       return
     }
-    let xPos = this.getXPosFromIndex(i)
+    const xPos = this.getXPosFromIndex(i)
 
     // prepare yValues and handle multi series
-    let data = o.data instanceof Array ? { _: { data: o.data, enabled: true } } : o.data
-    let yValues = {}
-    let keys = Object.keys(data)
-    for (let [keyIndex, k] of keys.entries()) {
+    const data = (o.data instanceof Array ? { _: { data: o.data, enabled: true } } : o.data) as LichenMultiLineData
+    const yValues: StringIndexedObject = {}
+    const keys = Object.keys(data)
+    for (const [keyIndex, k] of keys.entries()) {
       if (!data[k].enabled) {
         continue
       }
-      let yValue = data[k].data[i]
-      let yPos = yValue != null && o.type !== 'timing' ? this.getYPos(yValue) : null
+      const yValue = data[k].data[i]
+      let yPos = yValue != null && o.type !== 'timing' ? this.getYPos(yValue as number) : null
       if (yPos != null && o.stacked) {
-        let yPosValue = yValue
+        let yPosValue = yValue as number
         for (let j = keyIndex + 1; j < keys.length; j++) {
           if (data[keys[j]].enabled) {
-            yPosValue += data[keys[j]].data[i]
+            yPosValue += data[keys[j]].data[i] as number
           }
         }
         yPos = this.getYPos(yPosValue)
@@ -815,11 +954,12 @@ export default class Lichen {
         value: yValue,
         yPos,
         key: k !== '_' ? `${k} : ` : '',
-        strValue: yValue != null ? `${o.tooltipFormatter(yValue)} ${o.units}` : 'null',
+        strValue: yValue != null ? `${o.tooltipFormatter!(yValue as number)} ${o.units}` : 'null',
         color: k === '_' ? o.color : data[k].color
       }
       if (yValue !== null && o.type === 'timing') {
-        yValues[k].strValue = o.categories.find(x => x.key === yValue).label
+        const cat = o.categories as { key: string; label: string; }[]
+        yValues[k].strValue = cat.find(x => x.key === yValue)!.label as string
       }
     }
 
@@ -831,7 +971,7 @@ export default class Lichen {
     ctx.save()
 
     // draw point for all series
-    for (let v of Object.values(yValues)) {
+    for (const v of Object.values(yValues)) {
       ctx.lineWidth = 2
       ctx.strokeStyle = v.color != null ? v.color : this.getColor(v.value)
       ctx.fillStyle = 'white'
@@ -845,20 +985,20 @@ export default class Lichen {
     }
 
     // compute box position and size
-    let [m, b, p, f] = [8, 1, 3, o.fontSize] // [margin, border, padding, fontSize]
-    let nbSeries = Object.keys(yValues).length
-    let boxHeight = 2 * b + (1 + nbSeries) * f + (2 + nbSeries) * p
+    const [m, b, p, f] = [8, 1, 3, o.fontSize] // [margin, border, padding, fontSize]
+    const nbSeries = Object.keys(yValues).length
+    const boxHeight = 2 * b + (1 + nbSeries) * f + (2 + nbSeries) * p
     let boxY
     if (o.type !== 'timing' && o.data instanceof Array) {
-      let yPos = yValues._.yPos
+      const yPos = yValues._.yPos
       boxY = yPos > (o.height / 2) ? yPos - m - boxHeight : yPos + m
     } else {
       boxY = (o.height - boxHeight - o.xAxisHeight) / 2
     }
     ctx.font = `bold ${o.fontSize}px sans-serif`
-    let tooltipDate = new Date(o.xStart + o.xStep * i)
-    let txtTime = o.displayDateInTooltip ? tooltipDate.toISOString().replace(/[TZ]/g, ' ') : tooltipDate.toISOString().slice(11, -1)
-    let boxWidth = 2 * b + 2 * p + Math.max(
+    const tooltipDate = new Date(o.xStart + o.xStep * i)
+    const txtTime = o.displayDateInTooltip ? tooltipDate.toISOString().replace(/[TZ]/g, ' ') : tooltipDate.toISOString().slice(11, -1)
+    const boxWidth = 2 * b + 2 * p + Math.max(
       ctx.measureText(txtTime).width,
       Math.max.apply(null, Object.values(yValues).map(x => ctx.measureText(`${x.key}${x.strValue}`).width))
     )
@@ -873,8 +1013,8 @@ export default class Lichen {
     } else {
       boxX = xPos < o.width / 2 ? xPos + m : xPos - m - boxWidth
     }
-    // let txtX = boxX + Math.floor(boxWidth / 2)
-    let txtX = boxX + b + p
+    // const txtX = boxX + Math.floor(boxWidth / 2)
+    const txtX = boxX + b + p
 
     // draw tooltip
     ctx.lineWidth = b
@@ -887,7 +1027,7 @@ export default class Lichen {
     ctx.fillText(txtTime, txtX, boxY + b + p + f)
     ctx.font = `bold ${o.fontSize}px sans-serif`
     let txtY = boxY + b + 2 * p + 2 * f
-    let sortedByValues = Object.entries(yValues)
+    const sortedByValues = Object.entries(yValues)
     if (!o.stacked) {
       sortedByValues.sort((a, b) => {
         a = a[1].value
@@ -895,7 +1035,7 @@ export default class Lichen {
         return a < b ? 1 : a > b ? -1 : 0
       })
     }
-    for (let x of sortedByValues) {
+    for (const x of sortedByValues) {
       ctx.fillStyle = x[1].color
       ctx.fillText(x[1].key, txtX, txtY)
       ctx.fillStyle = o.textColor
@@ -906,33 +1046,33 @@ export default class Lichen {
   }
 
   drawColorScale () {
-    let o = this.opt
-    let ctx = this.ctx3
-    let w = 300
-    let x1 = Math.floor(o.width / 2 - w / 2)
-    let minValue = o.logarithmicColorScale && o.zStart !== 0 ? Math.log2(o.zStart) : o.zStart
-    let maxValue = o.logarithmicColorScale ? Math.log2(o.zEnd) : o.zEnd
-    let grad = ctx.createLinearGradient(x1, 0, x1 + w, 0)
+    const o = this.opt
+    const ctx = this.ctx3!
+    const w = 300
+    const x1 = Math.floor(o.width / 2 - w / 2)
+    const minValue = o.logarithmicColorScale && o.zStart !== 0 ? Math.log2(o.zStart!) : o.zStart!
+    const maxValue = o.logarithmicColorScale ? Math.log2(o.zEnd!) : o.zEnd!
+    const grad = ctx.createLinearGradient(x1, 0, x1 + w, 0)
     ctx.font = `${o.fontSize}px sans-serif`
     ctx.textAlign = 'center'
     ctx.strokeStyle = o.textColor
     ctx.fillStyle = o.textColor
-    for (let [i, stop] of o.colorScale.entries()) {
+    for (const [i, stop] of o.colorScale!.entries()) {
       let x = Math.floor(x1 + stop[0] * w)
-      let v = minValue + (maxValue - minValue) * stop[0]
+      let v: (number | string) = minValue + (maxValue - minValue) * stop[0]
       if (o.logarithmicColorScale && v !== 0) {
         v = Math.round(Math.pow(2, v))
       }
       if (stop.length === 3) {
-        v = stop[2]
-        let r = i / (o.colorScale.length - 1)
+        v = stop[2] as (number | string)
+        const r = i / (o.colorScale!.length - 1)
         x = x1 + w * r
         grad.addColorStop(r, this.toRGB(stop[1]))
       } else {
         grad.addColorStop(stop[0], this.toRGB(stop[1]))
       }
       ctx.fillRect(x, 20, 1, 4)
-      ctx.fillText(v, x, 38)
+      ctx.fillText(`${v}`, x, 38)
     }
     ctx.fillStyle = grad
     ctx.fillRect(x1, 10, w, 10)
@@ -940,12 +1080,12 @@ export default class Lichen {
   }
 
   drawXAxis () {
-    let o = this.opt
-    let ctx = this.ctx
+    const o = this.opt
+    const ctx = this.ctx!
     ctx.save()
-    let width = o.width - o.yAxisWidth
-    let yPos = o.height - o.xAxisHeight
-    let scales = [
+    const width = o.width - o.yAxisWidth
+    const yPos = o.height - o.xAxisHeight
+    const scales = [
       31536000e3, 15768000e3, // >/= 6 months
       4838400e3, 2419200e3, 604800e3, // >/= 7days
       172800e3, 86400e3, // >/= 1 day
@@ -956,8 +1096,8 @@ export default class Lichen {
     ]
     let i = 0
     let a = scales[0]
-    let d = new Date()
-    let tickInterval = 60 * (this.disp.xEnd - this.disp.xStart) / width
+    const d = new Date()
+    const tickInterval = 60 * (this.disp.xEnd - this.disp.xStart) / width
     while (tickInterval < scales[i]) {
       a = scales[i++]
     }
@@ -967,13 +1107,17 @@ export default class Lichen {
     let j = this.disp.xStart - (this.disp.xStart % a) + a
     while (j < this.disp.xEnd) {
       d.setTime(j)
-      let xPos = this.getXPos(j)
-      let tickText = (
-        (j % 86400e3) === 0 ? d.getDate() + '/' + (d.getMonth() + 1)
-          : (j % 3600e3) === 0 ? d.getUTCHours() + 'h'
-            : (j % 600e3) === 0 ? d.toISOString().substr(11, 5)
-              : (j % 1e3) === 0 ? d.toISOString().substr(11, 8)
-                : (j % 100) === 0 ? d.toISOString().substr(11, 10) : ''
+      const xPos = this.getXPos(j)
+      const tickText = (
+        (j % 86400e3) === 0
+          ? d.getDate() + '/' + (d.getMonth() + 1)
+          : (j % 3600e3) === 0
+              ? d.getUTCHours() + 'h'
+              : (j % 600e3) === 0
+                  ? d.toISOString().substr(11, 5)
+                  : (j % 1e3) === 0
+                      ? d.toISOString().substr(11, 8)
+                      : (j % 100) === 0 ? d.toISOString().substr(11, 10) : ''
       )
       if ((j % 86400e3) === 0) {
         ctx.font = `bold ${o.fontSize + 2}px sans-serif`
@@ -991,16 +1135,16 @@ export default class Lichen {
   }
 
   drawYAxis () {
-    let o = this.opt
-    let ctx = this.ctx
+    const o = this.opt
+    const ctx = this.ctx!
     ctx.save()
     ctx.font = `${o.fontSize}px sans-serif`
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'right'
     ctx.fillStyle = o.textColor
-    let height = o.height - o.xAxisHeight
-    let xPos = this.getXPos(this.disp.xStart) - 1
-    let a = o.fontSize * 2 * (this.disp.yEnd - this.disp.yStart) / height
+    const height = o.height - o.xAxisHeight
+    const xPos = this.getXPos(this.disp.xStart) - 1
+    let a = o.fontSize * 2 * (this.disp.yEnd! - this.disp.yStart!) / height
     let pow = 0
     if (a === 0) {
       return
@@ -1017,23 +1161,30 @@ export default class Lichen {
       }
     }
     a = Math.round(a) * Math.pow(10, pow)
-    let y = this.disp.yStart - (this.disp.yStart % a)
+    let y = this.disp.yStart! - (this.disp.yStart! % a)
     ctx.fillRect(xPos, 0, 1, height + 1)
-    while (y < this.disp.yEnd) {
-      let yPos = this.getYPos(y)
+    while (y < this.disp.yEnd!) {
+      const yPos = this.getYPos(y)
       if (yPos - height <= 0) {
         ctx.fillStyle = o.gridColor
         ctx.fillRect(xPos, yPos, o.width - o.yAxisWidth + 1, 1)
         ctx.fillStyle = o.textColor
         ctx.fillRect(xPos - 4, yPos, 4, 1)
-        let tickText = (
-          o.yAxisPowerOfTen === false ? y.toFixed(2)
-            : pow >= 9 ? (y / 1e9).toFixed(0) + 'e9'
-              : pow >= 6 ? (y / 1e6).toFixed(0) + 'e6'
-                : pow >= 3 ? (y / 1e3).toFixed(0) + 'e3'
-                  : pow <= -9 ? (y * 1e9).toFixed(0) + 'e-9'
-                    : pow <= -6 ? (y * 1e6).toFixed(0) + 'e-6'
-                      : pow <= -3 ? (y * 1e3).toFixed(0) + 'e-3'
+        const tickText = (
+          o.yAxisPowerOfTen === false
+            ? y.toFixed(2)
+            : pow >= 9
+              ? (y / 1e9).toFixed(0) + 'e9'
+              : pow >= 6
+                ? (y / 1e6).toFixed(0) + 'e6'
+                : pow >= 3
+                  ? (y / 1e3).toFixed(0) + 'e3'
+                  : pow <= -9
+                    ? (y * 1e9).toFixed(0) + 'e-9'
+                    : pow <= -6
+                      ? (y * 1e6).toFixed(0) + 'e-6'
+                      : pow <= -3
+                        ? (y * 1e3).toFixed(0) + 'e-3'
                         : y.toFixed(2)
         )
         ctx.fillText(tickText, xPos - 8, yPos)
@@ -1044,14 +1195,14 @@ export default class Lichen {
   }
 
   drawHeatmap () {
-    let ctx = this.ctx
-    let o = this.opt
-    let iStart = this.getIndexFromXValue(this.disp.xStart)
-    let iEnd = this.getIndexFromXValue(this.disp.xEnd)
-    let width = this.opt.width - this.opt.yAxisWidth
-    let height = o.height - o.xAxisHeight
-    let jStart = this.getIndexFromYValue(this.disp.yStart)
-    let jEnd = this.getIndexFromYValue(this.disp.yEnd)
+    const ctx = this.ctx!
+    const o = this.opt
+    const iStart = this.getIndexFromXValue(this.disp.xStart)
+    const iEnd = this.getIndexFromXValue(this.disp.xEnd)
+    const width = this.opt.width - this.opt.yAxisWidth
+    const height = o.height - o.xAxisHeight
+    const jStart = this.getIndexFromYValue(this.disp.yStart!)
+    const jEnd = this.getIndexFromYValue(this.disp.yEnd!)
     let xValuesPerPixel = (this.disp.xEnd - this.disp.xStart) / (width * o.xStep)
     let xPos = o.yAxisWidth
     let xStep = 1
@@ -1066,15 +1217,16 @@ export default class Lichen {
       yValuesPerPixel = 1
     }
     for (let i = iStart; i < iEnd; i += xValuesPerPixel, xPos += xStep) {
-      let currGroup = []
-      let xGroup = o.data.slice(i, i + xValuesPerPixel)
+      const currGroup: (number | null)[] = []
+      const data = o.data as LichenHeatmapData
+      const xGroup = data.slice(i, i + xValuesPerPixel)
       let yPos = height - yStep
       for (let j = jStart; j < jEnd; j += yValuesPerPixel) {
         let sum = 0
         let count = 0
-        for (let g of xGroup) {
-          let yGroup = g.slice(j, j + yValuesPerPixel)
-          for (let v of yGroup) {
+        for (const g of xGroup) {
+          const yGroup = g.slice(j, j + yValuesPerPixel)
+          for (const v of yGroup) {
             if (v != null) {
               sum += v
               count++
@@ -1083,10 +1235,11 @@ export default class Lichen {
         }
         currGroup.push(count > 0 ? sum / count : null)
       }
-      let noNull = currGroup.filter(v => v != null)
+      const noNull = currGroup.filter(v => v != null) as number[]
       if (noNull.length > 0) {
-        // let maxValue = Math.max.apply(null, currGroup)
-        for (let v of currGroup) {
+        // const maxValue = Math.max.apply(null, currGroup)
+        // for (const v of currGroup) {
+        for (const v of noNull) {
           ctx.fillStyle = this.getColor(v)
           ctx.fillRect(
             Math.floor(xPos), Math.floor(yPos),
@@ -1096,18 +1249,19 @@ export default class Lichen {
         }
       } else {
         // no data
-        ctx.fillStyle = '#000'
+        // ctx.fillStyle = '#000'
+        ctx.fillStyle = 'rgba(0,0,0,0)'
         ctx.fillRect(Math.floor(xPos), 0, Math.round(xStep) + 1, height)
       }
     }
   }
 
   drawCategoryHeatmap () {
-    let ctx = this.ctx
-    let o = this.opt
-    let iStart = Math.max(0, this.getIndexFromXValue(this.disp.xStart) - 2)
-    let iEnd = Math.min(this.getDataLength() - 1, this.getIndexFromXValue(this.disp.xEnd) + 2)
-    let width = this.opt.width - this.opt.yAxisWidth
+    const ctx = this.ctx!
+    const o = this.opt
+    const iStart = Math.max(0, this.getIndexFromXValue(this.disp.xStart) - 2)
+    const iEnd = Math.min(this.getDataLength() - 1, this.getIndexFromXValue(this.disp.xEnd) + 2)
+    const width = this.opt.width - this.opt.yAxisWidth
     let xValuesPerPixel = (this.disp.xEnd - this.disp.xStart) / (width * this.opt.xStep)
     let xPos = o.yAxisWidth
     let xStep = 1
@@ -1115,20 +1269,22 @@ export default class Lichen {
       xStep = 1 / xValuesPerPixel
       xValuesPerPixel = 1
     }
-    let xStart = this.getXPos(o.xStart + o.xStep * iStart)
+    const xStart = this.getXPos(o.xStart + o.xStep * iStart)
     ctx.font = `${o.fontSize}px sans-serif`
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'right'
-    for (let [j, c] of o.categories.entries()) {
+    const cat = o.categories as string[]
+    const data = o.data as (number | null)[][]
+    for (const [j, c] of cat.entries()) {
       xPos = xStart
-      let yPos = j * o.categoryHeight + (j + 1) * o.categoryMargin
+      const yPos = j * o.categoryHeight + (j + 1) * o.categoryMargin
       ctx.fillStyle = o.textColor
       ctx.fillText(c, o.yAxisWidth - 4, yPos + o.categoryHeight / 2)
       for (let i = iStart; i < iEnd; i += xValuesPerPixel, xPos += xStep) {
         let sum = 0
         let count = 0
-        let group = o.data[j].slice(i, i + xValuesPerPixel)
-        for (let v of group) {
+        const group = data[j].slice(i, i + xValuesPerPixel)
+        for (const v of group) {
           if (v != null) {
             sum += v
             count++
@@ -1146,12 +1302,12 @@ export default class Lichen {
   }
 
   drawTimingChart () {
-    let ctx = this.ctx
-    let o = this.opt
-    let iStart = Math.max(0, this.getIndexFromXValue(this.disp.xStart) - 2)
-    let iEnd = Math.min(this.getDataLength() - 1, this.getIndexFromXValue(this.disp.xEnd) + 2)
-    let width = this.opt.width - this.opt.yAxisWidth
-    let height = this.opt.height - this.opt.xAxisHeight
+    const ctx = this.ctx!
+    const o = this.opt
+    const iStart = Math.max(0, this.getIndexFromXValue(this.disp.xStart) - 2)
+    const iEnd = Math.min(this.getDataLength() - 1, this.getIndexFromXValue(this.disp.xEnd) + 2)
+    const width = this.opt.width - this.opt.yAxisWidth
+    const height = this.opt.height - this.opt.xAxisHeight
     let xValuesPerPixel = (this.disp.xEnd - this.disp.xStart) / (width * this.opt.xStep)
     let xPos = o.yAxisWidth
     let xStep = 1
@@ -1159,13 +1315,14 @@ export default class Lichen {
       xStep = 1 / xValuesPerPixel
       xValuesPerPixel = 1
     }
-    let xStart = this.getXPos(o.xStart + o.xStep * iStart)
+    const xStart = this.getXPos(o.xStart + o.xStep * iStart)
     ctx.font = `${o.fontSize}px sans-serif`
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'right'
-    let categoryPos = {}
-    for (let [i, c] of o.categories.entries()) {
-      let yPos = i * o.categoryHeight + (i + 1) * o.categoryMargin
+    const categoryPos: StringIndexedObject = {}
+    const cat = o.categories as { key: string; label: string; }[]
+    for (const [i, c] of cat.entries()) {
+      const yPos = i * o.categoryHeight + (i + 1) * o.categoryMargin
       categoryPos[c.key] = yPos
       ctx.fillStyle = o.textColor
       ctx.fillText(c.label, o.yAxisWidth - 4, yPos + o.categoryHeight / 2)
@@ -1177,9 +1334,10 @@ export default class Lichen {
     ctx.rect(o.yAxisWidth, 0, width, height)
     ctx.closePath()
     ctx.clip()
+    const data = o.data as string[]
     for (let i = iStart; i < iEnd; i += xValuesPerPixel, xPos += xStep) {
-      let dataSliced = o.data.slice(i, i + xValuesPerPixel)
-      for (let c of o.categories) {
+      const dataSliced = data.slice(i, i + xValuesPerPixel)
+      for (const c of cat) {
         if (dataSliced.indexOf(c.key) >= 0) {
           ctx.fillRect(xPos, categoryPos[c.key], xStep, o.categoryHeight)
         }
@@ -1189,14 +1347,14 @@ export default class Lichen {
   }
 
   drawLine (skipDataPreparation = false) {
-    let ctx = this.ctx
-    let o = this.opt
-    let iStart = Math.max(0, this.getIndexFromXValue(this.disp.xStart) - 2)
-    let iEnd = Math.min(this.getDataLength(), this.getIndexFromXValue(this.disp.xEnd) + 2)
-    let width = o.width - o.yAxisWidth
-    let height = this.opt.height - this.opt.xAxisHeight
+    const ctx = this.ctx!
+    const o = this.opt
+    const iStart = Math.max(0, this.getIndexFromXValue(this.disp.xStart) - 2)
+    const iEnd = Math.min(this.getDataLength(), this.getIndexFromXValue(this.disp.xEnd) + 2)
+    const width = o.width - o.yAxisWidth
+    const height = this.opt.height - this.opt.xAxisHeight
     let xValuesPerPixel = (this.disp.xEnd - this.disp.xStart) / (width * o.xStep)
-    let data = o.data instanceof Array ? { _: { data: o.data, enabled: true } } : o.data
+    const data = (o.data instanceof Array ? { _: { data: o.data, enabled: true } } : o.data) as { [index: string]: { data: (number | null)[]; enabled: boolean; color?: string; } }
     let xStep = 1
     if (xValuesPerPixel <= 1) {
       xStep = 1 / xValuesPerPixel
@@ -1206,57 +1364,57 @@ export default class Lichen {
       // process data
       let minValue = null
       let maxValue = null
-      let groupValue = {}
+      const groupValue: { [index: string]: ([number, number] | null)[] } = {}
       let count = 0
       let sum = 0
-      let sq_sum = 0
+      let sqSum = 0
       for (let i = iStart; i < iEnd; i += xValuesPerPixel) {
-        for (let [k, v] of Object.entries(data)) {
+        for (const [k, v] of Object.entries(data)) {
           if (!v.enabled) {
             continue
           }
           if (groupValue[k] == null) {
             groupValue[k] = []
           }
-          let g = v.data.slice(i, i + xValuesPerPixel).filter(x => x != null)
+          const g = v.data.slice(i, i + xValuesPerPixel).filter((x: (number | null)) => x != null) as number[]
           if (g.length === 0) {
             groupValue[k].push(null)
             continue
           }
           let groupMin = null
           let groupMax = null
-          for (let v of g) {
+          for (const v of g) {
             groupMin = groupMin == null ? v : Math.min(groupMin, v)
             groupMax = groupMax == null ? v : Math.max(groupMax, v)
-            sq_sum += v * v
+            sqSum += v * v
             sum += v
             count++
           }
-          minValue = minValue == null ? groupMin : Math.min(minValue, groupMin)
-          maxValue = maxValue == null ? groupMax : Math.max(maxValue, groupMax)
-          groupValue[k].push([groupMin, groupMax])
+          minValue = minValue == null ? groupMin : Math.min(minValue, groupMin!)
+          maxValue = maxValue == null ? groupMax : Math.max(maxValue, groupMax!)
+          groupValue[k].push([groupMin!, groupMax!])
         }
       }
-  
-      let avg = sum / count
+
+      const avg = sum / count
       if (Object.keys(data).length === 1) {
         this.dispStats.min = minValue
         this.dispStats.max = maxValue
         this.dispStats.avg = avg
-        this.dispStats.rms = Math.sqrt((sq_sum - 2 * avg * sum + count * avg * avg) / count)
+        this.dispStats.rms = Math.sqrt((sqSum - 2 * avg * sum + count * avg * avg) / count)
       }
-  
+
       if (o.stacked) {
-        let keys = Object.keys(groupValue)
-        for (let [keyIndex, k] of keys.entries()) {
-          for (let [i, g] of groupValue[k].entries()) {
+        const keys = Object.keys(groupValue)
+        for (const [keyIndex, k] of keys.entries()) {
+          for (const [i, g] of groupValue[k].entries()) {
             if (g != null) {
               let [stackedValueMin, stackedValueMax] = g
               for (let j = keyIndex + 1; j < keys.length; j++) {
-                let currGroup = groupValue[keys[j]][i]
-                stackedValueMin += currGroup[0]
-                stackedValueMax += currGroup[1]
-                maxValue = Math.max(maxValue, stackedValueMax)
+                const currGroup = groupValue[keys[j]][i]
+                stackedValueMin += currGroup![0]
+                stackedValueMax += currGroup![1]
+                maxValue = Math.max(maxValue!, stackedValueMax)
               }
               g[0] = stackedValueMin
               g[1] = stackedValueMax
@@ -1270,20 +1428,20 @@ export default class Lichen {
       if (o.fixedMax != null) {
         maxValue = o.fixedMax
       }
-      let amplitude = maxValue - minValue
+      let amplitude = maxValue! - minValue!
       if (amplitude === 0) {
         amplitude = 0.1
       }
-      this.disp.yStart = o.fixedMin != null ? minValue : minValue - amplitude * 0.1
-      this.disp.yEnd = o.fixedMax != null ? maxValue : maxValue + amplitude * 0.1
+      this.disp.yStart = o.fixedMin != null ? minValue! : minValue! - amplitude * 0.1
+      this.disp.yEnd = o.fixedMax != null ? maxValue! : maxValue! + amplitude * 0.1
       this.groupValue = groupValue
     }
     if (o.syncScale) {
-      let maxAmp = this.dispStats.max - this.dispStats.min
+      let maxAmp = this.dispStats.max! - this.dispStats.min!
       let wait = false
       // check that all charts are ready
-      for (let chart of o.syncCharts()) {
-        if (chart == this) {
+      for (const chart of o.syncCharts()) {
+        if (chart === this) {
           continue
         }
         if (chart.dispStats.min == null || chart.dispStats.max == null) {
@@ -1299,7 +1457,7 @@ export default class Lichen {
         }, 50)
         return
       }
-      let mid = (this.dispStats.min + this.dispStats.max) / 2
+      const mid = (this.dispStats.min! + this.dispStats.max!) / 2
       this.disp.yStart = mid - maxAmp / 2 - maxAmp * 0.1
       this.disp.yEnd = mid + maxAmp / 2 + maxAmp * 0.1
     }
@@ -1325,14 +1483,14 @@ export default class Lichen {
           ctx.fillStyle = o.color.replace('rgb', 'rgba').replace(')', ', 0.2)')
         }
       } else {
-        let strokeGrad = ctx.createLinearGradient(0, height, 0, 0)
-        for (let c of this.getGradient()) {
+        const strokeGrad = ctx.createLinearGradient(0, height, 0, 0)
+        for (const c of this.getGradient()) {
           strokeGrad.addColorStop(c[0], c[1])
         }
         ctx.strokeStyle = strokeGrad
         if (o.area) {
-          let fillGrad = ctx.createLinearGradient(0, height, 0, 0)
-          for (let c of this.getGradient()) {
+          const fillGrad = ctx.createLinearGradient(0, height, 0, 0)
+          for (const c of this.getGradient()) {
             fillGrad.addColorStop(c[0], c[1].replace('rgb', 'rgba').replace(')', ', 0.2)'))
           }
           ctx.fillStyle = fillGrad
@@ -1342,16 +1500,16 @@ export default class Lichen {
 
     // draw area
     if (o.area) {
-      for (let [k, v] of Object.entries(this.groupValue)) {
+      for (const [k, v] of Object.entries(this.groupValue)) {
         if (data[k].color != null) {
-          if (data[k].color.indexOf('rgb') === 0) {
-            ctx.fillStyle = data[k].color.replace('rgb', 'rgba').replace(')', `, ${o.areaFillOpacity})`)
+          if (data[k].color!.indexOf('rgb') === 0) {
+            ctx.fillStyle = data[k].color!.replace('rgb', 'rgba').replace(')', `, ${o.areaFillOpacity})`)
           } else {
-            ctx.fillStyle = data[k].color
+            ctx.fillStyle = data[k].color!
           }
         }
         xPos = this.getXPos(o.xStart + o.xStep * iStart)
-        for (let [i, g] of v.entries()) {
+        for (const [i, g] of v.entries()) {
           if (g != null) {
             if (i === 0 || v[i - 1] == null) {
               ctx.beginPath()
@@ -1380,16 +1538,16 @@ export default class Lichen {
       }
     }
 
-    for (let [k, v] of Object.entries(this.groupValue)) {
-      // set fixed color for mutil series
+    for (const [k, v] of Object.entries(this.groupValue)) {
+      // set fixed color for multi series
       if (!(o.data instanceof Array)) {
-        ctx.strokeStyle = o.data[k].color
+        ctx.strokeStyle = o.data[k].color!
       }
 
       // draw line
       xPos = this.getXPos(o.xStart + o.xStep * iStart)
       ctx.beginPath()
-      for (let [i, g] of v.entries()) {
+      for (const [i, g] of v.entries()) {
         if (g != null) {
           if (i === 0 || v[i - 1] == null) {
             ctx.moveTo(xPos, this.getYPos(g[0]))
@@ -1409,8 +1567,8 @@ export default class Lichen {
   }
 
   debounce () {
-    let d = this.debounceOpt
-    let o = this.opt
+    const d = this.debounceOpt
+    const o = this.opt
     if (d.locked) {
       return
     }
@@ -1423,23 +1581,23 @@ export default class Lichen {
       this.draw()
       d.refresh = false
     }, 500)
-    let ctx = this.ctx
-    let [width, height] = [o.width - o.yAxisWidth, o.height - o.xAxisHeight]
+    const ctx = this.ctx!
+    const [width, height] = [o.width - o.yAxisWidth, o.height - o.xAxisHeight]
     ctx.clearRect(0, 0, o.yAxisWidth, o.height)
     ctx.clearRect(0, height, o.width, o.xAxisHeight)
-    let img = new Image(o.width, o.height)
+    const img = new Image(o.width, o.height)
     img.onload = () => {
       ctx.clearRect(0, 0, o.width, o.height)
       let [sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight] = [o.yAxisWidth, 0, width, height, o.yAxisWidth, 0, width, height]
-      let xRatio = (this.disp.xEnd - this.disp.xStart) / (d.disp.xEnd - d.disp.xStart)
-      let yRatio = (this.disp.yEnd - this.disp.yStart) / (d.disp.yEnd - d.disp.yStart)
+      const xRatio = (this.disp.xEnd - this.disp.xStart) / (d.disp.xEnd - d.disp.xStart)
+      const yRatio = (this.disp.yEnd! - this.disp.yStart!) / (d.disp.yEnd! - d.disp.yStart!)
       sx = Math.max(o.yAxisWidth, sx + width * this.getRatio(this.disp.xStart, d.disp.xStart, d.disp.xEnd))
       sWidth = Math.min(width, width * xRatio)
       dx = Math.max(o.yAxisWidth, dx + width * this.getRatio(d.disp.xStart, this.disp.xStart, this.disp.xEnd))
       dWidth = Math.min(width, width / xRatio)
-      sy = Math.max(0, height - height * this.getRatio(this.disp.yEnd, d.disp.yStart, d.disp.yEnd))
+      sy = Math.max(0, height - height * this.getRatio(this.disp.yEnd!, d.disp.yStart!, d.disp.yEnd!))
       sHeight = Math.min(height, height * yRatio)
-      dy = Math.max(0, height - height * this.getRatio(d.disp.yEnd, this.disp.yStart, this.disp.yEnd))
+      dy = Math.max(0, height - height * this.getRatio(d.disp.yEnd!, this.disp.yStart!, this.disp.yEnd!))
       dHeight = Math.min(height, height / yRatio)
       this.drawXAxis()
       this.drawYAxis()
@@ -1451,13 +1609,13 @@ export default class Lichen {
   }
 
   displayStats () {
-    let s = this.dispStats
-    s.container.innerHTML = `MAX: ${s.max.toExponential(3)} | MIN: ${s.min.toExponential(3)} | AVG: ${s.avg.toExponential(3)} | RMS: ${s.rms.toExponential(3)}`
+    const s = this.dispStats
+    s.container!.innerHTML = `MAX: ${s.max!.toExponential(3)} | MIN: ${s.min!.toExponential(3)} | AVG: ${s.avg!.toExponential(3)} | RMS: ${s.rms!.toExponential(3)}`
   }
 
   draw () {
-    let o = this.opt
-    let d = this.debounceOpt
+    const o = this.opt
+    const d = this.debounceOpt
     if (o.debounce && d.init && !d.refresh) {
       this.debounce()
     } else {
@@ -1466,7 +1624,7 @@ export default class Lichen {
       }
       // if beforeDraw returns false the draw is not done.
       if (o.beforeDraw.call(this) !== false) {
-        let ctx = this.ctx
+        const ctx = this.ctx!
         ctx.clearRect(0, 0, o.width, o.height)
         this.drawXAxis()
         if (o.categories == null && o.type !== 'line') {

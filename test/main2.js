@@ -1,5 +1,6 @@
 import Lichen from '../lichen.js'
-import data from './data.js'
+import data from './data2.js'
+import fail from './download_failed.js'
 
 let container = document.querySelector('#chart')
 
@@ -110,3 +111,19 @@ console.log(data)
 
 window.chart = new Lichen(container, data)
 
+for (let [x, s] of fail) {
+  let i = chart.getIndexFromXValue(x)
+  let found = false
+  for (let [j, cat] of chart.opt.categories.entries()) {
+    if (cat.indexOf(s) > 0) {
+      let v = chart.opt.data[j][i]
+      if (v === 1) {
+        found = true
+        break
+      }
+    }
+  }
+  if (!found) {
+    console.log(`no data available : ${s} | ${new Date(x).toISOString()}`)
+  }
+}
