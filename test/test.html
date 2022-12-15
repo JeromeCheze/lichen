@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head></head>
+  <body>
+    <div id="wrapper">
+      <canvas id="c1"></canvas>
+      <canvas id="c2"></canvas>
+    </div>
+    <script>
+      const wrapper = document.getElementById('wrapper')
+      Object.assign(wrapper.style, { position: 'relative' })
+      const size = wrapper.getBoundingClientRect()
+      const c1 = document.getElementById('c1')
+      c1.width = size.width
+      c1.height = 100
+      Object.assign(c1.style, { position: 'absolute', top: 0, left: 0 })
+      const c2 = document.getElementById('c2')
+      c2.width = size.width - 50
+      c2.height = 150
+      Object.assign(c2.style, { position: 'absolute', top: 0, left: '50px' })
+      const ctx1 = c1.getContext('2d')
+      ctx1.strokeRect(0, 0, c1.width, c1.height)
+      const ctx2 = c2.getContext('2d')
+      ctx2.strokeRect(0, 0, c2.width, c2.height)
+      for (let y = 0; y < c1.height; y += 20) {
+        ctx1.fillRect(0, y, c1.width, 1)
+      }
+      for (let x = 0; x < c2.width; x += 20) {
+        ctx2.fillRect(x, 0, 1, c2.height)
+      }
+    </script>
+  </body>
+</html>
