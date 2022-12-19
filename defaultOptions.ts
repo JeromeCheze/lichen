@@ -6,6 +6,8 @@ const LINE_WIDTH = 1
 const TICK_LENGTH = 4
 const TICK_WIDTH = 1
 const FONT_SIZE = 10
+const AXIS_TEXT_COLOR = '#888'
+const GRID_COLOR = 'rgba(136, 136, 136, 0.1)'
 
 export default {
   crosshair: true,
@@ -13,17 +15,21 @@ export default {
     enabled: AXIS_ENABLED,
     gridEnabled: GRID_ENABLED,
     fontSize: FONT_SIZE,
+    textColor: AXIS_TEXT_COLOR,
     lineWidth: LINE_WIDTH,
     tickLength: TICK_LENGTH,
-    tickWidth: TICK_WIDTH
+    tickWidth: TICK_WIDTH,
+    gridColor: GRID_COLOR
   },
   yAxis: {
     enabled: AXIS_ENABLED,
     gridEnabled: GRID_ENABLED,
     fontSize: FONT_SIZE,
+    textColor: AXIS_TEXT_COLOR,
     lineWidth: LINE_WIDTH,
     tickLength: TICK_LENGTH,
     tickWidth: TICK_WIDTH,
+    gridColor: GRID_COLOR,
     powerOfTen: false,
     width: 50
   },

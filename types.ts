@@ -1,3 +1,5 @@
+import Lichen from './index'
+
 export interface Coordinates {
   x: number;
   y: number;
@@ -7,9 +9,11 @@ export interface GlobalAxisOptions {
   enabled: boolean;
   gridEnabled: boolean;
   fontSize: number;
+  textColor: string;
   lineWidth: number;
   tickLength: number;
   tickWidth: number;
+  gridColor: string;
 }
 
 export interface XAxisOptions extends GlobalAxisOptions {}
@@ -36,9 +40,10 @@ export interface LichenOptions {
   xAxis: XAxisOptions;
   yAxis: YAxisOptions;
   series: SerieOptions[];
+  synced: () => Lichen[];
 }
 
-export interface DataUtilsDrawData {
+export interface DataUtilsComputedData {
   displayMin: number;
   displayMax: number;
   xRatio: number;
@@ -49,4 +54,11 @@ export interface DataUtilsDrawData {
   maxValue: number;
   avgValue: number;
   rmsValue: number;
+}
+
+export interface DataUtilsDataFromPos {
+  index: number;
+  xDataValue: number;
+  xDataValuePos: number;
+  yDataValue: number | null;
 }

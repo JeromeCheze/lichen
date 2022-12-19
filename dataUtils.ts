@@ -1,4 +1,4 @@
-import { SerieOptions, DataUtilsDrawData } from './types'
+import { SerieOptions, DataUtilsComputedData, DataUtilsDataFromPos } from './types'
 
 const DATA_DISPLAY_PADDING = 0.1
 const MIN_AMPLITUDE = 0.1
@@ -8,13 +8,17 @@ export default class DataUtils {
   opt: SerieOptions[];
   width: number;
   height: number;
-  drawData: (null | DataUtilsDrawData)[];
+  computed: (null | DataUtilsComputedData)[];
+  start: number | null;
+  end: number | null;
 
   constructor (opt: SerieOptions[], width: number, height: number) {
     this.opt = opt
     this.width = width
     this.height = height
-    this.drawData = Array.from(opt, x => null)
+    this.computed = Array.from(opt, () => null)
+    this.start = null
+    this.end = null
   }
 
   dataRange (): [number, number] {
@@ -28,14 +32,58 @@ export default class DataUtils {
     return [minStart, maxEnd] as [number, number]
   }
 
-  computeDrawData(t1: number, t2: number) {
-    const drawData: (null | DataUtilsDrawData)[] = []
+  xValueFromPos (xPos: number): null | number {
+    if (this.start == null || this.end == null) {
+      return null
+    }
+    return this.start + (xPos / this.width) * (this.end - this.start)
+  }
+
+  xPosFromValue (xValue: number): null | number {
+    if (this.start == null || this.end == null) {
+      return null
+    }
+    return this.width * (xValue - this.start) / (this.end - this.start)
+  }
+
+  dataFromPos (xPos: number) {
+    const result: (DataUtilsDataFromPos | null)[] = Array.from(this.opt, () => null)
+    if (this.start == null || this.end == null) {
+      return result
+    }
+    const xValue = this.xValueFromPos(xPos)
+    if (xValue == null) {
+      return result
+    }
+    for (const [i, serie] of this.opt.entries()) {
+      const c = this.computed[i]
+      if (c == null) {
+        result.push(null)
+        continue
+      }
+      const index = Math.round(serie.data.length * (serie.start - xValue) / (serie.start + serie.data.length * serie.step))
+      const xDataValue = serie.start + index * serie.step
+      result[i] = {
+        index,
+        xDataValue,
+        xDataValuePos: this.xPosFromValue(xDataValue)!,
+        yDataValue: serie.data[index]
+      }
+    }
+    return result
+  }
+
+  computeData() {
+    if (this.start == null || this.end == null) {
+      return
+    }
+    const computed: (null | DataUtilsComputedData)[] = []
     for (const serie of this.opt) {
-      const xRatio = (t2 - t1) / (serie.step * this.width)
-      const minIndex = (t1 - serie.start) / serie.step
-      const maxIndex = (t2 - serie.start) / serie.step
+      const xRatio = (this.end - this.start) / (serie.step * this.width)
+      const minIndex = (this.start - serie.start) / serie.step
+      const maxIndex = (this.end - serie.start) / serie.step
       if (minIndex >= serie.data.length || maxIndex <= 0) {
-        drawData.push(null)
+        computed.push(null)
         continue
       }
       let minValue: null | number = null
@@ -55,7 +103,7 @@ export default class DataUtils {
         valueCount++
       }
       if (valueCount === 0) {
-        drawData.push(null)
+        computed.push(null)
         continue
       }
       const avgValue = valueSum / valueCount
@@ -65,7 +113,7 @@ export default class DataUtils {
       }
       const displayMin = minValue! - DATA_DISPLAY_PADDING * amplitude
       const displayMax = maxValue! + DATA_DISPLAY_PADDING * amplitude
-      drawData.push({
+      computed.push({
         displayMin,
         displayMax,
         xRatio,
@@ -78,6 +126,6 @@ export default class DataUtils {
         rmsValue: Math.sqrt((valueSqSum - 2 * avgValue * valueSum + valueCount * avgValue * avgValue) / valueCount)
       })
     }
-    this.drawData = drawData
+    this.computed = computed
   }
 }

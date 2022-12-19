@@ -3,13 +3,13 @@ import { LichenOptions } from './types'
 import XAxis from './xAxis'
 import YAxis from './yAxis'
 
-export class Lichen {
+export default class Lichen {
 
   opt: LichenOptions;
   yAxis: YAxis;
   xAxis: XAxis;
 
-  constructor (container: HTMLElement, opt: LichenOptions) {
+  constructor (container: HTMLElement, opt: LichenOptions, drawOnCreation: boolean = true) {
     this.opt = this.mergeOptions(opt)
     this.initStructure(container)
   }
