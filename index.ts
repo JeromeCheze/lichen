@@ -30,17 +30,22 @@ export class Lichen {
 
   initStructure (container: HTMLElement) {
     const sizes = container.getBoundingClientRect()
-    const wrapper = document.createElement('div')
-    Object.assign(wrapper.style, { position: 'relative', top: 0, left: 0 })
-    container.appendChild(wrapper)
+    if (this.opt.title != null) {
+      const title = document.createElement('div')
+      title.innerHTML = this.opt.title
+      container.appendChild(title)
+    }
+    const canvasWrapper = document.createElement('div')
+    Object.assign(canvasWrapper.style, { position: 'relative', top: 0, left: 0 })
+    container.appendChild(canvasWrapper)
     this.xAxis = new XAxis(
-      wrapper,
+      canvasWrapper,
       this.opt.yAxis.enabled ? this.opt.yAxis.width : 0,
       sizes.width,
       this.opt.height,
       this.opt.xAxis
     )
-    this.yAxis = new YAxis(wrapper, sizes.width, this.opt.height, this.opt.yAxis)
+    this.yAxis = new YAxis(canvasWrapper, sizes.width, this.opt.height, this.opt.yAxis)
     if (this.opt.type === 'line') {
       
     }

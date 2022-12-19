@@ -37,3 +37,16 @@ export interface LichenOptions {
   yAxis: YAxisOptions;
   series: SerieOptions[];
 }
+
+export interface DataUtilsDrawData {
+  displayMin: number;
+  displayMax: number;
+  xRatio: number;
+  yRatio: number;
+  minIndex: number;
+  maxIndex: number;
+  minValue: number;
+  maxValue: number;
+  avgValue: number;
+  rmsValue: number;
+}
