@@ -43,17 +43,20 @@ export interface LichenOptions {
   synced: () => Lichen[];
 }
 
-export interface DataUtilsComputedData {
-  displayMin: number;
-  displayMax: number;
+export interface DataUtilsComputedSerieData {
   xRatio: number;
-  yRatio: number;
   minIndex: number;
   maxIndex: number;
   minValue: number;
   maxValue: number;
   avgValue: number;
   rmsValue: number;
+}
+
+export interface DataUtilsComputedData {
+  minValue: number | null;
+  maxValue: number | null;
+  series: (DataUtilsComputedSerieData | null)[];
 }
 
 export interface DataUtilsDataFromPos {

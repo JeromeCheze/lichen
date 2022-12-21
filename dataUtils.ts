@@ -1,14 +1,12 @@
-import { SerieOptions, DataUtilsComputedData, DataUtilsDataFromPos } from './types'
+import { SerieOptions, DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData } from './types'
 
-const DATA_DISPLAY_PADDING = 0.1
-const MIN_AMPLITUDE = 0.1
 
 export default class DataUtils {
 
   opt: SerieOptions[];
   width: number;
   height: number;
-  computed: (null | DataUtilsComputedData)[];
+  computed: DataUtilsComputedData;
   start: number | null;
   end: number | null;
 
@@ -16,7 +14,11 @@ export default class DataUtils {
     this.opt = opt
     this.width = width
     this.height = height
-    this.computed = Array.from(opt, () => null)
+    this.computed = {
+      minValue: null,
+      maxValue: null,
+      series: Array.from(opt, () => null)
+    }
     this.start = null
     this.end = null
   }
@@ -56,7 +58,7 @@ export default class DataUtils {
       return result
     }
     for (const [i, serie] of this.opt.entries()) {
-      const c = this.computed[i]
+      const c = this.computed.series[i]
       if (c == null) {
         result.push(null)
         continue
@@ -77,7 +79,9 @@ export default class DataUtils {
     if (this.start == null || this.end == null) {
       return
     }
-    const computed: (null | DataUtilsComputedData)[] = []
+    const computed: (DataUtilsComputedSerieData | null)[] = []
+    let globalMinValue: number | null = null
+    let globalMaxValue: number | null = null
     for (const serie of this.opt) {
       const xRatio = (this.end - this.start) / (serie.step * this.width)
       const minIndex = (this.start - serie.start) / serie.step
@@ -107,17 +111,10 @@ export default class DataUtils {
         continue
       }
       const avgValue = valueSum / valueCount
-      let amplitude = maxValue! - minValue!
-      if (amplitude === 0) {
-        amplitude = MIN_AMPLITUDE
-      }
-      const displayMin = minValue! - DATA_DISPLAY_PADDING * amplitude
-      const displayMax = maxValue! + DATA_DISPLAY_PADDING * amplitude
+      globalMinValue = globalMinValue == null || minValue! < globalMinValue ? minValue : globalMinValue
+      globalMaxValue = globalMaxValue == null || globalMaxValue < maxValue! ? maxValue : globalMaxValue
       computed.push({
-        displayMin,
-        displayMax,
         xRatio,
-        yRatio: (displayMax! - displayMin!) / this.height,
         minIndex,
         maxIndex,
         minValue: minValue!,
@@ -126,6 +123,11 @@ export default class DataUtils {
         rmsValue: Math.sqrt((valueSqSum - 2 * avgValue * valueSum + valueCount * avgValue * avgValue) / valueCount)
       })
     }
-    this.computed = computed
+
+    this.computed = {
+      minValue: globalMinValue,
+      maxValue: globalMaxValue,
+      series: computed
+    }
   }
 }
