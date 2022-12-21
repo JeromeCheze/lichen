@@ -1,4 +1,5 @@
-import { XAxisOptions, Coordinates } from './types'
+import { XAxisOptions } from './types'
+import DataUtils from './dataUtils'
 
 const TEXT_PADDING = 4
 
@@ -7,39 +8,29 @@ export default class XAxis {
   opt: XAxisOptions;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
-  plotHeight: number;
+  dataUtils: DataUtils;
 
   constructor (
     container: HTMLElement,
-    xPos: number,
-    plotWidth: number,
-    plotHeight: number,
-    opt: XAxisOptions
+    opt: XAxisOptions,
+    dataUtils: DataUtils
   ) {
     this.opt = opt
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
-    this.plotHeight = plotHeight
-    this.canvas.width = plotWidth
-    this.canvas.height = this.computeHeight(plotHeight)
-    Object.assign(this.canvas.style, { position: 'absolute', top: 0, left: xPos })
+    this.dataUtils = dataUtils
+    this.canvas.width = dataUtils.width
+    this.canvas.height = dataUtils.height + this.opt.tickLength + 2 * TEXT_PADDING + this.opt.fontSize
+    Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0 })
     container.appendChild(this.canvas)
   }
 
-  computeHeight (plotHeight: number): number {
-    return plotHeight
-      + this.opt.lineWidth
-      + this.opt.tickLength
-      + TEXT_PADDING
-      + this.opt.fontSize
-      + TEXT_PADDING
-  }
-
-  update (minValue: number, maxValue: number) {
+  update () {
     const ctx = this.ctx
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     ctx.save()
     const width = this.canvas.width
-    const yPos = this.plotHeight
+    const yPos = this.dataUtils.height
     const scales = [
       31536000e3, 15768000e3, // >/= 6 months
       4838400e3, 2419200e3, 604800e3, // >/= 7days
@@ -52,7 +43,7 @@ export default class XAxis {
     let i = 0
     let a = scales[0]
     const d = new Date()
-    const tickInterval = 60 * (maxValue - minValue) / width
+    const tickInterval = 60 * (this.dataUtils.end - this.dataUtils.start) / width
     while (tickInterval < scales[i]) {
       a = scales[i++]
     }
@@ -62,10 +53,10 @@ export default class XAxis {
       ctx.fillStyle = this.opt.textColor
       ctx.fillRect(0, yPos, width, this.opt.lineWidth)
     }
-    let j = minValue - (minValue % a) + a
-    while (j < maxValue) {
+    let j = this.dataUtils.start - (this.dataUtils.start % a) + a
+    while (j < this.dataUtils.end) {
       d.setTime(j)
-      const xPos = width * (j - minValue) / (maxValue - minValue)
+      const xPos = this.dataUtils.xPosFromValue(j)
       if (this.opt.gridEnabled) {
         ctx.fillStyle = this.opt.gridColor
         ctx.fillRect(xPos, 0, 1, yPos)

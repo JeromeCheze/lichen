@@ -1,12 +1,13 @@
 import { SerieOptions, DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData } from './types'
 
-
 export default class DataUtils {
 
   opt: SerieOptions[];
   width: number;
   height: number;
   computed: DataUtilsComputedData;
+  yMin: number | null;
+  yMax: number | null;
   start: number | null;
   end: number | null;
 
@@ -19,6 +20,8 @@ export default class DataUtils {
       maxValue: null,
       series: Array.from(opt, () => null)
     }
+    this.yMin = null
+    this.yMax = null
     this.start = null
     this.end = null
   }
@@ -27,7 +30,7 @@ export default class DataUtils {
     let minStart: number | null = null
     let maxEnd: number | null = null
     for (const serie of this.opt) {
-      const end = serie.data.length * serie.step
+      const end = serie.start + serie.data.length * serie.step
       minStart = minStart == null || serie.start < minStart ? serie.start : minStart
       maxEnd = maxEnd == null || maxEnd < end ? end : maxEnd
     }
@@ -46,6 +49,13 @@ export default class DataUtils {
       return null
     }
     return this.width * (xValue - this.start) / (this.end - this.start)
+  }
+
+  yPosFromValue (yValue: number): null | number {
+    if (this.yMin == null || this.yMax == null) {
+      return null
+    }
+    return this.height * (this.yMax - yValue) / (this.yMax - this.yMin)
   }
 
   dataFromPos (xPos: number) {

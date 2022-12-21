@@ -1,3 +1,4 @@
+import DataUtils from './dataUtils'
 import { YAxisOptions } from './types'
 
 const TEXT_PADDING = 4
@@ -7,32 +8,34 @@ export default class YAxis {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   opt: YAxisOptions;
+  dataUtils: DataUtils;
 
   constructor (
     container: HTMLElement,
-    plotWidth: number,
-    plotHeight: number,
-    opt: YAxisOptions
+    opt: YAxisOptions,
+    dataUtils: DataUtils
   ) {
     this.opt = opt
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
-    this.canvas.width = opt.width + plotWidth
-    this.canvas.height = plotHeight
+    this.dataUtils = dataUtils
+    this.canvas.width = opt.width + dataUtils.width
+    this.canvas.height = dataUtils.height
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, left: 0 })
     container.appendChild(this.canvas)
   }
 
-  update (minValue: number, maxValue: number) {
+  update () {
     const o = this.opt
     const ctx = this.ctx!
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     ctx.save()
     ctx.font = `${this.opt.fontSize}px sans-serif`
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'right'
     const height = this.canvas.height
     const xPos = this.opt.width - 1
-    let a = this.opt.fontSize * 2 * (maxValue - minValue) / height
+    let a = this.opt.fontSize * 2 * (this.dataUtils.yMax - this.dataUtils.yMin) / height
     let pow = 0
     if (a === 0) {
       return
@@ -53,9 +56,9 @@ export default class YAxis {
       ctx.fillStyle = this.opt.textColor
       ctx.fillRect(xPos, 0, this.opt.lineWidth, height + 1)
     }
-    let y = minValue - (minValue % a)
-    while (y < maxValue) {
-      const yPos = maxValue - (maxValue - y) / (maxValue - minValue)
+    let y = this.dataUtils.yMin - (this.dataUtils.yMin % a)
+    while (y <= this.dataUtils.yMax) {
+      const yPos = this.dataUtils.yPosFromValue(y)
       if (yPos - height <= 0) {
         if (this.opt.gridEnabled) {
           ctx.fillStyle = o.gridColor
