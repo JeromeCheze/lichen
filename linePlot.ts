@@ -48,14 +48,12 @@ export default class LinePlot {
             minValue = minValue == null || v < minValue ? v : minValue
             maxValue = maxValue == null || maxValue < v ? v : maxValue
           }
-          if (xStep > 1) {
-            if (prev == null) {
-              ctx.moveTo(xPos, this.dataUtils.yPosFromValue(minValue))
-            } else {
-              ctx.lineTo(xPos, this.dataUtils.yPosFromValue(minValue))
-            }
-          } else {
+          if (prev == null) {
             ctx.moveTo(xPos, this.dataUtils.yPosFromValue(minValue))
+          } else {
+            ctx.lineTo(xPos, this.dataUtils.yPosFromValue(minValue))
+          }
+          if (xStep === 1) {
             ctx.lineTo(xPos, this.dataUtils.yPosFromValue(maxValue))
           }
           prev = minValue

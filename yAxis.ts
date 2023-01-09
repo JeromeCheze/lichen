@@ -21,7 +21,7 @@ export default class YAxis {
     this.dataUtils = dataUtils
     this.canvas.width = opt.width + dataUtils.width
     this.canvas.height = dataUtils.height
-    Object.assign(this.canvas.style, { position: 'absolute', top: 0, left: 0 })
+    Object.assign(this.canvas.style, { position: 'absolute', top: 0, left: 0, zIndex: 0 })
     container.appendChild(this.canvas)
   }
 
