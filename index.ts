@@ -16,6 +16,9 @@ export default class Lichen {
   constructor (container: HTMLElement, opt: LichenOptions, drawOnCreation: boolean = true) {
     this.opt = this.mergeOptions(opt)
     this.init(container)
+    if (drawOnCreation) {
+      this.draw()
+    }
   }
 
   mergeOptions (opt: LichenOptions): LichenOptions {
@@ -49,11 +52,10 @@ export default class Lichen {
     if (this.opt.type === 'line') {
       this.plot = new LinePlot(canvasWrapper, this.opt.series, this.dataUtils)
     }
-    
+    [this.dataUtils.start, this.dataUtils.end] = this.dataUtils.dataRange()
   }
 
   draw () {
-    [this.dataUtils.start, this.dataUtils.end] = this.dataUtils.dataRange()
     this.dataUtils.computeData()
     let amplitude = this.dataUtils.computed.maxValue - this.dataUtils.computed.minValue
     if (amplitude === 0) {

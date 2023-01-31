@@ -24,7 +24,7 @@ window.chart = new Lichen(container, {
     data: data.data
   }]
 })
-window.chart.draw()
+// window.chart.draw()
 
 // let animation = setInterval(() => {
 //   window.chart.addData([Math.floor(Math.random() * 1e8 * Math.random()) * 10], false)
