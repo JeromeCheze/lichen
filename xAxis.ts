@@ -21,7 +21,7 @@ export default class XAxis {
     this.dataUtils = dataUtils
     this.canvas.width = dataUtils.width
     this.canvas.height = dataUtils.height + this.opt.tickLength + 2 * TEXT_PADDING + this.opt.fontSize
-    Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0 })
+    Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 0 })
     container.appendChild(this.canvas)
   }
 

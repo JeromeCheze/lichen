@@ -39,6 +39,7 @@ export default class Lichen {
     const sizes = container.getBoundingClientRect()
     if (this.opt.title != null) {
       const title = document.createElement('div')
+      Object.assign(title.style, { textAlign: 'center', fontWeight: 'bold' })
       title.innerHTML = this.opt.title
       container.appendChild(title)
     }
