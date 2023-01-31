@@ -1,6 +1,7 @@
 import defaultOptions from './defaultOptions.js'
 import { LichenOptions } from './types.js'
 import DataUtils from './dataUtils.js'
+import EventUtils from './eventUtils.js'
 import XAxis from './xAxis.js'
 import YAxis from './yAxis.js'
 import LinePlot from './linePlot.js'
@@ -11,6 +12,7 @@ export default class Lichen {
   yAxis: YAxis;
   xAxis: XAxis;
   dataUtils: DataUtils;
+  eventUtils: EventUtils;
   plot: LinePlot;
 
   constructor (container: HTMLElement, opt: LichenOptions, drawOnCreation: boolean = true) {
@@ -54,6 +56,15 @@ export default class Lichen {
       this.plot = new LinePlot(canvasWrapper, this.opt.series, this.dataUtils)
     }
     [this.dataUtils.start, this.dataUtils.end] = this.dataUtils.dataRange()
+    this.eventUtils = new EventUtils(this.plot.canvas, this.dataUtils)
+    this.eventUtils
+      .active(value => console.log(value))
+      // .move(value => console.log(value))
+      .xRangeChange(value => {
+        this.dataUtils.start = value[0]
+        this.dataUtils.end = value[1]
+        this.draw()
+      })
   }
 
   draw () {

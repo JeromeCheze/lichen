@@ -44,6 +44,10 @@ export default class DataUtils {
     return this.start + (xPos / this.width) * (this.end - this.start)
   }
 
+  yValueFromPos (yPos: number): number {
+    return this.yMax - (yPos / this.height) * (this.yMax - this.yMin)
+  }
+
   xPosFromValue (xValue: number): null | number {
     if (this.start == null || this.end == null) {
       return null
