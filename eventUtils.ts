@@ -1,10 +1,13 @@
+import { EvenUtilsEventHandlerMap } from './types';
 import DataUtils from './dataUtils'
+
+const THRESHOLD = 5
 
 export default class EventUtils {
 
   element: HTMLElement;
   dataUtils: DataUtils;
-  handler: Record<string, (e: any) => void>;
+  handler: EvenUtilsEventHandlerMap;
   registered: Record<string, ((e:any) => void)[]>;
   state: Record<string, any>;
 
@@ -12,30 +15,32 @@ export default class EventUtils {
     this.element = element
     this.dataUtils = dataUtils
     this.handler = {
-      'mouseleave': (e: MouseEvent) => this.handleMouseLeave(e),
-      'mousemove': (e: MouseEvent) => this.handleMouseMove(e),
-      'mousedown': (e: MouseEvent) => this.handleMouseDown(e),
-      'mouseup': (e: MouseEvent) => this.handleMouseUp(e),
-      'dblclick': (e: MouseEvent) => this.handleDblClick(e),
-      'wheel': (e: WheelEvent) => this.handleWheel(e),
-      'touchstart': (e: TouchEvent) => this.handleTouchStart(e),
-      'touchend': (e: TouchEvent) => this.handleTouchEnd(e),
-      'touchmove': (e: TouchEvent) => this.handleTouchMove(e),
-      'keydown': (e: KeyboardEvent) => this.handleKeyDown(e),
-      'keyup': (e: KeyboardEvent) => this.handleKeyup(e)
+      'mouseleave': { el: element, callback: (e: MouseEvent) => this.handleMouseLeave(e) },
+      'mousemove': { el: element, callback: (e: MouseEvent) => this.handleMouseMove(e) },
+      'mousedown': { el: element, callback: (e: MouseEvent) => this.handleMouseDown(e) },
+      'mouseup': { el: element, callback: (e: MouseEvent) => this.handleMouseUp(e) },
+      'dblclick': { el: element, callback: (e: MouseEvent) => this.handleDblClick(e) },
+      'wheel': { el: element, callback: (e: WheelEvent) => this.handleWheel(e) },
+      'touchstart': { el: element, callback: (e: TouchEvent) => this.handleTouchStart(e) },
+      'touchend': { el: element, callback: (e: TouchEvent) => this.handleTouchEnd(e) },
+      'touchmove': { el: element, callback: (e: TouchEvent) => this.handleTouchMove(e) },
+      'keydown': { el: document.body, callback: (e: KeyboardEvent) => this.handleKeyDown(e) },
+      'keyup': { el: document.body, callback: (e: KeyboardEvent) => this.handleKeyUp(e) }
     }
-    for (const [eventName, callback] of Object.entries(this.handler)) {
-      element.addEventListener(eventName, callback)
+    for (const [eventName, o] of Object.entries(this.handler)) {
+      o.el.addEventListener(eventName, o.callback)
     }
     this.registered = {
       active: [],
       move: [],
       xRangeChange: [],
-      yRangeChange: []
+      yRangeChange: [],
+      selecting: []
     }
     this.state = {
       active: false,
-      mouseDownPos: null
+      mouseDownPos: null,
+      shiftKey: false
     }
   }
 
@@ -62,16 +67,23 @@ export default class EventUtils {
     }
     const [x, y] = this.getRelativePosition(e)
     if (this.state.mouseDownPos != null) {
-      const deltaX = this.state.mouseDownPos[0] - x
-      if (Math.abs(deltaX) > 5) {
-        // MARKER
-        const valueDeltaX = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0]) - this.dataUtils.xValueFromPos(x)
-        console.log(valueDeltaX)
-        
-        // this.executeCallback('xRangeChange', [
-        //   this.dataUtils.start + valueDeltaX,
-        //   this.dataUtils.end + valueDeltaX
-        // ])
+      if (this.state.shiftKey) {
+        const x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])
+        const x2 = this.dataUtils.xValueFromPos(x)
+        this.executeCallback('selecting', {
+          x: [Math.min(x1, x2), Math.max(x1, x2)],
+          y: [null, null]
+        })
+      } else {
+        const deltaX = this.state.mouseDownPos[0] - x
+        if (Math.abs(deltaX) > THRESHOLD) {
+          const valueDeltaX = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0]) - this.dataUtils.xValueFromPos(x)
+          this.state.mouseDownPos = [x, y]
+          this.executeCallback('xRangeChange', [
+            this.dataUtils.start + valueDeltaX,
+            this.dataUtils.end + valueDeltaX
+          ])
+        }
       }
     } else {
       this.executeCallback('move', [
@@ -82,20 +94,37 @@ export default class EventUtils {
   }
 
   handleMouseDown (e: MouseEvent) {
-    console.log('mouseDown')
     this.state.mouseDownPos = this.getRelativePosition(e)
   }
 
   handleMouseUp (e: MouseEvent) {
+    if (this.state.shiftKey) {
+      const [x, y] = this.getRelativePosition(e)
+      if (Math.abs(x - this.state.mouseDownPos[0]) > THRESHOLD) {
+        const x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])
+        const x2 = this.dataUtils.xValueFromPos(x)
+        this.executeCallback('xRangeChange', [Math.min(x1, x2), Math.max(x1, x2)])
+      }
+      
+    }
     this.state.mouseDownPos = null
   }
 
   handleDblClick (e: MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
     this.executeCallback('xRangeChange', this.dataUtils.dataRange())
   }
 
   handleWheel (e: WheelEvent) {
-
+    if (this.state.shiftKey) {
+      const sign = Math.sign(e.deltaY)
+      const ratio = 0.1 * (this.dataUtils.end - this.dataUtils.start)
+      this.executeCallback('xRangeChange', [
+        this.dataUtils.start + sign * ratio,
+        this.dataUtils.end - sign * ratio
+      ])
+    }
   }
 
   handleTouchStart (e: TouchEvent) {
@@ -111,11 +140,15 @@ export default class EventUtils {
   }
 
   handleKeyDown (e: KeyboardEvent) {
-
+    if (this.state.active) {
+      this.state.shiftKey = e.shiftKey
+    }
   }
 
-  handleKeyup (e: KeyboardEvent) {
-
+  handleKeyUp (e: KeyboardEvent) {
+    if (this.state.active) {
+      this.state.shiftKey = e.shiftKey
+    }
   }
 
   active (callback) {
@@ -135,6 +168,11 @@ export default class EventUtils {
 
   yRangeChange (callback) {
     this.registered.yRangeChange.push(callback)
+    return this
+  }
+
+  selecting (callback) {
+    this.registered.selecting.push(callback)
     return this
   }
 

@@ -26,11 +26,11 @@ export default class LinePlot {
     ctx.strokeStyle = 'black'
     for (const [i, computed] of this.dataUtils.computed.series.entries()) {
       if (computed == null) {
-        console.log('no draw for serie #${i}')
+        console.log(`no draw for serie #${i}`)
         continue
       }
       const serie = this.opt[i]
-      let xPos = this.dataUtils.xPosFromValue(serie.start + computed.minIndex * serie.step)
+      let xPos = this.dataUtils.xPosFromValue(computed.dataStart)
       let xStep = 1
       let indexStep = computed.xRatio
       if (computed.xRatio <= 1) {

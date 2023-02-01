@@ -5,6 +5,7 @@ import EventUtils from './eventUtils.js'
 import XAxis from './xAxis.js'
 import YAxis from './yAxis.js'
 import LinePlot from './linePlot.js'
+import FrontPanel from './frontPanel.js'
 
 export default class Lichen {
 
@@ -14,6 +15,7 @@ export default class Lichen {
   dataUtils: DataUtils;
   eventUtils: EventUtils;
   plot: LinePlot;
+  frontPanel: FrontPanel;
 
   constructor (container: HTMLElement, opt: LichenOptions, drawOnCreation: boolean = true) {
     this.opt = this.mergeOptions(opt)
@@ -56,11 +58,20 @@ export default class Lichen {
       this.plot = new LinePlot(canvasWrapper, this.opt.series, this.dataUtils)
     }
     [this.dataUtils.start, this.dataUtils.end] = this.dataUtils.dataRange()
-    this.eventUtils = new EventUtils(this.plot.canvas, this.dataUtils)
+    this.frontPanel = new FrontPanel(canvasWrapper, this.dataUtils)
+    this.eventUtils = new EventUtils(this.frontPanel.canvas, this.dataUtils)
     this.eventUtils
-      .active(value => console.log(value))
-      // .move(value => console.log(value))
-      .xRangeChange(value => {
+      .active((value: boolean) => {
+        if (value === false) {
+          this.frontPanel.drawCrosshair(null)
+        }
+      })
+      .move((value: [number, number]) => this.frontPanel.drawCrosshair(value[0]))
+      .selecting((value: { x: [number | null, number | null], y: [number | null, number | null] }) => {
+        this.frontPanel.selection(value)
+      })
+      .xRangeChange((value: [number, number]) => {
+        this.frontPanel.drawCrosshair(null)
         this.dataUtils.start = value[0]
         this.dataUtils.end = value[1]
         this.draw()

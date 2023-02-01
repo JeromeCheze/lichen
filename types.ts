@@ -44,6 +44,7 @@ export interface LichenOptions {
 }
 
 export interface DataUtilsComputedSerieData {
+  dataStart: number;
   xRatio: number;
   minIndex: number;
   maxIndex: number;
@@ -64,4 +65,12 @@ export interface DataUtilsDataFromPos {
   xDataValue: number;
   xDataValuePos: number;
   yDataValue: number | null;
+}
+
+
+export interface EvenUtilsEventHandlerMap {
+  [eventName: string]: {
+    el: HTMLElement;
+    callback: (e: any) => void;
+  }
 }

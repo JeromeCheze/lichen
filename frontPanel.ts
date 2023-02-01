@@ -1,0 +1,46 @@
+import DataUtils from "./dataUtils";
+
+export default class FrontPanel {
+
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  dataUtils: DataUtils;
+
+  constructor (container: HTMLElement, dataUtils: DataUtils) {
+    this.canvas = document.createElement('canvas')
+    this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
+    this.dataUtils = dataUtils
+    this.canvas.width = dataUtils.width
+    this.canvas.height = dataUtils.height
+    Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 100 })
+    container.appendChild(this.canvas)
+  }
+
+  drawCrosshair (value: number | null) {
+    const ctx = this.ctx
+    ctx.save()
+    ctx.fillStyle = 'grey'
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    if (value != null) {
+      ctx.fillRect(this.dataUtils.xPosFromValue(value), 0, 1, this.canvas.height)
+    }
+    ctx.restore()
+  }
+
+  selection (value: { x: [number | null, number | null], y: [number | null, number | null] }) {
+    this.drawCrosshair(null)
+    const ctx = this.ctx
+    ctx.save()
+    if (value.x[0] != null && value.x[1] != null) {
+      const [x1, x2] = [this.dataUtils.xPosFromValue(value.x[0]), this.dataUtils.xPosFromValue(value.x[1])]
+      ctx.fillStyle = 'rgba(255,255,255,0.8)'
+      ctx.fillRect(0, 0, x1, this.canvas.height)
+      ctx.fillRect(x2, 0, this.canvas.width - x2, this.canvas.height)
+      ctx.fillStyle = 'grey'
+      ctx.fillRect(x1, 0, 1, this.canvas.height)
+      ctx.fillRect(x2, 0, 1, this.canvas.height)
+    }
+    ctx.restore()
+  }
+
+}

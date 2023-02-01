@@ -98,8 +98,13 @@ export default class DataUtils {
     let globalMaxValue: number | null = null
     for (const serie of this.opt) {
       const xRatio = (this.end - this.start) / (serie.step * this.width)
-      const minIndex = (this.start - serie.start) / serie.step
-      const maxIndex = (this.end - serie.start) / serie.step
+      let minIndex = Math.floor((this.start - serie.start) / serie.step)
+      const maxIndex = Math.min((this.end - serie.start) / serie.step, serie.data.length - 1)
+      let dataStart = this.start
+      if (minIndex < 0) {
+        dataStart = serie.start
+        minIndex = 0
+      }
       if (minIndex >= serie.data.length || maxIndex <= 0) {
         computed.push(null)
         continue
@@ -128,6 +133,7 @@ export default class DataUtils {
       globalMinValue = globalMinValue == null || minValue! < globalMinValue ? minValue : globalMinValue
       globalMaxValue = globalMaxValue == null || globalMaxValue < maxValue! ? maxValue : globalMaxValue
       computed.push({
+        dataStart,
         xRatio,
         minIndex,
         maxIndex,
