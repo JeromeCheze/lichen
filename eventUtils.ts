@@ -118,6 +118,8 @@ export default class EventUtils {
 
   handleWheel (e: WheelEvent) {
     if (this.state.shiftKey) {
+      e.preventDefault()
+      e.stopPropagation()
       const sign = Math.sign(e.deltaY)
       const ratio = 0.1 * (this.dataUtils.end - this.dataUtils.start)
       this.executeCallback('xRangeChange', [

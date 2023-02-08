@@ -27,12 +27,12 @@ export default class FrontPanel {
     ctx.restore()
   }
 
-  selection (value: { x: [number | null, number | null], y: [number | null, number | null] }) {
+  selection (x: [number | null, number | null], y: [number | null, number | null]) {
     this.drawCrosshair(null)
     const ctx = this.ctx
     ctx.save()
-    if (value.x[0] != null && value.x[1] != null) {
-      const [x1, x2] = [this.dataUtils.xPosFromValue(value.x[0]), this.dataUtils.xPosFromValue(value.x[1])]
+    if (x[0] != null && x[1] != null) {
+      const [x1, x2] = [this.dataUtils.xPosFromValue(x[0]), this.dataUtils.xPosFromValue(x[1])]
       ctx.fillStyle = 'rgba(255,255,255,0.8)'
       ctx.fillRect(0, 0, x1, this.canvas.height)
       ctx.fillRect(x2, 0, this.canvas.width - x2, this.canvas.height)

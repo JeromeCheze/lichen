@@ -99,10 +99,9 @@ export default class DataUtils {
     for (const serie of this.opt) {
       const xRatio = (this.end - this.start) / (serie.step * this.width)
       let minIndex = Math.floor((this.start - serie.start) / serie.step)
-      const maxIndex = Math.min((this.end - serie.start) / serie.step, serie.data.length - 1)
-      let dataStart = this.start
+      const maxIndex = Math.min(1 + (this.end - serie.start) / serie.step, serie.data.length - 1)
+      const dataStart = minIndex < 0 ? serie.start : serie.start + minIndex * serie.step
       if (minIndex < 0) {
-        dataStart = serie.start
         minIndex = 0
       }
       if (minIndex >= serie.data.length || maxIndex <= 0) {

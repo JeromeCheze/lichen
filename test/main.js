@@ -14,15 +14,46 @@ const data = {"timestamp":1671033000,"step":600,"data":[13.302,13.302,13.302,13.
 // }
 // const STEP = 10
 
-window.chart = new Lichen(container, {
-  title: 'test',
+window.synced = []
+window.chart0 = new Lichen(container, {
+  header: {
+    title: 'test 1',
+    position: 'left'
+  },
   type: 'line',
+  xAxis: {
+    enabled: false
+  },
   series: [{
     name: 'power supply',
     start: data.timestamp * 1e3,
     step: data.step * 1e3,
-    data: data.data
-  }]
+    data: data.data,
+    width: 2,
+    color: 'rgb(255,0,0)',
+    area: true
+  }],
+  synced: () => window.synced
+})
+window.chart1 = new Lichen(container, {
+  header: {
+    title: 'test 2',
+    position: 'left'
+  },
+  type: 'line',
+  xAxis: {
+    enabled: true
+  },
+  series: [{
+    name: 'power supply',
+    start: data.timestamp * 1e3,
+    step: data.step * 1e3,
+    data: data.data,
+    width: 2,
+    color: 'rgb(0,0,255)',
+    area: true
+  }],
+  synced: () => window.synced
 })
 // window.chart.draw()
 

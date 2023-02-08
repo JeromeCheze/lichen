@@ -30,10 +30,20 @@ export interface SerieOptions {
   start: number;
   step: number;
   data: (number | null)[];
+  color?: string;
+  area?: boolean;
+  width?: number;
+}
+
+export interface HeaderOptions {
+  title?: string;
+  position: 'top' | 'left';
+  width?: number;
 }
 
 export interface LichenOptions {
   title?: string;
+  header: HeaderOptions;
   type: 'line';
   crosshair: boolean;
   height: number;

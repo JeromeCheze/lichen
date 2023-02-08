@@ -20,7 +20,10 @@ export default class XAxis {
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
     this.dataUtils = dataUtils
     this.canvas.width = dataUtils.width
-    this.canvas.height = dataUtils.height + this.opt.tickLength + 2 * TEXT_PADDING + this.opt.fontSize
+    this.canvas.height = dataUtils.height
+    if (opt.enabled) {
+      this.canvas.height += this.opt.tickLength + 2 * TEXT_PADDING + this.opt.fontSize
+    }
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 0 })
     container.appendChild(this.canvas)
   }
@@ -62,6 +65,7 @@ export default class XAxis {
         ctx.fillRect(xPos, 0, 1, yPos)
       }
       if (!this.opt.enabled) {
+        j += a
         continue
       }
       if ((j % 86400e3) === 0) {

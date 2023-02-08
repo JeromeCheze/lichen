@@ -11,6 +11,10 @@ const GRID_COLOR = 'rgba(136, 136, 136, 0.1)'
 
 export default {
   crosshair: true,
+  header: {
+    position: 'top',
+    width: 80
+  },
   xAxis: {
     enabled: AXIS_ENABLED,
     gridEnabled: GRID_ENABLED,
@@ -33,5 +37,6 @@ export default {
     powerOfTen: false,
     width: 50
   },
-  height: 120
+  height: 120,
+  synced: () => []
 } as LichenOptions

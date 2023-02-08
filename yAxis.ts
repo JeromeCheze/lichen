@@ -19,7 +19,7 @@ export default class YAxis {
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
     this.dataUtils = dataUtils
-    this.canvas.width = opt.width + dataUtils.width
+    this.canvas.width = opt.enabled ? opt.width + dataUtils.width : dataUtils.width
     this.canvas.height = dataUtils.height
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, left: 0, zIndex: 0 })
     container.appendChild(this.canvas)
@@ -34,7 +34,8 @@ export default class YAxis {
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'right'
     const height = this.canvas.height
-    const xPos = this.opt.width - 1
+    const xPos = this.opt.enabled ? this.opt.width - 1 : 0
+    const gridWidth = this.opt.enabled ? this.canvas.width - this.opt.width + 1 : this.canvas.width
     let a = this.opt.fontSize * 2 * (this.dataUtils.yMax - this.dataUtils.yMin) / height
     let pow = 0
     if (a === 0) {
@@ -62,9 +63,10 @@ export default class YAxis {
       if (yPos - height <= 0) {
         if (this.opt.gridEnabled) {
           ctx.fillStyle = o.gridColor
-          ctx.fillRect(xPos, yPos, this.canvas.width - this.opt.width + 1, 1)
+          ctx.fillRect(xPos, yPos, gridWidth, 1)
         }
         if (!this.opt.enabled) {
+          y += a
           continue
         }
         const tickText = (

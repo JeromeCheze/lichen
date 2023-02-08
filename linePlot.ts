@@ -19,17 +19,25 @@ export default class LinePlot {
     container.appendChild(this.canvas)
   }
 
+  setSerieColor (serie: SerieOptions) {
+    const ctx = this.ctx
+    if (serie.area === true) {
+      ctx.fillStyle = serie.color ? `rgba(${serie.color.slice(4, -1)},0.2)` : 'rgba(0,0,0,0.2)'
+    }
+    ctx.strokeStyle = serie.color ? serie.color : 'rgb(0,0,0)'
+  }
+
   update () {
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     ctx.save()
-    ctx.strokeStyle = 'black'
     for (const [i, computed] of this.dataUtils.computed.series.entries()) {
       if (computed == null) {
         console.log(`no draw for serie #${i}`)
         continue
       }
       const serie = this.opt[i]
+      this.setSerieColor(serie)
       let xPos = this.dataUtils.xPosFromValue(computed.dataStart)
       let xStep = 1
       let indexStep = computed.xRatio
@@ -37,8 +45,46 @@ export default class LinePlot {
         xStep = 1 / computed.xRatio
         indexStep = 1
       }
-      ctx.beginPath()
+      ctx.lineWidth = serie.width ? serie.width : 1
       let prev = null
+      if (serie.area === true) {
+        for (let i = computed.minIndex; i < computed.maxIndex; i += indexStep) {
+          const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
+          if (group.length > 0) {
+            let minValue: number | null = null
+            let maxValue: number | null = null
+            for (const v of group) {
+              minValue = minValue == null || v < minValue ? v : minValue
+              maxValue = maxValue == null || maxValue < v ? v : maxValue
+            }
+            if (prev == null) {
+              ctx.beginPath()
+              ctx.moveTo(xPos, Math.min(this.dataUtils.yPosFromValue(0), this.canvas.height))
+              ctx.lineTo(xPos, this.dataUtils.yPosFromValue(minValue))
+            } else {
+              ctx.lineTo(xPos, this.dataUtils.yPosFromValue(minValue))
+            }
+            if (xStep === 1) {
+              ctx.lineTo(xPos, this.dataUtils.yPosFromValue(maxValue))
+            }
+            prev = minValue
+          } else {
+            ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0), this.canvas.height))
+            ctx.closePath()
+            ctx.fill()
+            prev = null
+          }
+          xPos += xStep
+        }
+        if (prev != null) {
+          ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0), this.canvas.height))
+          ctx.closePath()
+          ctx.fill()
+        }
+      }
+      ctx.beginPath()
+      xPos = this.dataUtils.xPosFromValue(computed.dataStart)
+      prev = null
       for (let i = computed.minIndex; i < computed.maxIndex; i += indexStep) {
         const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
         if (group.length > 0) {
