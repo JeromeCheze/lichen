@@ -5,6 +5,7 @@ import EventUtils from './eventUtils.js'
 import XAxis from './xAxis.js'
 import YAxis from './yAxis.js'
 import LinePlot from './linePlot.js'
+import Heatmap2dPlot from './heatmap2dPlot.js'
 import FrontPanel from './frontPanel.js'
 
 export default class Lichen {
@@ -14,26 +15,26 @@ export default class Lichen {
   xAxis: XAxis;
   dataUtils: DataUtils;
   eventUtils: EventUtils;
-  plot: LinePlot;
+  plot: LinePlot | Heatmap2dPlot;
   frontPanel: FrontPanel;
   ready: boolean;
 
   constructor (container: HTMLElement, opt: LichenOptions, drawOnCreation: boolean = true) {
     this.ready = false
-    opt.synced().push(this)
     this.opt = this.mergeOptions(opt)
     this.init(container)
+    this.opt.synced().push(this)
     if (drawOnCreation) {
       let waitAllReady = true
       while (waitAllReady) {
         waitAllReady = false
-        for (const chart of opt.synced()) {
+        for (const chart of this.opt.synced()) {
           if (chart.ready === false) {
             waitAllReady = true
           }
         }
       }
-      const dataRanges = opt.synced().map(chart => chart.dataUtils.dataRange())
+      const dataRanges = this.opt.synced().map(chart => chart.dataUtils.dataRange())
       this.dataUtils.start = Math.min.apply(null, dataRanges.map(x => x[0]))
       this.dataUtils.end = Math.max.apply(null, dataRanges.map(x => x[1]))
       this.draw()
@@ -53,7 +54,21 @@ export default class Lichen {
         result[k] = v
       }
     }
+    if (result.synced == null) {
+      const instance = []
+      result.synced = () => instance
+    }
     return result
+  }
+
+  getHeight () {
+    return this.opt.type === 'line'
+      ? this.opt.height
+      : this.opt.type === 'heatmap2d'
+        ? this.opt.serieHeight * this.opt.series.length
+        : this.opt.type === 'heatmap3d'
+          ? this.opt.height
+          : null
   }
 
   buildStructure (container: HTMLElement) {
@@ -80,12 +95,15 @@ export default class Lichen {
     }
     const sizes = canvasWrapperContainer.getBoundingClientRect()
     const plotWidth = this.opt.yAxis.enabled ? sizes.width - this.opt.yAxis.width : sizes.width
-    this.dataUtils = new DataUtils(this.opt.series, plotWidth, this.opt.height)
+    this.dataUtils = new DataUtils(this.opt.series, plotWidth, this.getHeight())
     this.yAxis = new YAxis(canvasWrapper, this.opt.yAxis, this.dataUtils)
     this.xAxis = new XAxis(canvasWrapper, this.opt.xAxis, this.dataUtils)
     canvasWrapper.style.height = `${this.xAxis.canvas.height}px`
     if (this.opt.type === 'line') {
       this.plot = new LinePlot(canvasWrapper, this.opt.series, this.dataUtils)
+    } else if (this.opt.type === 'heatmap2d') {
+      this.yAxis.categories = this.opt.series.map(x => x.name)
+      this.plot = new Heatmap2dPlot(canvasWrapper, this.opt.series, this.dataUtils)
     }
     this.frontPanel = new FrontPanel(canvasWrapper, this.dataUtils)
   }

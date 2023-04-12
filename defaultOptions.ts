@@ -38,5 +38,5 @@ export default {
     width: 50
   },
   height: 120,
-  synced: () => []
+  serieHeight: 15
 } as LichenOptions

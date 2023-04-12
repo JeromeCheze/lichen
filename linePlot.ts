@@ -1,6 +1,8 @@
 import { SerieOptions } from './types'
 import DataUtils from './dataUtils'
 
+const FILL_OPACITY = 0.2
+
 export default class LinePlot {
 
   opt: SerieOptions[];
@@ -21,22 +23,53 @@ export default class LinePlot {
 
   setSerieColor (serie: SerieOptions) {
     const ctx = this.ctx
-    if (serie.area === true) {
-      ctx.fillStyle = serie.color ? `rgba(${serie.color.slice(4, -1)},0.2)` : 'rgba(0,0,0,0.2)'
+    if (typeof serie.color === 'string') {
+      if (serie.area === true) {
+        ctx.fillStyle = serie.color
+          ? `rgba(${serie.color.slice(4, -1)},${FILL_OPACITY})`
+          : `rgba(0,0,0,${FILL_OPACITY})`
+      }
+      ctx.strokeStyle = serie.color ? serie.color : 'rgb(0,0,0)'
+    } else {
+      const min = serie.color[0][0]
+      const max = serie.color.slice(-1)[0][0]
+      if (serie.area === true) {
+        const fillGrad = ctx.createLinearGradient(
+          0, this.dataUtils.yPosFromValue(min),
+          0, this.dataUtils.yPosFromValue(max)
+        )
+        for (const stop of serie.color) {
+          fillGrad.addColorStop(
+            this.dataUtils.getRatio(stop[0], min, max),
+            this.dataUtils.toRGBA(stop[1], FILL_OPACITY)
+          )
+        }
+        ctx.fillStyle = fillGrad
+      }
+      const strokeGrad = ctx.createLinearGradient(
+        0, this.dataUtils.yPosFromValue(min),
+        0, this.dataUtils.yPosFromValue(max)
+      )
+      for (const stop of serie.color) {
+        strokeGrad.addColorStop(
+          this.dataUtils.getRatio(stop[0], min, max),
+          this.dataUtils.toRGB(stop[1])
+        )
+      }
+      ctx.strokeStyle = strokeGrad
     }
-    ctx.strokeStyle = serie.color ? serie.color : 'rgb(0,0,0)'
   }
 
   update () {
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     ctx.save()
-    for (const [i, computed] of this.dataUtils.computed.series.entries()) {
+    for (const [serieIndex, computed] of this.dataUtils.computed.series.entries()) {
       if (computed == null) {
-        console.log(`no draw for serie #${i}`)
+        console.log(`no draw for serie #${serieIndex}`)
         continue
       }
-      const serie = this.opt[i]
+      const serie = this.opt[serieIndex]
       this.setSerieColor(serie)
       let xPos = this.dataUtils.xPosFromValue(computed.dataStart)
       let xStep = 1
@@ -45,7 +78,7 @@ export default class LinePlot {
         xStep = 1 / computed.xRatio
         indexStep = 1
       }
-      ctx.lineWidth = serie.width ? serie.width : 1
+      ctx.lineWidth = serie.linewidth ? serie.linewidth : 1
       let prev = null
       if (serie.area === true) {
         for (let i = computed.minIndex; i < computed.maxIndex; i += indexStep) {

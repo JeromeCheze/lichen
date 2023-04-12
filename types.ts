@@ -25,14 +25,21 @@ export interface YAxisOptions extends GlobalAxisOptions {
   width: number;
 }
 
+export type ColorScaleObject  = [
+  number,
+  [number, number, number],
+  string?
+][];
+
 export interface SerieOptions {
   name?: string;
   start: number;
   step: number;
   data: (number | null)[];
-  color?: string;
+  color?: string | ColorScaleObject;
   area?: boolean;
-  width?: number;
+  linewidth?: number;
+  logarithmicColorScale?: boolean;
 }
 
 export interface HeaderOptions {
@@ -44,9 +51,10 @@ export interface HeaderOptions {
 export interface LichenOptions {
   title?: string;
   header: HeaderOptions;
-  type: 'line';
+  type: 'line' | 'heatmap2d' | 'heatmap3d';
   crosshair: boolean;
   height: number;
+  serieHeight: number;
   xAxis: XAxisOptions;
   yAxis: YAxisOptions;
   series: SerieOptions[];

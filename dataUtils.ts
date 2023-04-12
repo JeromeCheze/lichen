@@ -1,4 +1,4 @@
-import { SerieOptions, DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData } from './types'
+import { SerieOptions, DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData, ColorScaleObject } from './types'
 
 export default class DataUtils {
 
@@ -148,5 +148,48 @@ export default class DataUtils {
       maxValue: globalMaxValue,
       series: computed
     }
+  }
+
+  getRatio (v: number, min: number, max: number) {
+    return (v - min) / (max - min)
+  }
+
+  toRGB (c: [number, number, number]) {
+    return `rgb(${c[0]},${c[1]},${c[2]})`
+  }
+
+  toRGBA (c: [number, number, number], a: number) {
+    return `rgba(${c[0]},${c[1]},${c[2]},${a})`
+  }
+
+  getColor (value: number, colorScale: ColorScaleObject, logarithmic = false) {
+    let min = colorScale[0][0]
+    let max = colorScale.slice(-1)[0][0]
+    if (logarithmic) {
+      if (value !== 0) {
+        value = Math.log2(value)
+      }
+      if (min !== 0) {
+        min = Math.log2(min)
+      }
+      if (max !== 0) {
+        max = Math.log2(max)
+      }
+    }
+    if (value <= min) {
+      return this.toRGB(colorScale[0][1])
+    } else if (value >= max) {
+      return this.toRGB(colorScale.slice(-1)[0][1])
+    }
+    let i = 0
+    while (colorScale[i][0] < value) {
+      i++
+    }
+    const color = []
+    const r = this.getRatio(value, colorScale[i - 1][0], colorScale[i][0])
+    for (let j = 0; j < colorScale[0][1].length; j++) {
+      color.push(colorScale[i - 1][1][j] + r * (colorScale[i][1][j] - colorScale[i - 1][1][j]))
+    }
+    return this.toRGB(color as [number, number, number])
   }
 }
