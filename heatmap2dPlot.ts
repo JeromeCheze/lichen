@@ -9,8 +9,9 @@ export default class Heatmap2dPlot {
   dataUtils: DataUtils;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
+  colorScale: ColorScaleObject;
 
-  constructor (container: HTMLElement, opt: SerieOptions[], dataUtils: DataUtils) {
+  constructor (container: HTMLElement, opt: SerieOptions[], dataUtils: DataUtils, colorScale: ColorScaleObject) {
     this.opt = opt
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
@@ -18,6 +19,7 @@ export default class Heatmap2dPlot {
     this.canvas.width = dataUtils.width
     this.canvas.height = dataUtils.height
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 10 })
+    this.colorScale = colorScale
     container.appendChild(this.canvas)
   }
 
@@ -43,7 +45,7 @@ export default class Heatmap2dPlot {
       for (let i = computed.minIndex; i < computed.maxIndex; i += indexStep) {
         const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
         if (group.length > 0) {
-          ctx.fillStyle = this.dataUtils.getColor(Math.max.apply(null, group), serie.color as ColorScaleObject)
+          ctx.fillStyle = this.dataUtils.getColor(Math.max.apply(null, group), this.colorScale)
           ctx.fillRect(Math.floor(xPos), yPos + MARGIN, Math.floor(xStep) + 1, serieHeight - 2 * MARGIN)
         }
         xPos += xStep

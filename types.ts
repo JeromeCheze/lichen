@@ -36,7 +36,7 @@ export interface SerieOptions {
   start: number;
   step: number;
   data: (number | null)[];
-  color?: string | ColorScaleObject;
+  color?: string;
   area?: boolean;
   linewidth?: number;
   logarithmicColorScale?: boolean;
@@ -55,6 +55,7 @@ export interface LichenOptions {
   crosshair: boolean;
   height: number;
   serieHeight: number;
+  colorScale?: ColorScaleObject;
   xAxis: XAxisOptions;
   yAxis: YAxisOptions;
   series: SerieOptions[];

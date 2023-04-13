@@ -100,10 +100,10 @@ export default class Lichen {
     this.xAxis = new XAxis(canvasWrapper, this.opt.xAxis, this.dataUtils)
     canvasWrapper.style.height = `${this.xAxis.canvas.height}px`
     if (this.opt.type === 'line') {
-      this.plot = new LinePlot(canvasWrapper, this.opt.series, this.dataUtils)
+      this.plot = new LinePlot(canvasWrapper, this.opt.series, this.dataUtils, this.opt.colorScale)
     } else if (this.opt.type === 'heatmap2d') {
       this.yAxis.categories = this.opt.series.map(x => x.name)
-      this.plot = new Heatmap2dPlot(canvasWrapper, this.opt.series, this.dataUtils)
+      this.plot = new Heatmap2dPlot(canvasWrapper, this.opt.series, this.dataUtils, this.opt.colorScale)
     }
     this.frontPanel = new FrontPanel(canvasWrapper, this.dataUtils)
   }

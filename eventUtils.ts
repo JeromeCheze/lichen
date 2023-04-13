@@ -56,6 +56,7 @@ export default class EventUtils {
   }
 
   handleMouseLeave (e: MouseEvent) {
+    this.handleMouseUp(e)
     this.state.active = false
     this.executeCallback('active', false)
   }
