@@ -58,7 +58,7 @@ export interface LichenOptions {
   colorScale?: ColorScaleObject;
   xAxis: XAxisOptions;
   yAxis: YAxisOptions;
-  series: SerieOptions[];
+  series: SerieOptions[];// TODO: create a different type for heatmap3d
   synced: () => Lichen[];
 }
 
