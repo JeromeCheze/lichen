@@ -1,8 +1,9 @@
-import { SerieOptions, DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData, ColorScaleObject } from './types'
+import { DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData, ColorScaleObject, LineOptions, Heatmap2dOptions, Heatmap3dOptions } from './types'
 
 export default class DataUtils {
 
-  opt: SerieOptions[];
+  type: string;
+  opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions;
   width: number;
   height: number;
   computed: DataUtilsComputedData;
@@ -11,15 +12,16 @@ export default class DataUtils {
   start: number | null;
   end: number | null;
 
-  constructor (opt: SerieOptions[], width: number, height: number) {
+  constructor (
+    type: string,
+    opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions,
+    width: number,
+    height: number
+  ) {
+    this.type = type
     this.opt = opt
     this.width = width
     this.height = height
-    this.computed = {
-      minValue: null,
-      maxValue: null,
-      series: Array.from(opt, () => null)
-    }
     this.yMin = null
     this.yMax = null
     this.start = null
@@ -27,14 +29,20 @@ export default class DataUtils {
   }
 
   dataRange (): [number, number] {
-    let minStart: number | null = null
-    let maxEnd: number | null = null
-    for (const serie of this.opt) {
-      const end = serie.start + serie.data.length * serie.step
-      minStart = minStart == null || serie.start < minStart ? serie.start : minStart
-      maxEnd = maxEnd == null || maxEnd < end ? end : maxEnd
+    if (this.type === 'line' || this.type === 'heatmap2d') {
+      let minStart: number | null = null
+      let maxEnd: number | null = null
+      const opt = this.opt as LineOptions[] | Heatmap2dOptions[]
+      for (const serie of opt) {
+        const end = serie.start + serie.data.length * serie.step
+        minStart = minStart == null || serie.start < minStart ? serie.start : minStart
+        maxEnd = maxEnd == null || maxEnd < end ? end : maxEnd
+      }
+      return [minStart, maxEnd]
+    } else if (this.type === 'heatmap3d') {
+      const opt = this.opt as Heatmap3dOptions
+      return [opt.start, opt.start + opt.data.length * opt.step]
     }
-    return [minStart, maxEnd] as [number, number]
   }
 
   xValueFromPos (xPos: number): null | number {
@@ -62,8 +70,9 @@ export default class DataUtils {
     return this.height * (this.yMax - yValue) / (this.yMax - this.yMin)
   }
 
-  dataFromPos (xPos: number) {
-    const result: (DataUtilsDataFromPos | null)[] = Array.from(this.opt, () => null)
+  dataFromXPos (xPos: number) {
+    const opt = this.opt as LineOptions[]
+    const result: (DataUtilsDataFromPos | null)[] = Array.from(opt, () => null)
     if (this.start == null || this.end == null) {
       return result
     }
@@ -71,7 +80,7 @@ export default class DataUtils {
     if (xValue == null) {
       return result
     }
-    for (const [i, serie] of this.opt.entries()) {
+    for (const [i, serie] of opt.entries()) {
       const c = this.computed.series[i]
       if (c == null) {
         result.push(null)
@@ -89,14 +98,20 @@ export default class DataUtils {
     return result
   }
 
-  computeData() {
+  computeData () {
     if (this.start == null || this.end == null) {
       return
+    }
+    const opt  = this.opt as LineOptions[] | Heatmap2dOptions[]
+    this.computed = {
+      minValue: null,
+      maxValue: null,
+      series: Array.from(opt, () => null)
     }
     const computed: (DataUtilsComputedSerieData | null)[] = []
     let globalMinValue: number | null = null
     let globalMaxValue: number | null = null
-    for (const serie of this.opt) {
+    for (const serie of opt) {
       const xRatio = (this.end - this.start) / (serie.step * this.width)
       let minIndex = Math.floor((this.start - serie.start) / serie.step)
       const maxIndex = Math.min(1 + (this.end - serie.start) / serie.step, serie.data.length - 1)

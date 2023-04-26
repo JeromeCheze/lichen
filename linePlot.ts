@@ -1,17 +1,17 @@
-import { ColorScaleObject, SerieOptions } from './types'
+import { ColorScaleObject, LineOptions } from './types'
 import DataUtils from './dataUtils'
 
 const FILL_OPACITY = 0.2
 
 export default class LinePlot {
 
-  opt: SerieOptions[];
+  opt: LineOptions[];
   dataUtils: DataUtils;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   colorScale: ColorScaleObject;
 
-  constructor (container: HTMLElement, opt: SerieOptions[], dataUtils: DataUtils, colorScale: ColorScaleObject) {
+  constructor (container: HTMLElement, opt: LineOptions[], dataUtils: DataUtils, colorScale: ColorScaleObject) {
     this.opt = opt
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
@@ -23,7 +23,7 @@ export default class LinePlot {
     container.appendChild(this.canvas)
   }
 
-  setSerieColor (serie: SerieOptions) {
+  setSerieColor (serie: LineOptions) {
     const ctx = this.ctx
     if (this.colorScale != null) {
       const min = this.colorScale[0][0]

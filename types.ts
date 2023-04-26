@@ -1,4 +1,4 @@
-import Lichen from './index'
+import { Lichen } from './index'
 
 export interface Coordinates {
   x: number;
@@ -31,7 +31,7 @@ export type ColorScaleObject  = [
   string?
 ][];
 
-export interface SerieOptions {
+export interface LineOptions {
   name?: string;
   start: number;
   step: number;
@@ -39,6 +39,25 @@ export interface SerieOptions {
   color?: string;
   area?: boolean;
   linewidth?: number;
+  logarithmicColorScale?: boolean;
+}
+
+export interface Heatmap2dOptions {
+  name?: string;
+  start: number;
+  step: number;
+  data: (number | null)[];
+  logarithmicColorScale?: boolean;
+}
+
+export interface Heatmap3dOptions {
+  start: number;
+  step: number;
+  data: (number[] | null)[];
+  yMin: number;
+  yMax: number;
+  zMin: number;
+  zMax: number;
   logarithmicColorScale?: boolean;
 }
 
@@ -58,7 +77,7 @@ export interface LichenOptions {
   colorScale?: ColorScaleObject;
   xAxis: XAxisOptions;
   yAxis: YAxisOptions;
-  series: SerieOptions[];// TODO: create a different type for heatmap3d
+  series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions;
   synced: () => Lichen[];
 }
 

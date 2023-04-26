@@ -1,17 +1,17 @@
-import { ColorScaleObject, SerieOptions } from './types'
+import { ColorScaleObject, Heatmap2dOptions } from './types'
 import DataUtils from './dataUtils'
 
 const MARGIN = 1
 
 export default class Heatmap2dPlot {
 
-  opt: SerieOptions[];
+  opt: Heatmap2dOptions[];
   dataUtils: DataUtils;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   colorScale: ColorScaleObject;
 
-  constructor (container: HTMLElement, opt: SerieOptions[], dataUtils: DataUtils, colorScale: ColorScaleObject) {
+  constructor (container: HTMLElement, opt: Heatmap2dOptions[], dataUtils: DataUtils, colorScale: ColorScaleObject) {
     this.opt = opt
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D

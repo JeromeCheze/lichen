@@ -1,21 +1,25 @@
 import defaultOptions from './defaultOptions.js'
-import { LichenOptions } from './types.js'
+import { Heatmap2dOptions, Heatmap3dOptions, LichenOptions, LineOptions } from './types.js'
 import DataUtils from './dataUtils.js'
 import EventUtils from './eventUtils.js'
 import XAxis from './xAxis.js'
 import YAxis from './yAxis.js'
 import LinePlot from './linePlot.js'
 import Heatmap2dPlot from './heatmap2dPlot.js'
+import Heatmap3dPlot from './heatmap3dPlot.js'
 import FrontPanel from './frontPanel.js'
+import * as COLORMAPS from './colormaps.js'
 
-export default class Lichen {
+export { COLORMAPS }
+
+export class Lichen {
 
   opt: LichenOptions;
   yAxis: YAxis;
   xAxis: XAxis;
   dataUtils: DataUtils;
   eventUtils: EventUtils;
-  plot: LinePlot | Heatmap2dPlot;
+  plot: LinePlot | Heatmap2dPlot | Heatmap3dPlot;
   frontPanel: FrontPanel;
   ready: boolean;
 
@@ -49,6 +53,9 @@ export default class Lichen {
       if (v instanceof Function) {
         result[k] = v
       } else if (v instanceof Object && !(v instanceof Array)) {
+        if (result[k] == null) {
+          result[k] = {}
+        }
         Object.assign(result[k], v)
       } else {
         result[k] = v
@@ -62,13 +69,14 @@ export default class Lichen {
   }
 
   getHeight () {
-    return this.opt.type === 'line'
-      ? this.opt.height
-      : this.opt.type === 'heatmap2d'
-        ? this.opt.serieHeight * this.opt.series.length
-        : this.opt.type === 'heatmap3d'
-          ? this.opt.height
-          : null
+    if (this.opt.type === 'line') {
+      return this.opt.height
+    } else if (this.opt.type === 'heatmap2d') {
+      const series = this.opt.series as Heatmap2dOptions[]
+      return this.opt.serieHeight * series.length
+    } else if (this.opt.type === 'heatmap3d') {
+      return this.opt.height
+    }
   }
 
   buildStructure (container: HTMLElement) {
@@ -95,15 +103,19 @@ export default class Lichen {
     }
     const sizes = canvasWrapperContainer.getBoundingClientRect()
     const plotWidth = this.opt.yAxis.enabled ? sizes.width - this.opt.yAxis.width : sizes.width
-    this.dataUtils = new DataUtils(this.opt.series, plotWidth, this.getHeight())
+    this.dataUtils = new DataUtils(this.opt.type, this.opt.series, plotWidth, this.getHeight())
     this.yAxis = new YAxis(canvasWrapper, this.opt.yAxis, this.dataUtils)
     this.xAxis = new XAxis(canvasWrapper, this.opt.xAxis, this.dataUtils)
     canvasWrapper.style.height = `${this.xAxis.canvas.height}px`
     if (this.opt.type === 'line') {
-      this.plot = new LinePlot(canvasWrapper, this.opt.series, this.dataUtils, this.opt.colorScale)
+      this.plot = new LinePlot(canvasWrapper, this.opt.series as LineOptions[], this.dataUtils, this.opt.colorScale)
     } else if (this.opt.type === 'heatmap2d') {
-      this.yAxis.categories = this.opt.series.map(x => x.name)
-      this.plot = new Heatmap2dPlot(canvasWrapper, this.opt.series, this.dataUtils, this.opt.colorScale)
+      const series = this.opt.series as Heatmap2dOptions[]
+      this.yAxis.categories = series.map(x => x.name)
+      this.plot = new Heatmap2dPlot(canvasWrapper, series, this.dataUtils, this.opt.colorScale)
+    } else if (this.opt.type === 'heatmap3d') {
+      const series = this.opt.series as Heatmap3dOptions
+      this.plot = new Heatmap3dPlot(canvasWrapper, series, this.dataUtils, this.opt.colorScale)
     }
     this.frontPanel = new FrontPanel(canvasWrapper, this.dataUtils)
   }
@@ -153,13 +165,19 @@ export default class Lichen {
   }
 
   draw () {
-    this.dataUtils.computeData()
-    let amplitude = this.dataUtils.computed.maxValue - this.dataUtils.computed.minValue
-    if (amplitude === 0) {
-      amplitude = 0.1
+    if (this.opt.type === 'line' || this.opt.type === 'heatmap2d') {
+      this.dataUtils.computeData()
+      let amplitude = this.dataUtils.computed.maxValue - this.dataUtils.computed.minValue
+      if (amplitude === 0) {
+        amplitude = 0.1
+      }
+      this.dataUtils.yMin = this.dataUtils.computed.minValue - 0.1 * amplitude
+      this.dataUtils.yMax = this.dataUtils.computed.maxValue + 0.1 * amplitude
+    } else {
+      const series = this.opt.series as Heatmap3dOptions
+      this.dataUtils.yMin = series.yMin
+      this.dataUtils.yMax = series.yMax
     }
-    this.dataUtils.yMin = this.dataUtils.computed.minValue - 0.1 * amplitude
-    this.dataUtils.yMax = this.dataUtils.computed.maxValue + 0.1 * amplitude
     this.xAxis.update()
     this.yAxis.update()
     this.plot.update()

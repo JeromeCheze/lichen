@@ -1,5 +1,4 @@
-import Lichen from '../dist/index.js'
-
+import { Lichen, COLORMAPS } from '../dist/index.js'
 import heatmap3dData from './heatmap3d_data.js'
 import heatmap2dData from './heatmap2d_data.js'
 import lineData from './line_data.js'
@@ -124,14 +123,35 @@ const processSampledist = (minValues, maxValues, sampledistValues) => {
     }
     result.push(currentSd)
   }
-  return [maxSd, result]
+  return [minValue, maxValue, maxSd, result]
 }
 
-const [maxValue, processed] = processSampledist(
+const [yMin, yMax, zMax, processed] = processSampledist(
   heatmap3dData['min_FR_SMPL_00_HHZ'].data,
   heatmap3dData['max_FR_SMPL_00_HHZ'].data,
   heatmap3dData['sampledist_FR_SMPL_00_HHZ'].data,
 )
-console.log(maxValue)
-console.log(processed)
-console.log(heatmap3dData)
+// console.log(zMax)
+// console.log(processed)
+// console.log(heatmap3dData)
+const colorScale = COLORMAPS.PARULA.map(x => [zMax * x[0], x[1]])
+window.chart2 = new Lichen(container, {
+  header: {
+    title: 'test heatmap3d'
+  },
+  type: 'heatmap3d',
+  yAxis: {
+    powerOfTen: true
+  },
+  height: 200,
+  colorScale,
+  series: {
+    start: heatmap3dData['min_FR_SMPL_00_HHZ'].timestamp * 1e3,
+    step: heatmap3dData['min_FR_SMPL_00_HHZ'].step * 1e3,
+    data: processed,
+    yMin,
+    yMax,
+    zMin: 0,
+    zMax
+  }
+})
