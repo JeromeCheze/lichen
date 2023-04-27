@@ -1,4 +1,4 @@
-import { DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData, ColorScaleObject, LineOptions, Heatmap2dOptions, Heatmap3dOptions } from './types'
+import { DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData, LineOptions, Heatmap2dOptions, Heatmap3dOptions, ColorScaleOptions } from './types'
 
 export default class DataUtils {
 
@@ -28,7 +28,7 @@ export default class DataUtils {
     this.end = null
   }
 
-  dataRange (): [number, number] {
+  xRange (): [number, number] {
     if (this.type === 'line' || this.type === 'heatmap2d') {
       let minStart: number | null = null
       let maxEnd: number | null = null
@@ -42,6 +42,15 @@ export default class DataUtils {
     } else if (this.type === 'heatmap3d') {
       const opt = this.opt as Heatmap3dOptions
       return [opt.start, opt.start + opt.data.length * opt.step]
+    }
+  }
+
+  yRange (): [number, number] {
+    if (this.type === 'line' || this.type === 'heatmap2d') {
+      return [this.computed.minValue, this.computed.maxValue]
+    } else if (this.type === 'heatmap3d') {
+      const opt = this.opt as Heatmap3dOptions
+      return [opt.yMin, opt.yMax]
     }
   }
 
@@ -177,10 +186,10 @@ export default class DataUtils {
     return `rgba(${c[0]},${c[1]},${c[2]},${a})`
   }
 
-  getColor (value: number, colorScale: ColorScaleObject, logarithmic = false) {
-    let min = colorScale[0][0]
-    let max = colorScale.slice(-1)[0][0]
-    if (logarithmic) {
+  getColor (value: number, colorScale: ColorScaleOptions) {
+    let min = colorScale.min
+    let max = colorScale.max
+    if (colorScale.logarithmic) {
       if (value !== 0) {
         value = Math.log2(value)
       }
@@ -191,19 +200,22 @@ export default class DataUtils {
         max = Math.log2(max)
       }
     }
-    if (value <= min) {
-      return this.toRGB(colorScale[0][1])
-    } else if (value >= max) {
-      return this.toRGB(colorScale.slice(-1)[0][1])
+    const cs = colorScale.stops
+    const v = this.getRatio(value, min, max)
+
+    if (v <= cs[0][0]) {
+      return this.toRGB(cs[0][1])
+    } else if (v >= cs.slice(-1)[0][0]) {
+      return this.toRGB(cs.slice(-1)[0][1])
     }
     let i = 0
-    while (colorScale[i][0] < value) {
+    while (cs[i][0] < v) {
       i++
     }
     const color = []
-    const r = this.getRatio(value, colorScale[i - 1][0], colorScale[i][0])
-    for (let j = 0; j < colorScale[0][1].length; j++) {
-      color.push(colorScale[i - 1][1][j] + r * (colorScale[i][1][j] - colorScale[i - 1][1][j]))
+    const r = this.getRatio(v, cs[i - 1][0], cs[i][0])
+    for (let j = 0; j < cs[0][1].length; j++) {
+      color.push(cs[i - 1][1][j] + r * (cs[i][1][j] - cs[i - 1][1][j]))
     }
     return this.toRGB(color as [number, number, number])
   }

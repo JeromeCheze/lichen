@@ -2,6 +2,7 @@ import { EvenUtilsEventHandlerMap } from './types';
 import DataUtils from './dataUtils'
 
 const THRESHOLD = 5
+const SELECT_THRESHOLD = 20
 
 export default class EventUtils {
 
@@ -40,7 +41,8 @@ export default class EventUtils {
     this.state = {
       active: false,
       mouseDownPos: null,
-      shiftKey: false
+      shiftKey: false,
+      ctrlKey: false
     }
   }
 
@@ -71,20 +73,39 @@ export default class EventUtils {
     const [x, y] = this.getRelativePosition(e)
     if (this.state.mouseDownPos != null) {
       if (this.state.shiftKey) {
-        const x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])
-        const x2 = this.dataUtils.xValueFromPos(x)
+        let x1 = null
+        let x2 = null
+        let y1 = null
+        let y2 = null
+        if (Math.abs(x - this.state.mouseDownPos[0]) > SELECT_THRESHOLD) {
+          x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])
+          x2 = this.dataUtils.xValueFromPos(x)
+        }
+        if (Math.abs(y - this.state.mouseDownPos[1]) > SELECT_THRESHOLD) {
+          y1 = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1])
+          y2 = this.dataUtils.yValueFromPos(y)
+        }
         this.executeCallback('selecting', {
-          x: [Math.min(x1, x2), Math.max(x1, x2)],
-          y: [null, null]
+          x: x1 != null && x2 != null ? [Math.min(x1, x2), Math.max(x1, x2)] : [null, null],
+          y: y1 != null && y2 != null ? [Math.min(y1, y2), Math.max(y1, y2)] : [null, null]
         })
       } else {
         const deltaX = this.state.mouseDownPos[0] - x
+        const deltaY = this.state.mouseDownPos[0] - y
         if (Math.abs(deltaX) > THRESHOLD) {
           const valueDeltaX = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0]) - this.dataUtils.xValueFromPos(x)
-          this.state.mouseDownPos = [x, y]
+          this.state.mouseDownPos = [x, this.state.mouseDownPos[1]]
           this.executeCallback('xRangeChange', [
             this.dataUtils.start + valueDeltaX,
             this.dataUtils.end + valueDeltaX
+          ])
+        }
+        if (Math.abs(deltaY) > THRESHOLD) {
+          const valueDeltaY = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1]) - this.dataUtils.yValueFromPos(y)
+          this.state.mouseDownPos = [this.state.mouseDownPos[0], y]
+          this.executeCallback('yRangeChange', [
+            this.dataUtils.yMin + valueDeltaY,
+            this.dataUtils.yMax + valueDeltaY
           ])
         }
       }
@@ -103,10 +124,15 @@ export default class EventUtils {
   handleMouseUp (e: MouseEvent) {
     if (this.state.shiftKey) {
       const [x, y] = this.getRelativePosition(e)
-      if (Math.abs(x - this.state.mouseDownPos[0]) > THRESHOLD) {
+      if (Math.abs(x - this.state.mouseDownPos[0]) > SELECT_THRESHOLD) {
         const x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])
         const x2 = this.dataUtils.xValueFromPos(x)
         this.executeCallback('xRangeChange', [Math.min(x1, x2), Math.max(x1, x2)])
+      }
+      if (Math.abs(y - this.state.mouseDownPos[1]) > SELECT_THRESHOLD) {
+        const y1 = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1])
+        const y2 = this.dataUtils.yValueFromPos(y)
+        this.executeCallback('yRangeChange', [Math.min(y1, y2), Math.max(y1, y2)])
       }
       
     }
@@ -116,7 +142,10 @@ export default class EventUtils {
   handleDblClick (e: MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    this.executeCallback('xRangeChange', this.dataUtils.dataRange())
+    const [yMin, yMax] = this.dataUtils.yRange()
+    this.dataUtils.yMin = yMin
+    this.dataUtils.yMax = yMax
+    this.executeCallback('xRangeChange', this.dataUtils.xRange())
   }
 
   handleWheel (e: WheelEvent) {
@@ -124,11 +153,19 @@ export default class EventUtils {
       e.preventDefault()
       e.stopPropagation()
       const sign = Math.sign(e.deltaY)
-      const ratio = 0.1 * (this.dataUtils.end - this.dataUtils.start)
-      this.executeCallback('xRangeChange', [
-        this.dataUtils.start + sign * ratio,
-        this.dataUtils.end - sign * ratio
-      ])
+      if (this.state.ctrlKey) {
+        const ratio = 0.1 * (this.dataUtils.yMax - this.dataUtils.yMin)
+        this.executeCallback('yRangeChange', [
+          this.dataUtils.yMin + sign * ratio,
+          this.dataUtils.yMax - sign * ratio
+        ])
+      } else {
+        const ratio = 0.1 * (this.dataUtils.end - this.dataUtils.start)
+        this.executeCallback('xRangeChange', [
+          this.dataUtils.start + sign * ratio,
+          this.dataUtils.end - sign * ratio
+        ])
+      }
     }
   }
 
@@ -147,12 +184,14 @@ export default class EventUtils {
   handleKeyDown (e: KeyboardEvent) {
     if (this.state.active) {
       this.state.shiftKey = e.shiftKey
+      this.state.ctrlKey = e.ctrlKey
     }
   }
 
   handleKeyUp (e: KeyboardEvent) {
     if (this.state.active) {
       this.state.shiftKey = e.shiftKey
+      this.state.ctrlKey = e.ctrlKey
     }
   }
 

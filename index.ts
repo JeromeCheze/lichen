@@ -38,9 +38,14 @@ export class Lichen {
           }
         }
       }
-      const dataRanges = this.opt.synced().map(chart => chart.dataUtils.dataRange())
-      this.dataUtils.start = Math.min.apply(null, dataRanges.map(x => x[0]))
-      this.dataUtils.end = Math.max.apply(null, dataRanges.map(x => x[1]))
+      const xRanges = this.opt.synced().map(chart => chart.dataUtils.xRange())
+      this.dataUtils.start = Math.min.apply(null, xRanges.map(x => x[0]))
+      this.dataUtils.end = Math.max.apply(null, xRanges.map(x => x[1]))
+      if (this.opt.type === 'heatmap3d') {
+        const [yMin, yMax] = this.dataUtils.yRange()
+        this.dataUtils.yMin = yMin
+        this.dataUtils.yMax = yMax
+      }
       this.draw()
     }
   }
@@ -146,6 +151,11 @@ export class Lichen {
           chart.setXRange(value[0], value[1])
         }
       })
+      .yRangeChange((value: [number, number]) => {
+        for (const chart of this.opt.synced()) {
+          chart.setYRange(value[0], value[1])
+        }
+      })
     this.ready = true
   }
 
@@ -153,6 +163,12 @@ export class Lichen {
     this.frontPanel.drawCrosshair(null)
     this.dataUtils.start = x1
     this.dataUtils.end = x2
+    this.draw()
+  }
+
+  setYRange (y1: number, y2: number) {
+    this.dataUtils.yMin = y1
+    this.dataUtils.yMax = y2
     this.draw()
   }
 
@@ -167,16 +183,13 @@ export class Lichen {
   draw () {
     if (this.opt.type === 'line' || this.opt.type === 'heatmap2d') {
       this.dataUtils.computeData()
-      let amplitude = this.dataUtils.computed.maxValue - this.dataUtils.computed.minValue
+      const [yMin, yMax] = this.dataUtils.yRange()
+      let amplitude = yMax - yMin
       if (amplitude === 0) {
         amplitude = 0.1
       }
-      this.dataUtils.yMin = this.dataUtils.computed.minValue - 0.1 * amplitude
-      this.dataUtils.yMax = this.dataUtils.computed.maxValue + 0.1 * amplitude
-    } else {
-      const series = this.opt.series as Heatmap3dOptions
-      this.dataUtils.yMin = series.yMin
-      this.dataUtils.yMax = series.yMax
+      this.dataUtils.yMin = yMin - 0.1 * amplitude
+      this.dataUtils.yMax = yMax + 0.1 * amplitude
     }
     this.xAxis.update()
     this.yAxis.update()

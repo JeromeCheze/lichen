@@ -31,6 +31,13 @@ export type ColorScaleObject  = [
   string?
 ][];
 
+export interface ColorScaleOptions {
+  stops: ColorScaleObject;
+  min: number;
+  max: number;
+  logarithmic: boolean
+}
+
 export interface LineOptions {
   name?: string;
   start: number;
@@ -39,7 +46,6 @@ export interface LineOptions {
   color?: string;
   area?: boolean;
   linewidth?: number;
-  logarithmicColorScale?: boolean;
 }
 
 export interface Heatmap2dOptions {
@@ -47,7 +53,6 @@ export interface Heatmap2dOptions {
   start: number;
   step: number;
   data: (number | null)[];
-  logarithmicColorScale?: boolean;
 }
 
 export interface Heatmap3dOptions {
@@ -58,7 +63,6 @@ export interface Heatmap3dOptions {
   yMax: number;
   zMin: number;
   zMax: number;
-  logarithmicColorScale?: boolean;
 }
 
 export interface HeaderOptions {
@@ -74,7 +78,7 @@ export interface LichenOptions {
   crosshair: boolean;
   height: number;
   serieHeight: number;
-  colorScale?: ColorScaleObject;
+  colorScale?: ColorScaleOptions;
   xAxis: XAxisOptions;
   yAxis: YAxisOptions;
   series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions;

@@ -40,6 +40,12 @@ export default class FrontPanel {
       ctx.fillRect(x1, 0, 1, this.canvas.height)
       ctx.fillRect(x2, 0, 1, this.canvas.height)
     }
+    if (y[0] != null && y[1] != null) {
+      const [y1, y2] = [this.dataUtils.yPosFromValue(y[0]), this.dataUtils.yPosFromValue(y[1])]
+      ctx.fillStyle = 'rgba(255,255,255,0.8)'
+      ctx.fillRect(0, 0, this.canvas.width, y2)
+      ctx.fillRect(0, y1, this.canvas.width, this.canvas.height - y1)
+    }
     ctx.restore()
   }
 

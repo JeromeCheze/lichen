@@ -1,4 +1,4 @@
-import { ColorScaleObject, LineOptions } from './types'
+import { ColorScaleOptions, LineOptions } from './types'
 import DataUtils from './dataUtils'
 
 const FILL_OPACITY = 0.2
@@ -9,9 +9,9 @@ export default class LinePlot {
   dataUtils: DataUtils;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
-  colorScale: ColorScaleObject;
+  colorScale: ColorScaleOptions;
 
-  constructor (container: HTMLElement, opt: LineOptions[], dataUtils: DataUtils, colorScale: ColorScaleObject) {
+  constructor (container: HTMLElement, opt: LineOptions[], dataUtils: DataUtils, colorScale: ColorScaleOptions) {
     this.opt = opt
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
@@ -26,18 +26,15 @@ export default class LinePlot {
   setSerieColor (serie: LineOptions) {
     const ctx = this.ctx
     if (this.colorScale != null) {
-      const min = this.colorScale[0][0]
-      const max = this.colorScale.slice(-1)[0][0]
+      const min = this.colorScale.min
+      const max = this.colorScale.max
       if (serie.area === true) {
         const fillGrad = ctx.createLinearGradient(
           0, this.dataUtils.yPosFromValue(min),
           0, this.dataUtils.yPosFromValue(max)
         )
-        for (const stop of this.colorScale) {
-          fillGrad.addColorStop(
-            this.dataUtils.getRatio(stop[0], min, max),
-            this.dataUtils.toRGBA(stop[1], FILL_OPACITY)
-          )
+        for (const stop of this.colorScale.stops) {
+          fillGrad.addColorStop(stop[0], this.dataUtils.toRGBA(stop[1], FILL_OPACITY))
         }
         ctx.fillStyle = fillGrad
       }
@@ -45,11 +42,8 @@ export default class LinePlot {
         0, this.dataUtils.yPosFromValue(min),
         0, this.dataUtils.yPosFromValue(max)
       )
-      for (const stop of this.colorScale) {
-        strokeGrad.addColorStop(
-          this.dataUtils.getRatio(stop[0], min, max),
-          this.dataUtils.toRGB(stop[1])
-        )
+      for (const stop of this.colorScale.stops) {
+        strokeGrad.addColorStop(stop[0], this.dataUtils.toRGB(stop[1]))
       }
       ctx.strokeStyle = strokeGrad
     } else {

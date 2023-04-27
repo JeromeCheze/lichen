@@ -19,11 +19,15 @@ window.chart0 = new Lichen(container, {
   xAxis: {
     enabled: true
   },
-  colorScale: [
-    [9, [255, 0, 0]],
-    [10, [215, 130, 30]],
-    [12, [39, 200, 19]]
-  ],
+  colorScale: {
+    min: 9,
+    max: 12,
+    stops: [
+      [0, [255, 0, 0]],
+      [0.333, [215, 130, 30]],
+      [1, [39, 200, 19]]
+    ]
+  },
   series: [{
     name: 'power supply',
     start: lineData.timestamp * 1e3,
@@ -50,15 +54,19 @@ window.chart1 = new Lichen(container, {
   yAxis: {
     width: 150
   },
-  colorScale: [
-    [0, [119, 255, 119], '0s'], // green
-    [300, [255, 242, 0], '5m'], // yellow
-    [3600, [255, 170, 0], '1h'], // orange
-    [86400, [255, 0, 0], '1j'], // red
-    [604800, [134, 72, 249], '7j'], // purple
-    [2592000, [0, 131, 255], '30j'], // blue
-    [5184000, [0, 0, 0], '60j'] // black
-  ],
+  colorScale: {
+    min: 0,
+    max: 5184000,
+    stops: [
+      [0, [119, 255, 119], '0s'], // green
+      [300 / 5184000, [255, 242, 0], '5m'], // yellow
+      [3600 / 5184000, [255, 170, 0], '1h'], // orange
+      [86400 / 5184000, [255, 0, 0], '1j'], // red
+      [604800 / 5184000, [134, 72, 249], '7j'], // purple
+      [2592000 / 5184000, [0, 131, 255], '30j'], // blue
+      [1, [0, 0, 0], '60j'] // black
+    ]
+  },
   series: heatmap2dData
 })
 
@@ -73,6 +81,7 @@ const processSampledist = (minValues, maxValues, sampledistValues) => {
   let minValue = null
   let maxValue = null
   let maxSd = null
+  const maxSdList = []
   for (let i = 0; i < minValues.length; i++) {
     const currentMin = minValues[i]
     const currentMax = maxValues[i]
@@ -107,6 +116,7 @@ const processSampledist = (minValues, maxValues, sampledistValues) => {
       currentSd.push(0)
       y += yStep
     }
+    maxSdList.push(Math.max.apply(null, sd))
     for (let j = 0; j < sd.length; j++) {
       if (maxSd == null || sd[j] > maxSd) {
         maxSd = sd[j]
@@ -134,7 +144,6 @@ const [yMin, yMax, zMax, processed] = processSampledist(
 // console.log(zMax)
 // console.log(processed)
 // console.log(heatmap3dData)
-const colorScale = COLORMAPS.PARULA.map(x => [zMax * x[0], x[1]])
 window.chart2 = new Lichen(container, {
   header: {
     title: 'test heatmap3d'
@@ -144,7 +153,12 @@ window.chart2 = new Lichen(container, {
     powerOfTen: true
   },
   height: 200,
-  colorScale,
+  colorScale: {
+    min: 0,
+    max: zMax,
+    stops: COLORMAPS.PARULA,
+    logarithmic: true
+  },
   series: {
     start: heatmap3dData['min_FR_SMPL_00_HHZ'].timestamp * 1e3,
     step: heatmap3dData['min_FR_SMPL_00_HHZ'].step * 1e3,
