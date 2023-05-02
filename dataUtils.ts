@@ -186,7 +186,7 @@ export default class DataUtils {
     return `rgba(${c[0]},${c[1]},${c[2]},${a})`
   }
 
-  getColor (value: number, colorScale: ColorScaleOptions) {
+  getColor (value: number, colorScale: ColorScaleOptions, text = true) {
     let min = colorScale.min
     let max = colorScale.max
     if (colorScale.logarithmic) {
@@ -204,9 +204,9 @@ export default class DataUtils {
     const v = this.getRatio(value, min, max)
 
     if (v <= cs[0][0]) {
-      return this.toRGB(cs[0][1])
+      return text ? this.toRGB(cs[0][1]) : cs[0][1]
     } else if (v >= cs.slice(-1)[0][0]) {
-      return this.toRGB(cs.slice(-1)[0][1])
+      return text ? this.toRGB(cs.slice(-1)[0][1]) : cs.slice(-1)[0][1]
     }
     let i = 0
     while (cs[i][0] < v) {
@@ -217,6 +217,6 @@ export default class DataUtils {
     for (let j = 0; j < cs[0][1].length; j++) {
       color.push(cs[i - 1][1][j] + r * (cs[i][1][j] - cs[i - 1][1][j]))
     }
-    return this.toRGB(color as [number, number, number])
+    return text ? this.toRGB(color as [number, number, number]) : color
   }
 }

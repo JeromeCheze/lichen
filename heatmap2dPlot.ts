@@ -45,7 +45,7 @@ export default class Heatmap2dPlot {
       for (let i = computed.minIndex; i < computed.maxIndex; i += indexStep) {
         const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
         if (group.length > 0) {
-          ctx.fillStyle = this.dataUtils.getColor(Math.max.apply(null, group), this.colorScale)
+          ctx.fillStyle = this.dataUtils.getColor(Math.max.apply(null, group), this.colorScale) as string
           ctx.fillRect(Math.floor(xPos), yPos + MARGIN, Math.floor(xStep) + 1, serieHeight - 2 * MARGIN)
         }
         xPos += xStep

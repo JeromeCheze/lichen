@@ -35,21 +35,24 @@ export default class Heatmap3dPlot {
       return
     }
     canvas.height = firstNotNull.length
-    let x = 0
-    for (let i = 0; i < o.data.length; i++) {
-      let y = firstNotNull.length - 1
-      const value = o.data[i]
-      if (value != null) {
-        for (let j = 0; j < value.length; j++) {
-          ctx.fillStyle = this.dataUtils.getColor(value[j], this.colorScale)
-          ctx.fillRect(x, y, 1, 1)
-          y--
+    const img = ctx.createImageData(canvas.width, canvas.height)
+    console.log(img)
+    let i = 0
+    for (let y = firstNotNull.length - 1; y >= 0; y--) {
+      for (let x = 0; x < o.data.length; x++) {
+        if (o.data[x] != null) {
+          const [r, g, b] = this.dataUtils.getColor(o.data[x][y], this.colorScale, false)
+          img.data[i + 0] = r
+          img.data[i + 1] = g
+          img.data[i + 2] = b
+          img.data[i + 3] = 255
         }
+        i += 4
       }
-      x++
     }
+    ctx.putImageData(img, 0, 0)
     this.image = new Image()
-    this.image.src = ctx.canvas.toDataURL()
+    this.image.src = canvas.toDataURL()
     this.imageWidth = canvas.width
     this.imageHeight = canvas.height
   }
