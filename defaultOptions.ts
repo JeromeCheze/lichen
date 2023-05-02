@@ -15,6 +15,7 @@ export default {
     position: 'top',
     width: 80
   },
+  zoom: 'xy',
   xAxis: {
     enabled: AXIS_ENABLED,
     gridEnabled: GRID_ENABLED,

@@ -36,7 +36,8 @@ export default class EventUtils {
       move: [],
       xRangeChange: [],
       yRangeChange: [],
-      selecting: []
+      resetDisplay: [],
+      selecting: [],
     }
     this.state = {
       active: false,
@@ -58,10 +59,10 @@ export default class EventUtils {
   }
 
   handleMouseLeave (e: MouseEvent) {
-    if (this.state.mouseDownPos != null) {
-      this.handleMouseUp(e)
-    }
+    this.handleMouseUp(e)
     this.state.active = false
+    this.state.shiftKey = false
+    this.state.ctrlKey = false
     this.executeCallback('active', false)
   }
 
@@ -122,7 +123,7 @@ export default class EventUtils {
   }
 
   handleMouseUp (e: MouseEvent) {
-    if (this.state.shiftKey) {
+    if (this.state.shiftKey && this.state.mouseDownPos != null) {
       const [x, y] = this.getRelativePosition(e)
       if (Math.abs(x - this.state.mouseDownPos[0]) > SELECT_THRESHOLD) {
         const x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])
@@ -134,7 +135,6 @@ export default class EventUtils {
         const y2 = this.dataUtils.yValueFromPos(y)
         this.executeCallback('yRangeChange', [Math.min(y1, y2), Math.max(y1, y2)])
       }
-      
     }
     this.state.mouseDownPos = null
   }
@@ -142,10 +142,7 @@ export default class EventUtils {
   handleDblClick (e: MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    const [yMin, yMax] = this.dataUtils.yRange()
-    this.dataUtils.yMin = yMin
-    this.dataUtils.yMax = yMax
-    this.executeCallback('xRangeChange', this.dataUtils.xRange())
+    this.executeCallback('resetDisplay', this.dataUtils.xRange())
   }
 
   handleWheel (e: WheelEvent) {
@@ -217,6 +214,11 @@ export default class EventUtils {
 
   selecting (callback) {
     this.registered.selecting.push(callback)
+    return this
+  }
+
+  resetDisplay (callback) {
+    this.registered.resetDisplay.push(callback)
     return this
   }
 

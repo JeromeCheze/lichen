@@ -78,6 +78,7 @@ export interface LichenOptions {
   crosshair: boolean;
   height: number;
   serieHeight: number;
+  zoom: null | 'x' | 'y' | 'xy';
   colorScale?: ColorScaleOptions;
   xAxis: XAxisOptions;
   yAxis: YAxisOptions;

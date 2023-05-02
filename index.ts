@@ -1,5 +1,5 @@
 import defaultOptions from './defaultOptions.js'
-import { Heatmap2dOptions, Heatmap3dOptions, LichenOptions, LineOptions } from './types.js'
+import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LichenOptions, LineOptions } from './types.js'
 import DataUtils from './dataUtils.js'
 import EventUtils from './eventUtils.js'
 import XAxis from './xAxis.js'
@@ -69,6 +69,9 @@ export class Lichen {
     if (result.synced == null) {
       const instance = []
       result.synced = () => instance
+    }
+    if (result.type === 'heatmap2d' && result.zoom === 'xy') {
+      result.zoom = 'x'
     }
     return result
   }
@@ -156,23 +159,55 @@ export class Lichen {
           chart.setYRange(value[0], value[1])
         }
       })
+      .resetDisplay(() => {
+        for (const chart of this.opt.synced()) {
+          let [yMin, yMax] = [null, null]
+          if (chart.opt.type === 'heatmap3d') {
+            [yMin, yMax] = chart.dataUtils.yRange()
+          }
+          const [xMin, xMax] = chart.dataUtils.xRange()
+          chart.setYRange(yMin, yMax, false)
+          chart.setXRange(xMin, xMax)
+        }
+      })
     this.ready = true
   }
 
-  setXRange (x1: number, x2: number) {
+  setColorScale (colorScale: ColorScaleOptions) {
+    Object.assign(this.opt.colorScale, colorScale)
+    if (this.opt.type === 'heatmap3d') {
+      const plot = this.plot as Heatmap3dPlot
+      plot.image = null
+      plot.update()
+    }
+  }
+
+  setXRange (x1: number, x2: number, draw = true) {
     this.frontPanel.drawCrosshair(null)
     this.dataUtils.start = x1
     this.dataUtils.end = x2
-    this.draw()
+    if (draw) {
+      this.draw()
+    }
   }
 
-  setYRange (y1: number, y2: number) {
+  setYRange (y1: number, y2: number, draw = true) {
     this.dataUtils.yMin = y1
     this.dataUtils.yMax = y2
-    this.draw()
+    if (draw) {
+      this.draw()
+    }
   }
 
   setSelection (x: [number | null, number | null], y: [number | null, number | null]) {
+    if (this.opt.zoom != null) {
+      if (this.opt.zoom.indexOf('x') < 0) {
+        x = [null, null]
+      }
+      if (this.opt.zoom.indexOf('y') < 0) {
+        y = [null, null]
+      }
+    }
     this.frontPanel.selection(x, y)
   }
 
@@ -183,13 +218,15 @@ export class Lichen {
   draw () {
     if (this.opt.type === 'line' || this.opt.type === 'heatmap2d') {
       this.dataUtils.computeData()
-      const [yMin, yMax] = this.dataUtils.yRange()
-      let amplitude = yMax - yMin
-      if (amplitude === 0) {
-        amplitude = 0.1
+      if (this.dataUtils.yMin == null || this.dataUtils.yMax == null || this.opt.zoom.indexOf('y') < 0) {
+        const [yMin, yMax] = this.dataUtils.yRange()
+        let amplitude = yMax - yMin
+        if (amplitude === 0) {
+          amplitude = 0.1
+        }
+        this.dataUtils.yMin = yMin - 0.1 * amplitude
+        this.dataUtils.yMax = yMax + 0.1 * amplitude
       }
-      this.dataUtils.yMin = yMin - 0.1 * amplitude
-      this.dataUtils.yMax = yMax + 0.1 * amplitude
     }
     this.xAxis.update()
     this.yAxis.update()

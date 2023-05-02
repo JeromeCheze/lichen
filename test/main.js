@@ -5,7 +5,7 @@ import lineData from './line_data.js'
 
 let container = document.querySelector('#chart')
 
-
+window.COLORMAPS = COLORMAPS
 /*
  * TEST LINE
  */
@@ -28,6 +28,7 @@ window.chart0 = new Lichen(container, {
       [1, [39, 200, 19]]
     ]
   },
+  zoom: 'x',
   series: [{
     name: 'power supply',
     start: lineData.timestamp * 1e3,

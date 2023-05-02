@@ -58,6 +58,7 @@ export default class Heatmap3dPlot {
   }
 
   update () {
+    // console.log(this.image)
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     ctx.save()
@@ -67,6 +68,7 @@ export default class Heatmap3dPlot {
       const t2 = new Date().getTime()
       console.log(t2 - t1)
     }
+    // console.log(this.image)
     const [sStart, sEnd] = this.dataUtils.xRange()
     const [sYMin, sYmax] = this.dataUtils.yRange()
     const [dStart, dEnd] = [this.dataUtils.start, this.dataUtils.end]
