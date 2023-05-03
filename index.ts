@@ -1,5 +1,5 @@
 import defaultOptions from './defaultOptions.js'
-import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LichenOptions, LineOptions } from './types.js'
+import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendOptions, LichenOptions, LineOptions } from './types.js'
 import DataUtils from './dataUtils.js'
 import EventUtils from './eventUtils.js'
 import XAxis from './xAxis.js'
@@ -8,9 +8,12 @@ import LinePlot from './linePlot.js'
 import Heatmap2dPlot from './heatmap2dPlot.js'
 import Heatmap3dPlot from './heatmap3dPlot.js'
 import FrontPanel from './frontPanel.js'
+import Legend from './legend.js'
 import * as COLORMAPS from './colormaps.js'
 
 export { COLORMAPS }
+
+const PADDING = 10
 
 export class Lichen {
 
@@ -20,6 +23,7 @@ export class Lichen {
   dataUtils: DataUtils;
   eventUtils: EventUtils;
   plot: LinePlot | Heatmap2dPlot | Heatmap3dPlot;
+  legend: Legend;
   frontPanel: FrontPanel;
   ready: boolean;
 
@@ -73,6 +77,11 @@ export class Lichen {
     if (result.type === 'heatmap2d' && result.zoom === 'xy') {
       result.zoom = 'x'
     }
+    if (result.type === 'line') {
+      for (const serie of result.series) {
+        serie.enabled = true
+      }
+    }
     return result
   }
 
@@ -91,10 +100,12 @@ export class Lichen {
     const wrapper = document.createElement('div')
     const header = document.createElement('div')
     const title = document.createElement('div')
+    const legend = document.createElement('div')
     const canvasWrapperContainer = document.createElement('div')
     const canvasWrapper = document.createElement('div')
-    Object.assign(header.style, { textAlign: 'center', userSelect: 'none' })
+    Object.assign(header.style, { textAlign: 'center', userSelect: 'none', padding: `${PADDING}px` })
     Object.assign(title.style, { fontWeight: 'bold' })
+    // Object.assign(legend.style, { padding: `${PADDING}px` })
     Object.assign(canvasWrapper.style, { position: 'relative', top: 0, left: 0 })
     if (this.opt.header.title != null) {
       title.innerHTML = this.opt.header.title
@@ -103,12 +114,18 @@ export class Lichen {
     header.appendChild(title)
     wrapper.appendChild(header)
     wrapper.appendChild(canvasWrapperContainer)
+    wrapper.appendChild(legend)
     canvasWrapperContainer.appendChild(canvasWrapper)
+    let canvasWrapperContainerWidth = wrapper.getBoundingClientRect().width
     if (this.opt.header.position === 'left') {
-      const availWidth = wrapper.getBoundingClientRect().width
+      canvasWrapperContainerWidth -= this.opt.header.width + 2 * PADDING
       Object.assign(header.style, { display: 'inline-block', width: `${this.opt.header.width}px`, verticalAlign: 'middle' })
-      Object.assign(canvasWrapperContainer.style, { display: 'inline-block', width: `${availWidth - this.opt.header.width}px`, verticalAlign: 'middle' })
     }
+    if (this.opt.legend.position === 'right') {
+      canvasWrapperContainerWidth -= this.opt.legend.width + 2 * PADDING
+      Object.assign(legend.style, { display: 'inline-block', width: `${this.opt.legend.width}px`, verticalAlign: 'top' })
+    }
+    Object.assign(canvasWrapperContainer.style, { display: 'inline-block', width: `${canvasWrapperContainerWidth}px`, verticalAlign: 'middle' })
     const sizes = canvasWrapperContainer.getBoundingClientRect()
     const plotWidth = this.opt.yAxis.enabled ? sizes.width - this.opt.yAxis.width : sizes.width
     this.dataUtils = new DataUtils(this.opt.type, this.opt.series, plotWidth, this.getHeight())
@@ -126,6 +143,8 @@ export class Lichen {
       this.plot = new Heatmap3dPlot(canvasWrapper, series, this.dataUtils, this.opt.colorScale)
     }
     this.frontPanel = new FrontPanel(canvasWrapper, this.dataUtils)
+    this.legend = new Legend(legend, this.opt.legend, this.opt.type, this.opt.height, this.opt.colorScale, this.opt.series)
+    this.legend.update()
   }
 
   init (container: HTMLElement) {
@@ -175,11 +194,8 @@ export class Lichen {
 
   setColorScale (colorScale: ColorScaleOptions) {
     Object.assign(this.opt.colorScale, colorScale)
-    if (this.opt.type === 'heatmap3d') {
-      const plot = this.plot as Heatmap3dPlot
-      plot.image = null
-      plot.update()
-    }
+    this.plot.update(true)
+    this.legend.update()
   }
 
   setXRange (x1: number, x2: number, draw = true) {
@@ -211,7 +227,7 @@ export class Lichen {
     this.frontPanel.selection(x, y)
   }
 
-  setCrosshair(value: number | null) {
+  setCrosshair (value: number | null) {
     this.frontPanel.drawCrosshair(value)
   }
 

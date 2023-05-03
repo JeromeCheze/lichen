@@ -71,10 +71,17 @@ export interface HeaderOptions {
   width?: number;
 }
 
+export interface LegendOptions {
+  enabled: boolean;
+  position: 'bottom' | 'right';
+  width: number;
+}
+
 export interface LichenOptions {
   title?: string;
   header: HeaderOptions;
   type: 'line' | 'heatmap2d' | 'heatmap3d';
+  legend: LegendOptions;
   crosshair: boolean;
   height: number;
   serieHeight: number;

@@ -36,7 +36,6 @@ export default class Heatmap3dPlot {
     }
     canvas.height = firstNotNull.length
     const img = ctx.createImageData(canvas.width, canvas.height)
-    console.log(img)
     let i = 0
     for (let y = firstNotNull.length - 1; y >= 0; y--) {
       for (let x = 0; x < o.data.length; x++) {
@@ -57,17 +56,19 @@ export default class Heatmap3dPlot {
     this.imageHeight = canvas.height
   }
 
-  update () {
+  update (forceRedraw = false) {
     // console.log(this.image)
-    const ctx = this.ctx
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    ctx.save()
-    if (this.image == null) {
+    let delay = false
+    if (this.image == null || forceRedraw) {
+      delay = true
       const t1 = new Date().getTime()
       this.createImage()
       const t2 = new Date().getTime()
       console.log(t2 - t1)
     }
+    const ctx = this.ctx
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    ctx.imageSmoothingEnabled = false
     // console.log(this.image)
     const [sStart, sEnd] = this.dataUtils.xRange()
     const [sYMin, sYmax] = this.dataUtils.yRange()
@@ -81,10 +82,13 @@ export default class Heatmap3dPlot {
     const sHeight = Math.min(this.imageHeight - sy, this.imageHeight - this.dataUtils.getRatio(dYmin, sYMin, sYmax) * this.imageHeight - sy)
     const dWidth = Math.min(ctx.canvas.width - dx, this.dataUtils.getRatio(sEnd, dStart, dEnd) * ctx.canvas.width - dx)
     const dHeight = Math.min(ctx.canvas.height - dy, ctx.canvas.height - this.dataUtils.getRatio(sYMin, dYmin, dYmax) * ctx.canvas.height - dy)
-    ctx.imageSmoothingEnabled = false
     // console.log({ sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight })
-    // ctx.drawImage(this.image, 0, 0, this.imageWidth, this.imageHeight, 0, 0, ctx.canvas.width, ctx.canvas.height)
-    ctx.drawImage(this.image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-    ctx.restore()
+    if (delay) {
+      setTimeout(() => {
+        ctx.drawImage(this.image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+      }, 100)
+    } else {
+      ctx.drawImage(this.image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+    }
   }
 }

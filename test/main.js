@@ -160,6 +160,9 @@ window.chart2 = new Lichen(container, {
     stops: COLORMAPS.PARULA,
     logarithmic: true
   },
+  legend: {
+    position: 'right'
+  },
   series: {
     start: heatmap3dData['min_FR_SMPL_00_HHZ'].timestamp * 1e3,
     step: heatmap3dData['min_FR_SMPL_00_HHZ'].step * 1e3,

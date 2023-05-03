@@ -38,6 +38,11 @@ export default {
     powerOfTen: false,
     width: 50
   },
+  legend: {
+    enabled: true,
+    position: 'bottom',
+    width: 80
+  },
   height: 120,
   serieHeight: 15
 } as LichenOptions

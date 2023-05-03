@@ -1,3 +1,4 @@
+// TODO: handle stacking series
 import { ColorScaleOptions, LineOptions } from './types'
 import DataUtils from './dataUtils'
 

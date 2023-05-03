@@ -31,9 +31,9 @@ export default class FrontPanel {
     this.drawCrosshair(null)
     const ctx = this.ctx
     ctx.save()
+    ctx.fillStyle = 'rgba(127,127,127,0.5)'
     if (x[0] != null && x[1] != null) {
       const [x1, x2] = [this.dataUtils.xPosFromValue(x[0]), this.dataUtils.xPosFromValue(x[1])]
-      ctx.fillStyle = 'rgba(255,255,255,0.8)'
       ctx.fillRect(0, 0, x1, this.canvas.height)
       ctx.fillRect(x2, 0, this.canvas.width - x2, this.canvas.height)
       ctx.fillStyle = 'grey'
@@ -42,7 +42,6 @@ export default class FrontPanel {
     }
     if (y[0] != null && y[1] != null) {
       const [y1, y2] = [this.dataUtils.yPosFromValue(y[0]), this.dataUtils.yPosFromValue(y[1])]
-      ctx.fillStyle = 'rgba(255,255,255,0.8)'
       ctx.fillRect(0, 0, this.canvas.width, y2)
       ctx.fillRect(0, y1, this.canvas.width, this.canvas.height - y1)
     }
