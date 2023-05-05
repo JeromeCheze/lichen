@@ -44,5 +44,6 @@ export default {
     width: 80
   },
   height: 120,
+  stacked: false,
   serieHeight: 15
 } as LichenOptions

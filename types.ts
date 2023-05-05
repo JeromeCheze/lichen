@@ -84,6 +84,7 @@ export interface LichenOptions {
   legend: LegendOptions;
   crosshair: boolean;
   height: number;
+  stacked: boolean;
   serieHeight: number;
   zoom: null | 'x' | 'y' | 'xy';
   colorScale?: ColorScaleOptions;
@@ -95,6 +96,7 @@ export interface LichenOptions {
 
 export interface DataUtilsComputedSerieData {
   dataStart: number;
+  dataEnd: number;
   xRatio: number;
   minIndex: number;
   maxIndex: number;
@@ -107,6 +109,7 @@ export interface DataUtilsComputedSerieData {
 export interface DataUtilsComputedData {
   minValue: number | null;
   maxValue: number | null;
+  maxStacked: number | null;
   series: (DataUtilsComputedSerieData | null)[];
 }
 

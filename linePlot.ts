@@ -1,4 +1,3 @@
-// TODO: handle stacking series
 import { ColorScaleOptions, LineOptions } from './types'
 import DataUtils from './dataUtils'
 
@@ -11,9 +10,11 @@ export default class LinePlot {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   colorScale: ColorScaleOptions;
+  stacked: boolean;
 
-  constructor (container: HTMLElement, opt: LineOptions[], dataUtils: DataUtils, colorScale: ColorScaleOptions) {
+  constructor (container: HTMLElement, opt: LineOptions[], stacked: boolean, dataUtils: DataUtils, colorScale: ColorScaleOptions) {
     this.opt = opt
+    this.stacked = stacked
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
     this.dataUtils = dataUtils

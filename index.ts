@@ -133,7 +133,7 @@ export class Lichen {
     this.xAxis = new XAxis(canvasWrapper, this.opt.xAxis, this.dataUtils)
     canvasWrapper.style.height = `${this.xAxis.canvas.height}px`
     if (this.opt.type === 'line') {
-      this.plot = new LinePlot(canvasWrapper, this.opt.series as LineOptions[], this.dataUtils, this.opt.colorScale)
+      this.plot = new LinePlot(canvasWrapper, this.opt.series as LineOptions[], this.opt.stacked, this.dataUtils, this.opt.colorScale)
     } else if (this.opt.type === 'heatmap2d') {
       const series = this.opt.series as Heatmap2dOptions[]
       this.yAxis.categories = series.map(x => x.name)
@@ -235,7 +235,10 @@ export class Lichen {
     if (this.opt.type === 'line' || this.opt.type === 'heatmap2d') {
       this.dataUtils.computeData()
       if (this.dataUtils.yMin == null || this.dataUtils.yMax == null || this.opt.zoom.indexOf('y') < 0) {
-        const [yMin, yMax] = this.dataUtils.yRange()
+        let [yMin, yMax] = this.dataUtils.yRange()
+        if (this.opt.stacked) {
+          yMax = this.dataUtils.computed.maxStacked
+        }
         let amplitude = yMax - yMin
         if (amplitude === 0) {
           amplitude = 0.1

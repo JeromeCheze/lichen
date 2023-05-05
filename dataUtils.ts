@@ -115,6 +115,7 @@ export default class DataUtils {
     this.computed = {
       minValue: null,
       maxValue: null,
+      maxStacked: null,
       series: Array.from(opt, () => null)
     }
     const computed: (DataUtilsComputedSerieData | null)[] = []
@@ -125,6 +126,7 @@ export default class DataUtils {
       let minIndex = Math.floor((this.start - serie.start) / serie.step)
       const maxIndex = Math.min(1 + (this.end - serie.start) / serie.step, serie.data.length - 1)
       const dataStart = minIndex < 0 ? serie.start : serie.start + minIndex * serie.step
+      const dataEnd = dataStart + maxIndex * serie.step
       if (minIndex < 0) {
         minIndex = 0
       }
@@ -157,6 +159,7 @@ export default class DataUtils {
       globalMaxValue = globalMaxValue == null || globalMaxValue < maxValue! ? maxValue : globalMaxValue
       computed.push({
         dataStart,
+        dataEnd,
         xRatio,
         minIndex,
         maxIndex,
@@ -167,9 +170,25 @@ export default class DataUtils {
       })
     }
 
+    let maxStacked = null
+    if (this.type === 'line') {
+      const start = Math.max.apply(null, computed.map(x => x.dataStart))
+      const end = Math.min.apply(null, computed.map(x => x.dataEnd))
+      const maxStep = Math.max.apply(null, opt.map((x: LineOptions) => x.step))
+      for (let t = start; t < end; t += maxStep) {
+        let currentSum = 0
+        for (const serie of opt) {
+          const i = Math.floor((t - serie.start) / serie.step)
+          currentSum += serie.data[i]
+        }
+        maxStacked = maxStacked == null ? currentSum : Math.max(maxStacked, currentSum)
+      }
+    }
+
     this.computed = {
       minValue: globalMinValue,
       maxValue: globalMaxValue,
+      maxStacked,
       series: computed
     }
   }
