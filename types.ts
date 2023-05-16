@@ -46,6 +46,22 @@ export interface LineOptions {
   color?: string;
   area?: boolean;
   linewidth?: number;
+  enabled?: boolean;
+}
+
+export interface StackedDataOptions {
+  name: string;
+  color: string;
+  linewidth: number;
+  enabled?: boolean;
+  data: (number | null)[];
+}
+
+export interface StackedOptions {
+  start: number;
+  step: number;
+  area?: boolean;
+  data: StackedDataOptions[];
 }
 
 export interface Heatmap2dOptions {
@@ -80,7 +96,7 @@ export interface LegendOptions {
 export interface LichenOptions {
   title?: string;
   header: HeaderOptions;
-  type: 'line' | 'heatmap2d' | 'heatmap3d';
+  type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked';
   legend: LegendOptions;
   crosshair: boolean;
   height: number;
@@ -90,7 +106,7 @@ export interface LichenOptions {
   colorScale?: ColorScaleOptions;
   xAxis: XAxisOptions;
   yAxis: YAxisOptions;
-  series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions;
+  series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions;
   synced: () => Lichen[];
 }
 

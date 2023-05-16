@@ -780,7 +780,7 @@ export class Lichen {
     while (cs[i][0] < v) {
       i++
     }
-    const color = []
+    const color: number[] = []
     const r = this.getRatio(v, cs[i - 1][0], cs[i][0])
     for (let j = 0; j < cs[0][1].length; j++) {
       color.push(cs[i - 1][1][j] + r * (cs[i][1][j] - cs[i - 1][1][j]))
@@ -1362,8 +1362,8 @@ export class Lichen {
     }
     if (!skipDataPreparation) {
       // process data
-      let minValue = null
-      let maxValue = null
+      let minValue: null | number = null
+      let maxValue: null | number = null
       const groupValue: { [index: string]: ([number, number] | null)[] } = {}
       let count = 0
       let sum = 0
@@ -1381,8 +1381,8 @@ export class Lichen {
             groupValue[k].push(null)
             continue
           }
-          let groupMin = null
-          let groupMax = null
+          let groupMin: null | number = null
+          let groupMax: null | number = null
           for (const v of g) {
             groupMin = groupMin == null ? v : Math.min(groupMin, v)
             groupMax = groupMax == null ? v : Math.max(groupMax, v)

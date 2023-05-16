@@ -1,5 +1,5 @@
 import defaultOptions from './defaultOptions.js'
-import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendOptions, LichenOptions, LineOptions } from './types.js'
+import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendOptions, LichenOptions, LineOptions, StackedOptions } from './types.js'
 import DataUtils from './dataUtils.js'
 import EventUtils from './eventUtils.js'
 import XAxis from './xAxis.js'
@@ -7,6 +7,7 @@ import YAxis from './yAxis.js'
 import LinePlot from './linePlot.js'
 import Heatmap2dPlot from './heatmap2dPlot.js'
 import Heatmap3dPlot from './heatmap3dPlot.js'
+import StackedPlot from './stackedPlot.js'
 import FrontPanel from './frontPanel.js'
 import Legend from './legend.js'
 import * as COLORMAPS from './colormaps.js'
@@ -22,7 +23,7 @@ export class Lichen {
   xAxis: XAxis;
   dataUtils: DataUtils;
   eventUtils: EventUtils;
-  plot: LinePlot | Heatmap2dPlot | Heatmap3dPlot;
+  plot: LinePlot | Heatmap2dPlot | Heatmap3dPlot | StackedPlot;
   legend: Legend;
   frontPanel: FrontPanel;
   ready: boolean;
@@ -133,7 +134,9 @@ export class Lichen {
     this.xAxis = new XAxis(canvasWrapper, this.opt.xAxis, this.dataUtils)
     canvasWrapper.style.height = `${this.xAxis.canvas.height}px`
     if (this.opt.type === 'line') {
-      this.plot = new LinePlot(canvasWrapper, this.opt.series as LineOptions[], this.opt.stacked, this.dataUtils, this.opt.colorScale)
+      this.plot = new LinePlot(canvasWrapper, this.opt.series as LineOptions[], this.dataUtils, this.opt.colorScale)
+    } else if (this.opt.type === 'stacked') {
+      this.plot = new StackedPlot(canvasWrapper, this.opt.series as StackedOptions, this.dataUtils, this.opt.colorScale)
     } else if (this.opt.type === 'heatmap2d') {
       const series = this.opt.series as Heatmap2dOptions[]
       this.yAxis.categories = series.map(x => x.name)
@@ -232,7 +235,7 @@ export class Lichen {
   }
 
   draw () {
-    if (this.opt.type === 'line' || this.opt.type === 'heatmap2d') {
+    if (this.opt.type === 'line' || this.opt.type === 'heatmap2d' || this.opt.type === 'stacked') {
       this.dataUtils.computeData()
       if (this.dataUtils.yMin == null || this.dataUtils.yMax == null || this.opt.zoom.indexOf('y') < 0) {
         let [yMin, yMax] = this.dataUtils.yRange()

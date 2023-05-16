@@ -1,9 +1,9 @@
-import { DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData, LineOptions, Heatmap2dOptions, Heatmap3dOptions, ColorScaleOptions } from './types'
+import { DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData, LineOptions, Heatmap2dOptions, Heatmap3dOptions, ColorScaleOptions, StackedOptions } from './types'
 
 export default class DataUtils {
 
   type: string;
-  opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions;
+  opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions;
   width: number;
   height: number;
   computed: DataUtilsComputedData;
@@ -14,7 +14,7 @@ export default class DataUtils {
 
   constructor (
     type: string,
-    opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions,
+    opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions,
     width: number,
     height: number
   ) {
@@ -42,6 +42,9 @@ export default class DataUtils {
     } else if (this.type === 'heatmap3d') {
       const opt = this.opt as Heatmap3dOptions
       return [opt.start, opt.start + opt.data.length * opt.step]
+    } else if (this.type === 'heatmap3d') {
+      const opt = this.opt as StackedOptions
+      return [opt.start, opt.start + opt.data[0].data.length * opt.step]
     }
   }
 
@@ -80,8 +83,8 @@ export default class DataUtils {
   }
 
   dataFromXPos (xPos: number) {
-    const opt = this.opt as LineOptions[]
-    const result: (DataUtilsDataFromPos | null)[] = Array.from(opt, () => null)
+    const series = this.getSeries()
+    const result: (DataUtilsDataFromPos | null)[] = Array.from({ length: series.length }, () => null)
     if (this.start == null || this.end == null) {
       return result
     }
@@ -89,14 +92,15 @@ export default class DataUtils {
     if (xValue == null) {
       return result
     }
-    for (const [i, serie] of opt.entries()) {
+    for (const [i, serie] of series.entries()) {
       const c = this.computed.series[i]
       if (c == null) {
         result.push(null)
         continue
       }
-      const index = Math.round(serie.data.length * (serie.start - xValue) / (serie.start + serie.data.length * serie.step))
-      const xDataValue = serie.start + index * serie.step
+      const [start, step] = this.getSerieStartAndStep(i)
+      const index = Math.round(serie.data.length * (start - xValue) / (start + serie.data.length * step))
+      const xDataValue = start + index * step
       result[i] = {
         index,
         xDataValue,
@@ -107,26 +111,53 @@ export default class DataUtils {
     return result
   }
 
+  getSeries () {
+    if (this.type === 'stacked') {
+      const opt = this.opt as StackedOptions
+      return opt.data
+    } else if (this.type === 'line') {
+      const opt = this.opt as LineOptions[]
+      return opt
+    } else if (this.type === 'heatmap2d') {
+      const opt = this.opt as Heatmap2dOptions[]
+      return opt
+    }
+  }
+
+  getSerieStartAndStep (index: number) {
+    if (this.type === 'stacked') {
+      const opt = this.opt as StackedOptions
+      return [opt.start, opt.step]
+    } else if (this.type === 'heatmap2d') {
+      const series = this.getSeries() as Heatmap2dOptions[]
+      return [series[index].start, series[index].step]
+    } else if (this.type === 'line') {
+      const series = this.getSeries() as LineOptions[]
+      return [series[index].start, series[index].step]
+    }
+  }
+
   computeData () {
     if (this.start == null || this.end == null) {
       return
     }
-    const opt  = this.opt as LineOptions[] | Heatmap2dOptions[]
+    const series = this.getSeries()
     this.computed = {
       minValue: null,
       maxValue: null,
       maxStacked: null,
-      series: Array.from(opt, () => null)
+      series: Array.from({ length: series.length }, () => null)
     }
     const computed: (DataUtilsComputedSerieData | null)[] = []
     let globalMinValue: number | null = null
     let globalMaxValue: number | null = null
-    for (const serie of opt) {
-      const xRatio = (this.end - this.start) / (serie.step * this.width)
-      let minIndex = Math.floor((this.start - serie.start) / serie.step)
-      const maxIndex = Math.min(1 + (this.end - serie.start) / serie.step, serie.data.length - 1)
-      const dataStart = minIndex < 0 ? serie.start : serie.start + minIndex * serie.step
-      const dataEnd = dataStart + maxIndex * serie.step
+    for (const [index, serie] of series.entries()) {
+      const [start, step] = this.getSerieStartAndStep(index)
+      const xRatio = (this.end - this.start) / (step * this.width)
+      let minIndex = Math.floor((this.start - start) / step)
+      const maxIndex = Math.min(1 + (this.end - start) / step, serie.data.length - 1)
+      const dataStart = minIndex < 0 ? start : start + minIndex * step
+      const dataEnd = dataStart + maxIndex * step
       if (minIndex < 0) {
         minIndex = 0
       }
@@ -171,19 +202,6 @@ export default class DataUtils {
     }
 
     let maxStacked = null
-    if (this.type === 'line') {
-      const start = Math.max.apply(null, computed.map(x => x.dataStart))
-      const end = Math.min.apply(null, computed.map(x => x.dataEnd))
-      const maxStep = Math.max.apply(null, opt.map((x: LineOptions) => x.step))
-      for (let t = start; t < end; t += maxStep) {
-        let currentSum = 0
-        for (const serie of opt) {
-          const i = Math.floor((t - serie.start) / serie.step)
-          currentSum += serie.data[i]
-        }
-        maxStacked = maxStacked == null ? currentSum : Math.max(maxStacked, currentSum)
-      }
-    }
 
     this.computed = {
       minValue: globalMinValue,

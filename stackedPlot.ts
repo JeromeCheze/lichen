@@ -1,17 +1,15 @@
-import { ColorScaleOptions, LineOptions } from './types'
+import { ColorScaleOptions, StackedDataOptions, StackedOptions } from './types'
 import DataUtils from './dataUtils'
 
-const FILL_OPACITY = 0.2
+export default class StackedPlot {
 
-export default class LinePlot {
-
-  opt: LineOptions[];
+  opt: StackedOptions;
   dataUtils: DataUtils;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   colorScale: ColorScaleOptions;
 
-  constructor (container: HTMLElement, opt: LineOptions[], dataUtils: DataUtils, colorScale: ColorScaleOptions) {
+  constructor (container: HTMLElement, opt: StackedOptions, dataUtils: DataUtils, colorScale: ColorScaleOptions) {
     this.opt = opt
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
@@ -23,37 +21,14 @@ export default class LinePlot {
     container.appendChild(this.canvas)
   }
 
-  setSerieColor (serie: LineOptions) {
+  setSerieColor (serie: StackedDataOptions) {
     const ctx = this.ctx
-    if (this.colorScale != null) {
-      const min = this.colorScale.min
-      const max = this.colorScale.max
-      if (serie.area === true) {
-        const fillGrad = ctx.createLinearGradient(
-          0, this.dataUtils.yPosFromValue(min),
-          0, this.dataUtils.yPosFromValue(max)
-        )
-        for (const stop of this.colorScale.stops) {
-          fillGrad.addColorStop(stop[0], this.dataUtils.toRGBA(stop[1], FILL_OPACITY))
-        }
-        ctx.fillStyle = fillGrad
-      }
-      const strokeGrad = ctx.createLinearGradient(
-        0, this.dataUtils.yPosFromValue(min),
-        0, this.dataUtils.yPosFromValue(max)
-      )
-      for (const stop of this.colorScale.stops) {
-        strokeGrad.addColorStop(stop[0], this.dataUtils.toRGB(stop[1]))
-      }
-      ctx.strokeStyle = strokeGrad
-    } else {
-      if (serie.area === true) {
-        ctx.fillStyle = serie.color
-          ? `rgba(${serie.color.slice(4, -1)},${FILL_OPACITY})`
-          : `rgba(0,0,0,${FILL_OPACITY})`
-      }
-      ctx.strokeStyle = serie.color ? serie.color : 'rgb(0,0,0)'
+    if (this.opt.area === true) {
+      ctx.fillStyle = serie.color
+        ? `rgb(${serie.color.slice(4, -1)})`
+        : `rgb(0,0,0)`
     }
+    ctx.strokeStyle = serie.color ? serie.color : 'rgb(0,0,0)'
   }
 
   update () {
@@ -67,7 +42,7 @@ export default class LinePlot {
       }
       const serie = this.opt[serieIndex]
       this.setSerieColor(serie)
-      let xPos = this.dataUtils.xPosFromValue(computed.dataStart)
+      let xPos = this.dataUtils.xPosFromValue(computed.dataStart) as number
       let xStep = 1
       let indexStep = computed.xRatio
       if (computed.xRatio <= 1) {
