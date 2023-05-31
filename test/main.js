@@ -2,6 +2,7 @@ import { Lichen, COLORMAPS } from '../dist/index.js'
 import heatmap3dData from './heatmap3d_data.js'
 import heatmap2dData from './heatmap2d_data.js'
 import lineData from './line_data.js'
+import stackedData from './stacked_data.js'
 
 let container = document.querySelector('#chart')
 
@@ -157,7 +158,7 @@ window.chart2 = new Lichen(container, {
   colorScale: {
     min: 0,
     max: zMax,
-    stops: COLORMAPS.PARULA,
+    stops: COLORMAPS.MAGMA,
     logarithmic: true
   },
   legend: {
@@ -171,5 +172,31 @@ window.chart2 = new Lichen(container, {
     yMax,
     zMin: 0,
     zMax
+  }
+})
+
+window.chart3 = new Lichen(container, {
+  header: {
+    title: 'test stacked'
+  },
+  type: 'stacked',
+  yAxis: {
+    powerOfTen: true,
+    min: 0
+  },
+  zoom: 'x',
+  height: 200,
+  series: {
+    start: stackedData.data['memory.free'].timestamp * 1e3,
+    step: stackedData.data['memory.free'].step * 1e3,
+    area: true,
+    linewidth: 2,
+    data: [
+      { color: '#fc8c3b', name: 'buffer', data: stackedData.data['memory.buffers'].data },
+      { color: '#fb4f2d', name: 'slab', data: stackedData.data['memory.slab'].data },
+      { color: '#e21a1d', name: 'shared', data: stackedData.data['memory.shared'].data },
+      { color: '#bd0028', name: 'cached', data: stackedData.data['memory.cached'].data },
+      { color: '#810127', name: 'free', data: stackedData.data['memory.free'].data }
+    ]
   }
 })

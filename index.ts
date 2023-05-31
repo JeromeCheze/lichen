@@ -94,6 +94,8 @@ export class Lichen {
       return this.opt.serieHeight * series.length
     } else if (this.opt.type === 'heatmap3d') {
       return this.opt.height
+    } else if (this.opt.type === 'stacked') {
+      return this.opt.height
     }
   }
 
@@ -117,7 +119,7 @@ export class Lichen {
     wrapper.appendChild(canvasWrapperContainer)
     wrapper.appendChild(legend)
     canvasWrapperContainer.appendChild(canvasWrapper)
-    let canvasWrapperContainerWidth = wrapper.getBoundingClientRect().width
+    let canvasWrapperContainerWidth = wrapper.getBoundingClientRect().width - 20
     if (this.opt.header.position === 'left') {
       canvasWrapperContainerWidth -= this.opt.header.width + 2 * PADDING
       Object.assign(header.style, { display: 'inline-block', width: `${this.opt.header.width}px`, verticalAlign: 'middle' })
@@ -239,15 +241,12 @@ export class Lichen {
       this.dataUtils.computeData()
       if (this.dataUtils.yMin == null || this.dataUtils.yMax == null || this.opt.zoom.indexOf('y') < 0) {
         let [yMin, yMax] = this.dataUtils.yRange()
-        if (this.opt.stacked) {
-          yMax = this.dataUtils.computed.maxStacked
-        }
         let amplitude = yMax - yMin
         if (amplitude === 0) {
           amplitude = 0.1
         }
-        this.dataUtils.yMin = yMin - 0.1 * amplitude
-        this.dataUtils.yMax = yMax + 0.1 * amplitude
+        this.dataUtils.yMin = this.opt.yAxis.min != null ? this.opt.yAxis.min : yMin - 0.1 * amplitude
+        this.dataUtils.yMax = this.opt.yAxis.max != null ? this.opt.yAxis.max : yMax + 0.1 * amplitude
       }
     }
     this.xAxis.update()

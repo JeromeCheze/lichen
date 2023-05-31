@@ -42,14 +42,14 @@ export default class DataUtils {
     } else if (this.type === 'heatmap3d') {
       const opt = this.opt as Heatmap3dOptions
       return [opt.start, opt.start + opt.data.length * opt.step]
-    } else if (this.type === 'heatmap3d') {
+    } else if (this.type === 'stacked') {
       const opt = this.opt as StackedOptions
       return [opt.start, opt.start + opt.data[0].data.length * opt.step]
     }
   }
 
   yRange (): [number, number] {
-    if (this.type === 'line' || this.type === 'heatmap2d') {
+    if (this.type === 'line' || this.type === 'heatmap2d' || this.type === 'stacked') {
       return [this.computed.minValue, this.computed.maxValue]
     } else if (this.type === 'heatmap3d') {
       const opt = this.opt as Heatmap3dOptions
@@ -80,6 +80,18 @@ export default class DataUtils {
       return null
     }
     return this.height * (this.yMax - yValue) / (this.yMax - this.yMin)
+  }
+
+  yPosFromStackedValues(index: number, serieIndex: number) {
+    if (this.yMin == null || this.yMax == null) {
+      return null
+    }
+    let value = 0
+    const series = this.getSeries()
+    for (let s = series.length - 1; s >= serieIndex; s--) {
+      value += series[s][index]
+    }
+    return this.yPosFromValue(value)
   }
 
   dataFromXPos (xPos: number) {
@@ -145,7 +157,6 @@ export default class DataUtils {
     this.computed = {
       minValue: null,
       maxValue: null,
-      maxStacked: null,
       series: Array.from({ length: series.length }, () => null)
     }
     const computed: (DataUtilsComputedSerieData | null)[] = []
@@ -202,11 +213,29 @@ export default class DataUtils {
     }
 
     let maxStacked = null
+    if (this.type === 'stacked' && computed[0] != null) {
+      for (let i = computed[0].minIndex; i < computed[0].maxIndex; i++) {
+        let currentSum = null
+        for (const serie of series) {
+          if (serie.data[i] == null) {
+            break
+          } else if (currentSum == null) {
+            currentSum = serie.data[i]
+          } else {
+            currentSum += serie.data[i]
+          }
+        }
+        if (maxStacked == null) {
+          maxStacked = currentSum
+        } else if (currentSum != null) {
+          maxStacked = Math.max(maxStacked, currentSum)
+        }
+      }
+    }
 
     this.computed = {
       minValue: globalMinValue,
-      maxValue: globalMaxValue,
-      maxStacked,
+      maxValue: this.type === 'stacked' ? maxStacked : globalMaxValue,
       series: computed
     }
   }

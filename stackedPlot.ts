@@ -23,44 +23,64 @@ export default class StackedPlot {
 
   setSerieColor (serie: StackedDataOptions) {
     const ctx = this.ctx
-    if (this.opt.area === true) {
-      ctx.fillStyle = serie.color
-        ? `rgb(${serie.color.slice(4, -1)})`
-        : `rgb(0,0,0)`
-    }
+    ctx.fillStyle = serie.color ? serie.color : '#000000'
     ctx.strokeStyle = serie.color ? serie.color : 'rgb(0,0,0)'
   }
 
   update () {
-    const ctx = this.ctx
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    ctx.save()
+    // prepare data
+    const stackedValues: (null | [number, number])[][] = this.opt.data.map(x => [])
     for (const [serieIndex, computed] of this.dataUtils.computed.series.entries()) {
       if (computed == null) {
         console.log(`no draw for serie #${serieIndex}`)
         continue
       }
-      const serie = this.opt[serieIndex]
-      this.setSerieColor(serie)
-      let xPos = this.dataUtils.xPosFromValue(computed.dataStart) as number
-      let xStep = 1
-      let indexStep = computed.xRatio
-      if (computed.xRatio <= 1) {
-        xStep = 1 / computed.xRatio
-        indexStep = 1
+      const serie = this.opt.data[serieIndex]
+      let indexStep = computed.xRatio <= 1 ? 1 : computed.xRatio
+      let indexPos = 0
+      for (let i = computed.minIndex; i < computed.maxIndex; i += indexStep) {
+        const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
+        if (group.length > 0) {
+          let minValue: number | null = null
+          let maxValue: number | null = null
+          for (const v of group) {
+            minValue = minValue == null || v < minValue ? v : minValue
+            maxValue = maxValue == null || maxValue < v ? v : maxValue
+          }
+          const [prevMinStacked, prevMaxStacked] = serieIndex > 0 ? stackedValues[serieIndex - 1][indexPos] : [0, 0]
+          stackedValues[serieIndex].push([
+            prevMinStacked + minValue,
+            prevMaxStacked + maxValue
+          ])
+        } else {
+          stackedValues[serieIndex].push(null)
+        }
+        indexPos++
       }
-      ctx.lineWidth = serie.linewidth ? serie.linewidth : 1
+    }
+
+    const ctx = this.ctx
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    ctx.save()
+    ctx.lineWidth = this.opt.linewidth ? this.opt.linewidth : 1
+    for (let serieIndex = stackedValues.length - 1; serieIndex >= 0; serieIndex--) {
+      const serieStacked = stackedValues[serieIndex]
+      const computed = this.dataUtils.computed.series[serieIndex]
+      const serie = this.opt.data[serieIndex]
+      if (computed == null) {
+        continue
+      }
+      let xPos = this.dataUtils.xPosFromValue(computed.dataStart) as number
+      const xStep = computed.xRatio <= 1 ? 1 / computed.xRatio : 1
+
+      this.setSerieColor(serie)
+      
       let prev = null
-      if (serie.area === true) {
-        for (let i = computed.minIndex; i < computed.maxIndex; i += indexStep) {
-          const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
-          if (group.length > 0) {
-            let minValue: number | null = null
-            let maxValue: number | null = null
-            for (const v of group) {
-              minValue = minValue == null || v < minValue ? v : minValue
-              maxValue = maxValue == null || maxValue < v ? v : maxValue
-            }
+      if (this.opt.area) {
+        // draw area
+        for (let i = 0; i < serieStacked.length; i ++) {
+          if (serieStacked[i] != null) {
+            const [minValue, maxValue] = serieStacked[i]
             if (prev == null) {
               ctx.beginPath()
               ctx.moveTo(xPos, Math.min(this.dataUtils.yPosFromValue(0), this.canvas.height))
@@ -73,9 +93,11 @@ export default class StackedPlot {
             }
             prev = minValue
           } else {
-            ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0), this.canvas.height))
-            ctx.closePath()
-            ctx.fill()
+            if (prev != null) {
+              ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0), this.canvas.height))
+              ctx.closePath()
+              ctx.fill()
+            }
             prev = null
           }
           xPos += xStep
@@ -86,18 +108,14 @@ export default class StackedPlot {
           ctx.fill()
         }
       }
-      ctx.beginPath()
+
+      // draw line
       xPos = this.dataUtils.xPosFromValue(computed.dataStart)
       prev = null
-      for (let i = computed.minIndex; i < computed.maxIndex; i += indexStep) {
-        const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
-        if (group.length > 0) {
-          let minValue: number | null = null
-          let maxValue: number | null = null
-          for (const v of group) {
-            minValue = minValue == null || v < minValue ? v : minValue
-            maxValue = maxValue == null || maxValue < v ? v : maxValue
-          }
+      ctx.beginPath()
+      for (let i = 0; i < serieStacked.length; i++) {
+        if (serieStacked[i] != null) {
+          const [minValue, maxValue] = serieStacked[i]
           if (prev == null) {
             ctx.moveTo(xPos, this.dataUtils.yPosFromValue(minValue))
           } else {

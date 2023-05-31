@@ -52,7 +52,6 @@ export interface LineOptions {
 export interface StackedDataOptions {
   name: string;
   color: string;
-  linewidth: number;
   enabled?: boolean;
   data: (number | null)[];
 }
@@ -61,6 +60,7 @@ export interface StackedOptions {
   start: number;
   step: number;
   area?: boolean;
+  linewidth?: number;
   data: StackedDataOptions[];
 }
 
@@ -125,7 +125,6 @@ export interface DataUtilsComputedSerieData {
 export interface DataUtilsComputedData {
   minValue: number | null;
   maxValue: number | null;
-  maxStacked: number | null;
   series: (DataUtilsComputedSerieData | null)[];
 }
 
