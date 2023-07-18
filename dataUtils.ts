@@ -1,9 +1,9 @@
-import { DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData, LineOptions, Heatmap2dOptions, Heatmap3dOptions, ColorScaleOptions, StackedOptions } from './types'
+import { DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData, LineOptions, Heatmap2dOptions, Heatmap3dOptions, ColorScaleOptions, StackedOptions, SequenceOptions } from './types'
 
 export default class DataUtils {
 
   type: string;
-  opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions;
+  opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions;
   width: number;
   height: number;
   computed: DataUtilsComputedData;
@@ -14,7 +14,7 @@ export default class DataUtils {
 
   constructor (
     type: string,
-    opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions,
+    opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions,
     width: number,
     height: number
   ) {
@@ -45,11 +45,14 @@ export default class DataUtils {
     } else if (this.type === 'stacked') {
       const opt = this.opt as StackedOptions
       return [opt.start, opt.start + opt.data[0].data.length * opt.step]
+    } else if (this.type === 'sequence') {
+      const opt = this.opt as SequenceOptions
+      return [opt.start, opt.start + opt.data.length * opt.step]
     }
   }
 
   yRange (): [number, number] {
-    if (this.type === 'line' || this.type === 'heatmap2d' || this.type === 'stacked') {
+    if (this.type === 'line' || this.type === 'heatmap2d' || this.type === 'stacked' || this.type === 'sequence') {
       return [this.computed.minValue, this.computed.maxValue]
     } else if (this.type === 'heatmap3d') {
       const opt = this.opt as Heatmap3dOptions
@@ -133,19 +136,25 @@ export default class DataUtils {
     } else if (this.type === 'heatmap2d') {
       const opt = this.opt as Heatmap2dOptions[]
       return opt
+    } else if (this.type === 'sequence') {
+      const opt = this.opt as SequenceOptions
+      return [opt]
     }
   }
 
   getSerieStartAndStep (index: number) {
     if (this.type === 'stacked') {
-      const opt = this.opt as StackedOptions
-      return [opt.start, opt.step]
+      const series = this.opt as StackedOptions
+      return [series.start, series.step]
     } else if (this.type === 'heatmap2d') {
       const series = this.getSeries() as Heatmap2dOptions[]
       return [series[index].start, series[index].step]
     } else if (this.type === 'line') {
       const series = this.getSeries() as LineOptions[]
       return [series[index].start, series[index].step]
+    } else if (this.type === 'sequence') {
+      const series = this.getSeries() as SequenceOptions[]
+      return [series[0].start, series[0].step]
     }
   }
 

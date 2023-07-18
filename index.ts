@@ -1,5 +1,5 @@
 import defaultOptions from './defaultOptions.js'
-import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendOptions, LichenOptions, LineOptions, StackedOptions } from './types.js'
+import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendOptions, LichenOptions, LineOptions, SequenceOptions, StackedOptions } from './types.js'
 import DataUtils from './dataUtils.js'
 import EventUtils from './eventUtils.js'
 import XAxis from './xAxis.js'
@@ -8,6 +8,7 @@ import LinePlot from './linePlot.js'
 import Heatmap2dPlot from './heatmap2dPlot.js'
 import Heatmap3dPlot from './heatmap3dPlot.js'
 import StackedPlot from './stackedPlot.js'
+import SequencePlot from './sequencePlot.js'
 import FrontPanel from './frontPanel.js'
 import Legend from './legend.js'
 import * as COLORMAPS from './colormaps.js'
@@ -23,7 +24,7 @@ export class Lichen {
   xAxis: XAxis;
   dataUtils: DataUtils;
   eventUtils: EventUtils;
-  plot: LinePlot | Heatmap2dPlot | Heatmap3dPlot | StackedPlot;
+  plot: LinePlot | Heatmap2dPlot | Heatmap3dPlot | StackedPlot | SequencePlot;
   legend: Legend;
   frontPanel: FrontPanel;
   ready: boolean;
@@ -75,7 +76,7 @@ export class Lichen {
       const instance = []
       result.synced = () => instance
     }
-    if (result.type === 'heatmap2d' && result.zoom === 'xy') {
+    if ((result.type === 'heatmap2d' || result.type === 'sequence') && result.zoom === 'xy') {
       result.zoom = 'x'
     }
     if (result.type === 'line') {
@@ -96,6 +97,9 @@ export class Lichen {
       return this.opt.height
     } else if (this.opt.type === 'stacked') {
       return this.opt.height
+    } else if (this.opt.type === 'sequence') {
+      const series = this.opt.series as SequenceOptions
+      return this.opt.serieHeight * series.valueMap.length
     }
   }
 
@@ -146,6 +150,10 @@ export class Lichen {
     } else if (this.opt.type === 'heatmap3d') {
       const series = this.opt.series as Heatmap3dOptions
       this.plot = new Heatmap3dPlot(canvasWrapper, series, this.dataUtils, this.opt.colorScale)
+    } else if (this.opt.type === 'sequence') {
+      const series = this.opt.series as SequenceOptions
+      this.yAxis.categories = series.valueMap.map(x => x.name)
+      this.plot = new SequencePlot(canvasWrapper, series, this.dataUtils)
     }
     this.frontPanel = new FrontPanel(canvasWrapper, this.dataUtils)
     this.legend = new Legend(legend, this.opt.legend, this.opt.type, this.opt.height, this.opt.colorScale, this.opt.series)
@@ -237,7 +245,7 @@ export class Lichen {
   }
 
   draw () {
-    if (this.opt.type === 'line' || this.opt.type === 'heatmap2d' || this.opt.type === 'stacked') {
+    if (this.opt.type === 'line' || this.opt.type === 'heatmap2d' || this.opt.type === 'stacked' || this.opt.type === 'sequence') {
       this.dataUtils.computeData()
       if (this.dataUtils.yMin == null || this.dataUtils.yMax == null || this.opt.zoom.indexOf('y') < 0) {
         let [yMin, yMax] = this.dataUtils.yRange()

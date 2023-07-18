@@ -3,6 +3,7 @@ import heatmap3dData from './heatmap3d_data.js'
 import heatmap2dData from './heatmap2d_data.js'
 import lineData from './line_data.js'
 import stackedData from './stacked_data.js'
+import sequenceData from './sequence_data.js'
 
 let container = document.querySelector('#chart')
 
@@ -197,6 +198,32 @@ window.chart3 = new Lichen(container, {
       { color: '#e21a1d', name: 'shared', data: stackedData.data['memory.shared'].data },
       { color: '#bd0028', name: 'cached', data: stackedData.data['memory.cached'].data },
       { color: '#810127', name: 'free', data: stackedData.data['memory.free'].data }
+    ]
+  }
+})
+
+window.chart4 = new Lichen(container, {
+  header: {
+    title: 'test sequence'
+  },
+  yAxis: {
+    width: 70
+  },
+  type: 'sequence',
+  zoom: 'x',
+  series: {
+    start: sequenceData.data['TBOX_Current_Mode'].timestamp * 1e3,
+    step: sequenceData.data['TBOX_Current_Mode'].step * 1e3,
+    data: sequenceData.data['TBOX_Current_Mode'].data,
+    color: 'rgb(38, 139, 210)',
+    valueMap: [
+      { value: 0, name: 'No mode' },
+      { value: 1, name: 'Croisière' },
+      { value: 2, name: 'Batterie' },
+      { value: 3, name: 'Test batteries' },
+      { value: 4, name: 'Ecoute' },
+      { value: 5, name: 'Eco' },
+      { value: 6, name: 'Sauvegarde' }
     ]
   }
 })

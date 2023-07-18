@@ -1,21 +1,21 @@
-import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendOptions, LineOptions, StackedOptions } from './types'
+import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendOptions, LineOptions, SequenceOptions, StackedOptions } from './types'
 
 export default class Legend {
 
   container: HTMLElement;
   opt: LegendOptions;
-  type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked';
+  type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence';
   colorScale: null | ColorScaleOptions;
   height: number;
-  series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions
+  series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions
 
   constructor (
     container: HTMLElement,
     opt: LegendOptions,
-    type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked',
+    type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence',
     height: number,
     colorScale: null | ColorScaleOptions,
-    series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions
+    series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions
   ) {
     this.container = container
     this.opt = opt
