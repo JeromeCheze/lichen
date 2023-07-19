@@ -83,6 +83,10 @@ export class Lichen {
       for (const serie of result.series) {
         serie.enabled = true
       }
+    } else if (result.type === 'stacked') {
+      for (const serie of result.series.data) {
+        serie.enabled = true
+      }
     }
     return result
   }
@@ -156,7 +160,10 @@ export class Lichen {
       this.plot = new SequencePlot(canvasWrapper, series, this.dataUtils)
     }
     this.frontPanel = new FrontPanel(canvasWrapper, this.dataUtils)
-    this.legend = new Legend(legend, this.opt.legend, this.opt.type, this.opt.height, this.opt.colorScale, this.opt.series)
+    this.legend = new Legend(legend, this.opt.legend, this.opt.type, this.opt.height, this.opt.colorScale, this.opt.series, () => {
+      this.draw()
+      this.legend.update()
+    })
     this.legend.update()
   }
 

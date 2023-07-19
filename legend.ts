@@ -1,4 +1,4 @@
-import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendOptions, LineOptions, SequenceOptions, StackedOptions } from './types'
+import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendItem, LegendOptions, LineOptions, SequenceOptions, StackedOptions } from './types'
 
 export default class Legend {
 
@@ -7,7 +7,8 @@ export default class Legend {
   type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence';
   colorScale: null | ColorScaleOptions;
   height: number;
-  series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions
+  series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions;
+  redrawCallback: () => void;
 
   constructor (
     container: HTMLElement,
@@ -15,14 +16,16 @@ export default class Legend {
     type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence',
     height: number,
     colorScale: null | ColorScaleOptions,
-    series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions
+    series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions,
+    redrawCallback: () => void
   ) {
     this.container = container
     this.opt = opt
     this.type = type
     this.colorScale = colorScale
     this.series = series
-    this.height = height
+    this.height = height,
+    this.redrawCallback = redrawCallback
   }
 
   drawHeatmap3dLegend () {
@@ -81,12 +84,55 @@ export default class Legend {
     }
   }
 
+  drawLineLegend (items: LegendItem[]) {
+    this.container.innerHTML = ''
+    Object.assign(this.container.style, {
+      textAlign: this.opt.position === 'bottom' ? 'center' : 'left',
+      verticalAlign: this.opt.position === 'bottom' ? 'top' : 'middle'
+    })
+    for (const item of items) {
+      const div = document.createElement('div')
+      Object.assign(div.style, {
+        fontSize: '10px',
+        color: '#888',
+        margin: '3px 10px',
+        display: this.opt.position === 'bottom' ? 'inline-block' : 'block'
+      })
+      const box = document.createElement('span')
+      Object.assign(box.style, {
+        display: 'inline-block',
+        verticalAlign: 'middle',
+        width: '20px',
+        height: '10px',
+        border: '1px solid #888',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        marginRight: '5px',
+        background: item.enabled ? item.color : '#666',
+      })
+      box.addEventListener('click', () => {
+        item.enabled = !item.enabled
+        this.redrawCallback()
+      })
+      const text = document.createElement('span')
+      Object.assign(text.style, { display: 'inline-block', verticalAlign: 'middle' })
+      text.innerHTML = item.name
+      div.appendChild(box)
+      div.appendChild(text)
+      this.container.appendChild(div)
+    }
+  }
+
   update () {
     if (!this.opt.enabled) {
       return
     }
     if (this.type === 'line') {
-
+      const series = this.series as LineOptions[]
+      this.drawLineLegend(series as LegendItem[])
+    } else if (this.type === 'stacked') {
+      const series = this.series as StackedOptions
+      this.drawLineLegend(series.data as LegendItem[])
     } else if (this.type === 'heatmap3d') {
       this.drawHeatmap3dLegend()
     }

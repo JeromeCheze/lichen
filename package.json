@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "tsc --build",
+    "build": "rm dist/* ; tsc --build",
     "clean": "tsc --build --clean"
   },
   "devDependencies": {

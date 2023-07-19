@@ -29,9 +29,11 @@ export default class StackedPlot {
 
   update () {
     // prepare data
-    const stackedValues: (null | [number, number])[][] = this.opt.data.map(x => [])
+    const stackedValues: (null | (null | [number, number])[])[] = this.opt.data.map(x => [])
+    let prevSerieIndex = null
     for (const [serieIndex, computed] of this.dataUtils.computed.series.entries()) {
       if (computed == null) {
+        stackedValues[serieIndex] = null
         console.log(`no draw for serie #${serieIndex}`)
         continue
       }
@@ -47,7 +49,7 @@ export default class StackedPlot {
             minValue = minValue == null || v < minValue ? v : minValue
             maxValue = maxValue == null || maxValue < v ? v : maxValue
           }
-          const [prevMinStacked, prevMaxStacked] = serieIndex > 0 ? stackedValues[serieIndex - 1][indexPos] : [0, 0]
+          const [prevMinStacked, prevMaxStacked] = prevSerieIndex != null ? stackedValues[prevSerieIndex][indexPos] : [0, 0]
           stackedValues[serieIndex].push([
             prevMinStacked + minValue,
             prevMaxStacked + maxValue
@@ -57,6 +59,7 @@ export default class StackedPlot {
         }
         indexPos++
       }
+      prevSerieIndex = serieIndex
     }
 
     const ctx = this.ctx
@@ -68,6 +71,7 @@ export default class StackedPlot {
       const computed = this.dataUtils.computed.series[serieIndex]
       const serie = this.opt.data[serieIndex]
       if (computed == null) {
+        console.log(`Skip draw for serie #${serieIndex}`)
         continue
       }
       let xPos = this.dataUtils.xPosFromValue(computed.dataStart) as number

@@ -185,6 +185,9 @@ window.chart3 = new Lichen(container, {
     powerOfTen: true,
     min: 0
   },
+  legend: {
+    position: 'right'
+  },
   zoom: 'x',
   height: 200,
   series: {

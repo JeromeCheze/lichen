@@ -39,7 +39,7 @@ export interface ColorScaleOptions {
 }
 
 export interface LineOptions {
-  name?: string;
+  name: string;
   start: number;
   step: number;
   data: (number | null)[];
@@ -99,6 +99,12 @@ export interface LegendOptions {
   enabled: boolean;
   position: 'bottom' | 'right';
   width: number;
+}
+
+export interface LegendItem {
+  name: string;
+  color: string;
+  enabled?: boolean;
 }
 
 export interface LichenOptions {

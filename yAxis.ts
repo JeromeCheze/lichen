@@ -38,9 +38,14 @@ export default class YAxis {
     const height = this.dataUtils.height
     const xPos = o.enabled ? o.width - 1 : 0
     const gridWidth = o.enabled ? this.canvas.width - o.width + 1 : this.canvas.width
+    if (this.dataUtils.yMax == null || this.dataUtils.yMin == null) {
+      ctx.restore()
+      return
+    }
     let a = o.fontSize * 2 * (this.dataUtils.yMax - this.dataUtils.yMin) / height
     let pow = 0
     if (a === 0) {
+      ctx.restore()
       return
     }
     if (a > 10) {
