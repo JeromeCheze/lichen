@@ -159,7 +159,7 @@ export class Lichen {
       this.yAxis.categories = series.valueMap.map(x => x.name)
       this.plot = new SequencePlot(canvasWrapper, series, this.dataUtils)
     }
-    this.frontPanel = new FrontPanel(canvasWrapper, this.dataUtils)
+    this.frontPanel = new FrontPanel(canvasWrapper, this.dataUtils, this.opt.colorScale, this.opt.tooltip, this.opt.crosshair)
     this.legend = new Legend(legend, this.opt.legend, this.opt.type, this.opt.height, this.opt.colorScale, this.opt.series, () => {
       this.draw()
       this.legend.update()
@@ -174,17 +174,18 @@ export class Lichen {
       .active((value: boolean) => {
         if (value === false) {
           for (const chart of this.opt.synced()) {
-            chart.setCrosshair(null)
+            chart.frontPanel.update(null)
           }
         }
       })
       .move((value: [number, number]) => {
         for (const chart of this.opt.synced()) {
-          chart.setCrosshair(value[0])
+          chart.frontPanel.update(value[0])
         }
       })
       .selecting((value: { x: [number | null, number | null], y: [number | null, number | null] }) => {
         for (const chart of this.opt.synced()) {
+          chart.frontPanel.update(null)
           chart.setSelection(value.x, value.y)
         }
       })
@@ -209,6 +210,7 @@ export class Lichen {
           chart.setXRange(xMin, xMax)
         }
       })
+    this.frontPanel.setEventUtils(this.eventUtils)
     this.ready = true
   }
 
@@ -219,7 +221,7 @@ export class Lichen {
   }
 
   setXRange (x1: number, x2: number, draw = true) {
-    this.frontPanel.drawCrosshair(null)
+    this.frontPanel.update(null)
     this.dataUtils.start = x1
     this.dataUtils.end = x2
     if (draw) {
@@ -245,10 +247,6 @@ export class Lichen {
       }
     }
     this.frontPanel.selection(x, y)
-  }
-
-  setCrosshair (value: number | null) {
-    this.frontPanel.drawCrosshair(value)
   }
 
   draw () {

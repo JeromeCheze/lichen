@@ -78,8 +78,8 @@ export default class DataUtils {
     return this.width * (xValue - this.start) / (this.end - this.start)
   }
 
-  yPosFromValue (yValue: number): null | number {
-    if (this.yMin == null || this.yMax == null) {
+  yPosFromValue (yValue: number | null): null | number {
+    if (yValue == null || this.yMin == null || this.yMax == null) {
       return null
     }
     return this.height * (this.yMax - yValue) / (this.yMax - this.yMin)
@@ -114,13 +114,15 @@ export default class DataUtils {
         continue
       }
       const [start, step] = this.getSerieStartAndStep(i)
-      const index = Math.round(serie.data.length * (start - xValue) / (start + serie.data.length * step))
+      const index = Math.round(serie.data.length * (xValue - start) / (serie.data.length * step))
       const xDataValue = start + index * step
+      const yDataValue = serie.data[index]
       result[i] = {
         index,
         xDataValue,
         xDataValuePos: this.xPosFromValue(xDataValue)!,
-        yDataValue: serie.data[index]
+        yDataValuePos: this.yPosFromValue(yDataValue),
+        yDataValue
       }
     }
     return result

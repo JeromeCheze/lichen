@@ -47,6 +47,7 @@ export interface LineOptions {
   area?: boolean;
   linewidth?: number;
   enabled?: boolean;
+  tooltipFormatter?: (x: number) => string;
 }
 
 export interface SequenceOptions {
@@ -113,6 +114,7 @@ export interface LichenOptions {
   type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence';
   legend: LegendOptions;
   crosshair: boolean;
+  tooltip: boolean;
   height: number;
   stacked: boolean;
   serieHeight: number;
@@ -147,6 +149,7 @@ export interface DataUtilsDataFromPos {
   xDataValue: number;
   xDataValuePos: number;
   yDataValue: number | null;
+  yDataValuePos: number;
 }
 
 

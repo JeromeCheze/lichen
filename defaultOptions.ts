@@ -10,7 +10,8 @@ const AXIS_TEXT_COLOR = '#888'
 const GRID_COLOR = 'rgba(136, 136, 136, 0.1)'
 
 export default {
-  crosshair: true,
+  crosshair: false,
+  tooltip: true,
   header: {
     position: 'top',
     width: 80

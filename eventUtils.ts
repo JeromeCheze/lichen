@@ -41,6 +41,7 @@ export default class EventUtils {
     }
     this.state = {
       active: false,
+      mouseMovePos: null,
       mouseDownPos: null,
       shiftKey: false,
       ctrlKey: false
@@ -111,6 +112,7 @@ export default class EventUtils {
         }
       }
     } else {
+      this.state.mouseMovePos = e
       this.executeCallback('move', [
         this.dataUtils.xValueFromPos(x),
         this.dataUtils.yValueFromPos(y)

@@ -176,6 +176,9 @@ window.chart2 = new Lichen(container, {
   }
 })
 
+/*
+ * TEST STACKED
+ */
 window.chart3 = new Lichen(container, {
   header: {
     title: 'test stacked'
@@ -205,6 +208,9 @@ window.chart3 = new Lichen(container, {
   }
 })
 
+/*
+ * TEST SEQUENCE
+ */
 window.chart4 = new Lichen(container, {
   header: {
     title: 'test sequence'
