@@ -191,6 +191,9 @@ window.chart3 = new Lichen(container, {
   legend: {
     position: 'right'
   },
+  crosshair: {
+    text: 'Test'
+  },
   zoom: 'x',
   height: 200,
   series: {

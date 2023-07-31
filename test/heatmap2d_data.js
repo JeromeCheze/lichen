@@ -3,6 +3,7 @@ export default [
       "name": "dataage_HY_ISTEA_00_ENZ",
       "start": 1680696600 * 1e3,
       "step": 600 * 1e3,
+      "tooltipFormatter": x => `${x} s`,
       "data": [
         null,
         1,
@@ -1019,6 +1020,7 @@ export default [
       "name": "dataage_HY_ISTEA_00_EHZ",
       "start": 1680696600 * 1e3,
       "step": 600 * 1e3,
+      "tooltipFormatter": x => `${x} s`,
       "data": [
         null,
         1,
@@ -2035,6 +2037,7 @@ export default [
       "name": "dataage_HY_ISTEA_00_ENE",
       "start": 1680696600 * 1e3,
       "step": 600 * 1e3,
+      "tooltipFormatter": x => `${x} s`,
       "data": [
         null,
         1,
@@ -3051,6 +3054,7 @@ export default [
       "name": "dataage_HY_ISTEA_00_ENN",
       "start": 1680696600 * 1e3,
       "step": 600 * 1e3,
+      "tooltipFormatter": x => `${x} s`,
       "data": [
         null,
         2,

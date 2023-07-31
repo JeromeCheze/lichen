@@ -10,7 +10,6 @@ const AXIS_TEXT_COLOR = '#888'
 const GRID_COLOR = 'rgba(136, 136, 136, 0.1)'
 
 export default {
-  crosshair: false,
   tooltip: true,
   header: {
     position: 'top',
@@ -42,7 +41,13 @@ export default {
   legend: {
     enabled: true,
     position: 'bottom',
-    width: 80
+    width: 80,
+    fontSize: 10
+  },
+  crosshair: {
+    enabled: true,
+    sticky: true,
+    text: ''
   },
   height: 120,
   stacked: false,

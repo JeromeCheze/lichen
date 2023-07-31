@@ -33,6 +33,7 @@ export default class Legend {
     const canvas = document.createElement('canvas')
     this.container.appendChild(canvas)
     const ctx = canvas.getContext('2d')
+    ctx.save()
     const min = this.colorScale.logarithmic && this.colorScale.min != 0 ? Math.log2(this.colorScale.min) : this.colorScale.min
     const max = this.colorScale.logarithmic && this.colorScale.max != 0 ? Math.log2(this.colorScale.max) : this.colorScale.max
     if (this.opt.position === 'bottom') {
@@ -49,7 +50,7 @@ export default class Legend {
       ctx.strokeStyle = 'gray'
       ctx.strokeRect(20.5, 1.5, canvas.width - 40, 10)
       ctx.fillStyle = 'gray'
-      ctx.font = '10px sans-serif'
+      ctx.font = `${this.opt.fontSize}px sans-serif`
       ctx.textBaseline = 'top'
       ctx.textAlign = 'center'
       for (const stop of this.colorScale.stops) {
@@ -71,7 +72,7 @@ export default class Legend {
       ctx.strokeStyle = 'gray'
       ctx.strokeRect(0.5, 10.5, 10, canvas.height - 21)
       ctx.fillStyle = 'gray'
-      ctx.font = '10px sans-serif'
+      ctx.font = `${this.opt.fontSize}px sans-serif`
       ctx.textBaseline = 'middle'
       ctx.textAlign = 'left'
       const drawHeight = canvas.height - 21
@@ -82,6 +83,7 @@ export default class Legend {
         ctx.fillText(`${Math.round(v)}`, 19, y)
       }
     }
+    ctx.restore()
   }
 
   drawLineLegend (items: LegendItem[]) {

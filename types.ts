@@ -78,6 +78,7 @@ export interface Heatmap2dOptions {
   start: number;
   step: number;
   data: (number | null)[];
+  tooltipFormatter?: (x: number) => string;
 }
 
 export interface Heatmap3dOptions {
@@ -100,6 +101,7 @@ export interface LegendOptions {
   enabled: boolean;
   position: 'bottom' | 'right';
   width: number;
+  fontSize: number;
 }
 
 export interface LegendItem {
@@ -108,12 +110,18 @@ export interface LegendItem {
   enabled?: boolean;
 }
 
+export interface CrosshairOptions {
+  enabled: boolean;
+  sticky: boolean;
+  text: string;
+}
+
 export interface LichenOptions {
   title?: string;
   header: HeaderOptions;
   type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence';
   legend: LegendOptions;
-  crosshair: boolean;
+  crosshair: CrosshairOptions;
   tooltip: boolean;
   height: number;
   stacked: boolean;
