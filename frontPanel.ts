@@ -125,11 +125,11 @@ export default class FrontPanel {
       return aa < bb ? -1 : aa > bb ? 1 : 0
     })
     this.tooltipDiv.innerHTML = ''
-    if (this.eventUtils.state.mouseMovePos.pageX > (document.body.clientWidth / 2)) {
-      this.tooltipDiv.style.right = `${document.body.clientWidth - this.eventUtils.state.mouseMovePos.pageX + 30}px`
+    if (this.eventUtils.state.cursorPos.pageX > (document.body.clientWidth / 2)) {
+      this.tooltipDiv.style.right = `${document.body.clientWidth - this.eventUtils.state.cursorPos.pageX + 30}px`
       this.tooltipDiv.style.left = 'auto'
     } else {
-      this.tooltipDiv.style.left = `${this.eventUtils.state.mouseMovePos.pageX + 20}px`
+      this.tooltipDiv.style.left = `${this.eventUtils.state.cursorPos.pageX + 20}px`
       this.tooltipDiv.style.right = 'auto'
     }
     const timeDiv = document.createElement('div')
@@ -154,7 +154,7 @@ export default class FrontPanel {
     Object.assign(this.tooltipDiv.style, {
       display: 'block',
       position: 'absolute',
-      top: `${this.eventUtils.state.mouseMovePos.pageY + 20 - this.tooltipDiv.getBoundingClientRect().height / 2}px`,
+      top: `${this.eventUtils.state.cursorPos.pageY + 20 - this.tooltipDiv.getBoundingClientRect().height / 2}px`,
       color: 'black'
     })
     ctx.restore()
