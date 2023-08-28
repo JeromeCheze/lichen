@@ -281,7 +281,6 @@ export default class EventUtils {
   }
 
   pinchX (level: number) {
-    console.log('pinch x', level)
     const ratio = 0.1 * (this.dataUtils.end - this.dataUtils.start)
     const sign = Math.sign(level)
     this.executeCallback('xRangeChange', [
@@ -291,7 +290,6 @@ export default class EventUtils {
   }
 
   pinchY (level: number) {
-    console.log('pinch y', level)
     const ratio = 0.1 * (this.dataUtils.yMax - this.dataUtils.yMin)
     const sign = Math.sign(level)
     this.executeCallback('yRangeChange', [
