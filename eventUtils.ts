@@ -46,7 +46,9 @@ export default class EventUtils {
       mouseDownPos: null,
       shiftKey: false,
       ctrlKey: false,
-      touches: []
+      touches: [],
+      lastDistance: null,
+      lastTouchTime: null
     }
   }
 
@@ -146,7 +148,7 @@ export default class EventUtils {
     this.state.mouseDownPos = null
   }
 
-  handleDblClick (e: MouseEvent) {
+  handleDblClick (e: MouseEvent | TouchEvent) {
     e.preventDefault()
     e.stopPropagation()
     this.executeCallback('resetDisplay', this.dataUtils.xRange())
@@ -174,127 +176,127 @@ export default class EventUtils {
     }
   }
 
+  getAngle (x1: number, y1: number, x2: number, y2: number) {
+    const x1x2 = Math.abs(x2 - x1)
+    const y1y2 = Math.abs(y2 - y1)
+    let rad = Math.atan(y1y2 / x1x2)
+    if (x2 < x1 && y2 < y1) {
+      rad = Math.PI - rad
+    } else if (x2 < x1 && y2 > y1) {
+      rad += Math.PI
+    } else if (x2 > x1 && y2 > y1) {
+      rad = 2 * Math.PI - rad
+    }
+    return rad * 180 / Math.PI
+  }
+
+  getDistance (x1: number, y1: number, x2: number, y2: number) {
+    return Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2))
+  }
+
+  getPanning (refX1: number, refY1: number, refX2: number, refY2: number, curX1: number, curY1: number, curX2: number, curY2: number) {
+    const refMiddleX = (refX1 + refX2) / 2
+    const refMiddleY = (refY1 + refY2) / 2
+    const curMiddleX = (curX1 + curX2) / 2
+    const curMiddleY = (curY1 + curY2) / 2
+    return [curMiddleX - refMiddleX, refMiddleY - curMiddleY]
+  }
+
   handleTouchStart (e: TouchEvent) {
     e.preventDefault()
-    console.log('touchstart', e)
-    if (this.state.active === false) {
-      this.state.active = true
-      this.executeCallback('active', true)
-    }
-    for (const touch of e.changedTouches) {
-      this.state.touches.push({
-        identifier: touch.identifier,
-        clientX: touch.clientX,
-        clientY: touch.clientY
-      })
-    }
-    if (this.state.touches.length === 1) {
-      this.state.cursorPos = e.changedTouches[0]
-      const [x, y] = this.getRelativePosition(this.state.touches[0])
-      this.executeCallback('move', [
-        this.dataUtils.xValueFromPos(x),
-        this.dataUtils.yValueFromPos(y)
-      ])
+    if (e.touches.length === 1) {
+      if (this.state.lastTouchTime == null) {
+        this.state.lastTouchTime = new Date().getTime()
+      } else {
+        const t = new Date().getTime()
+        if ((t - this.state.lastTouchTime) <= 500) {
+          this.handleDblClick(e)
+        } else {
+          this.state.lastTouchTime = t
+        }
+      }
+    } else if (e.touches.length === 2) {
+      this.state.lastTouchTime = null
+      const touches = this.state.touches
+      for (const t of e.touches) {
+        const [x, y] = this.getRelativePosition(t)
+        touches.push({ identifier: t.identifier, x, y })
+      }
+      this.state.lastDistance = this.getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y)
     }
   }
   
   handleTouchEnd (e: TouchEvent) {
-    e.preventDefault()
-    console.log('touchend', e)
-    for (const touch of e.changedTouches) {
-      const corresponding = this.state.touches.filter(x => x.identifier === touch.identifier)
-      for (const curr of corresponding) {
-        this.state.touches.splice(this.state.touches.indexOf(curr), 1)
-      }
-    }
-    if (this.state.touches.length === 0) {
-      console.log('leave')
-      this.handleMouseLeave()
-    }
+    this.state.touches = []
+    this.state.lastDistance = null
+    this.handleMouseLeave()
   }
   
   handleTouchMove (e: TouchEvent) {
     e.preventDefault()
-    // console.log('touchmove', e)
     if (e.touches.length === 1) {
-      const touch = e.changedTouches[0]
-      this.state.cursorPos = {
-        pageX: touch.pageX,
-        pageY: touch.pageY
-      }
-      const [x, y] = this.getRelativePosition(touch)
+      this.state.cursorPos = e.touches[0]
+      const [x, y] = this.getRelativePosition(e.touches[0])
       this.executeCallback('move', [
         this.dataUtils.xValueFromPos(x),
         this.dataUtils.yValueFromPos(y)
       ])
-    } else if (e.touches.length  === 2) {
-      const touches = []
-      let updateX = false
-      let updateY = false
-      for (const touch of e.touches) {
-        const corresponding = this.state.touches.find(x => x.identifier === touch.identifier)
-        touches.push({
-          id: touch.identifier,
-          x1: corresponding != null ? corresponding.clientX : touch.clientX,
-          y1: corresponding != null ? corresponding.clientY : touch.clientY,
-          x2: touch.clientX,
-          y2: touch.clientY
-        })
+    } else if (e.touches.length === 2) {
+      const touches = this.state.touches
+      const cur = []
+      for (const t of e.touches) {
+        const [x, y] = this.getRelativePosition(t)
+        cur.push({ identifier: t.identifier, x, y })
       }
-      const pinchX = Math.min(2, Math.abs(touches[1].x1 - touches[0].x1) / Math.abs(1 + touches[1].x2 - touches[0].x2))
-      const pinchY = Math.min(2, Math.abs(touches[1].y1 - touches[0].y1) / Math.abs(1 + touches[1].y2 - touches[0].y2))
-      const panX = ((touches[0].x2 - touches[0].x1) + (touches[1].x2 - touches[1].x1)) / 2
-      const panY = ((touches[0].y2 - touches[0].y1) + (touches[1].y2 - touches[1].y1)) / 2
-      // console.log({ pinchX, pinchY, panX, panY })
-      if (Math.abs(pinchX - 1) > 0.2) {
-        updateX = true
-        console.log('pinch x', pinchX)
-        this.pinchX(pinchX)
-      }
-      if (Math.abs(pinchY - 1) > 0.2) {
-        updateY = true
-        console.log('pinch y', pinchY)
-        this.pinchY(pinchY)
-      }
-      if (Math.abs(panX) > SELECT_THRESHOLD) {
-        updateX = true
-        console.log('pan x', panX)
-      }
-      if (Math.abs(panY) > SELECT_THRESHOLD) {
-        updateY = true
-        console.log('pan y', panY)
-      }
-      for (const touch of e.touches) {
-        const corresponding = this.state.touches.find(x => x.identifier === touch.identifier)
-        if (corresponding != null) {
-          if (updateX) {
-            corresponding.clientX = touch.clientX
-          }
-          if (updateY) {
-            corresponding.clientY = touch.clientY
-          }
+      const ang = this.getAngle(cur[0].x, cur[0].y, cur[1].x, cur[1].y)
+      const dist = this.getDistance(cur[0].x, cur[0].y, cur[1].x, cur[1].y)
+      const currDelta = dist - this.state.lastDistance
+      const [panX, panY] = this.getPanning(touches[0].x, touches[0].y, touches[1].x, touches[1].y, touches[0].x, cur[0].y, cur[1].x, cur[1].y)
+      if (Math.abs(currDelta) > 40) {
+        if ((ang > 45 && ang < 135) || (ang > 225 && ang < 315)) {
+          this.pinchY(currDelta)
+        } else {
+          this.pinchX(currDelta)
         }
+        this.state.touches = cur
+        this.state.lastDistance = dist
+      } else if (Math.abs(panX) > 20) {
+        this.state.touches = cur
+        this.state.lastDistance = dist
+        const valueDeltaX = this.dataUtils.xValueFromPos(0) - this.dataUtils.xValueFromPos(panX)
+        this.executeCallback('xRangeChange', [
+          this.dataUtils.start + valueDeltaX,
+          this.dataUtils.end + valueDeltaX
+        ])
+      } else if (Math.abs(panY) > 20) {
+        this.state.touches = cur
+        this.state.lastDistance = dist
+        const valueDeltaY = this.dataUtils.yValueFromPos(0) - this.dataUtils.yValueFromPos(panY)
+        this.executeCallback('yRangeChange', [
+          this.dataUtils.yMin - valueDeltaY,
+          this.dataUtils.yMax - valueDeltaY
+        ])
       }
     }
   }
 
   pinchX (level: number) {
-    const halfSpan = (this.dataUtils.end - this.dataUtils.start) / 2
-    const center = this.dataUtils.start + halfSpan
-    const [xMin, xMax] = this.dataUtils.xRange()
+    console.log('pinch x', level)
+    const ratio = 0.1 * (this.dataUtils.end - this.dataUtils.start)
+    const sign = Math.sign(level)
     this.executeCallback('xRangeChange', [
-      Math.max(xMin, center - level * halfSpan),
-      Math.min(xMax, center + level * halfSpan)
+      this.dataUtils.start + sign * ratio,
+      this.dataUtils.end - sign * ratio
     ])
   }
 
   pinchY (level: number) {
-    const halfSpan = (this.dataUtils.yMax - this.dataUtils.yMin) / 2
-    const center = this.dataUtils.yMin + halfSpan
-    const [yMin, yMax] = this.dataUtils.yRange()
+    console.log('pinch y', level)
+    const ratio = 0.1 * (this.dataUtils.yMax - this.dataUtils.yMin)
+    const sign = Math.sign(level)
     this.executeCallback('yRangeChange', [
-      Math.max(yMin, center - level * halfSpan),
-      Math.min(yMax, center + level * halfSpan)
+      this.dataUtils.yMin + sign * ratio,
+      this.dataUtils.yMax - sign * ratio
     ])
   }
 

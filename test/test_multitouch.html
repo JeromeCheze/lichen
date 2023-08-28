@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas id="canvas" width="800" height="600" style="border: 1px solid black;"></canvas>
+    <div id="angle"></div>
+    <div id="delta"></div>
+    <div id="msg"></div>
+    <script type="text/javascript">
+const canvas = document.getElementById('canvas')
+const angle = document.getElementById('angle')
+const delta = document.getElementById('delta')
+const msg = document.getElementById('msg')
+const ctx = canvas.getContext('2d')
+
+ctx.lineWidth = 4
+ctx.font = 'bold 14px sans-serif'
+
+const getRelativePosition = t => {
+  // bcr = canvas.getBoundingClientRect()
+  // return [t.clientX - bcr.width, t.clientY - bcr.height]
+  return [t.clientX, t.clientY]
+}
+
+const clear = () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+}
+
+const getAngle = (x1, y1, x2, y2) => {
+  const x1x2 = Math.abs(x2 - x1)
+  const y1y2 = Math.abs(y2 - y1)
+  let rad = Math.atan(y1y2 / x1x2)
+  if (x2 < x1 && y2 < y1) {
+    rad = Math.PI - rad
+  } else if (x2 < x1 && y2 > y1) {
+    rad += Math.PI
+  } else if (x2 > x1 && y2 > y1) {
+    rad = 2 * Math.PI - rad
+  }
+  return rad * 180 / Math.PI
+}
+
+const getDistance = (x1, y1, x2, y2) => {
+  return Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2))
+}
+
+const getPanning = (refX1, refY1, refX2, refY2, curX1, curY1, curX2, curY2) => {
+  const refMiddleX = (refX1 + refX2) / 2
+  const refMiddleY = (refY1 + refY2) / 2
+  const curMiddleX = (curX1 + curX2) / 2
+  const curMiddleY = (curY1 + curY2) / 2
+  return [curMiddleX - refMiddleX, refMiddleY - curMiddleY]
+}
+
+const drawLine = (x1, y1, t1, x2, y2, t2, color) => {
+  ctx.save()
+  ctx.strokeStyle = color
+  ctx.beginPath()
+  ctx.moveTo(x1, y1)
+  ctx.lineTo(x2, y2)
+  ctx.stroke()
+  ctx.fillText(t1, x1 + 10, y1 - 10)
+  ctx.fillText(t2, x2 + 10, y2 - 10)
+  ctx.restore()
+}
+
+let ref = []
+let lastDist = null
+
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 2) {
+    e.preventDefault()
+    clear()
+    for (const t of e.touches) {
+      const [x, y] = getRelativePosition(t)
+      ref.push({ identifier: t.identifier, x, y })
+    }
+    lastDist = getDistance(ref[0].x, ref[0].y, ref[1].x, ref[1].y)
+    drawLine(ref[0].x, ref[0].y, ref[0].identifier, ref[1].x, ref[1].y, ref[1].identifier, 'red')
+  }
+})
+
+canvas.addEventListener('touchmove', e => {
+  if (e.touches.length === 2) {
+    e.preventDefault()
+    clear()
+    drawLine(ref[0].x, ref[0].y, ref[0].identifier, ref[1].x, ref[1].y, ref[1].identifier, 'red')
+    const cur = []
+    for (const t of e.touches) {
+      const [x, y] = getRelativePosition(t)
+      cur.push({ identifier: t.identifier, x, y })
+    }
+    drawLine(cur[0].x, cur[0].y, cur[0].identifier, cur[1].x, cur[1].y, cur[1].identifier, 'blue')
+    const ang = getAngle(cur[0].x, cur[0].y, cur[1].x, cur[1].y)
+    const dist = getDistance(cur[0].x, cur[0].y, cur[1].x, cur[1].y)
+    const currDelta = dist - lastDist
+    angle.innerHTML = ang
+    delta.innerHTML = currDelta
+    const [panX, panY] = getPanning(ref[0].x, ref[0].y, ref[1].x, ref[1].y, ref[0].x, cur[0].y, cur[1].x, cur[1].y)
+    if (Math.abs(currDelta) > 40) {
+      if ((ang > 45 && ang < 135) || (ang > 225 && ang < 315)) {
+        msg.innerHTML = `pinch y (${currDelta})<br>` + msg.innerHTML
+      } else {
+        msg.innerHTML = `pinch x (${currDelta})<br>` + msg.innerHTML
+      }
+      ref = cur
+      lastDist = dist
+    } else if (Math.abs(panX) > 20) {
+      ref = cur
+      lastDist = dist
+      msg.innerHTML = `pan x (${panX})<br>` + msg.innerHTML
+    } else if (Math.abs(panY) > 20) {
+      ref = cur
+      lastDist = dist
+      msg.innerHTML = `pan y (${panY})<br>` + msg.innerHTML
+    }
+  }
+})
+
+canvas.addEventListener('touchend', e => {
+  clear()
+  angle.innerHTML = ''
+  delta.innerHTML = ''
+  ref = []
+  lastDist = null
+})
+    </script>
+  </body>
+</html>
