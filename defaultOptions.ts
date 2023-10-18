@@ -24,7 +24,8 @@ export default {
     lineWidth: LINE_WIDTH,
     tickLength: TICK_LENGTH,
     tickWidth: TICK_WIDTH,
-    gridColor: GRID_COLOR
+    gridColor: GRID_COLOR,
+    datetime: true
   },
   yAxis: {
     enabled: AXIS_ENABLED,
@@ -49,6 +50,7 @@ export default {
     sticky: true,
     text: ''
   },
+  vLines: [],
   height: 120,
   stacked: false,
   serieHeight: 15

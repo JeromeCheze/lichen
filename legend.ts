@@ -1,31 +1,29 @@
-import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendItem, LegendOptions, LineOptions, SequenceOptions, StackedOptions } from './types'
+import MasterInterface from './masterInterface'
+import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendItem, LegendOptions, LineOptions, SequenceOptions, StackedOptions, ScatterOptions } from './types'
 
 export default class Legend {
-
+  
+  master: MasterInterface;
   container: HTMLElement;
   opt: LegendOptions;
-  type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence';
+  type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence' | 'scatter';
   colorScale: null | ColorScaleOptions;
   height: number;
-  series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions;
-  redrawCallback: () => void;
+  series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions | ScatterOptions[];
 
   constructor (
     container: HTMLElement,
-    opt: LegendOptions,
-    type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence',
-    height: number,
-    colorScale: null | ColorScaleOptions,
-    series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions,
-    redrawCallback: () => void
+    master: MasterInterface
   ) {
+    master.register('LEGEND', this)
+    this.master = master
+    const chartOpt = master.getRegistered('CHART').opt
     this.container = container
-    this.opt = opt
-    this.type = type
-    this.colorScale = colorScale
-    this.series = series
-    this.height = height,
-    this.redrawCallback = redrawCallback
+    this.opt = chartOpt.legend
+    this.type = chartOpt.type
+    this.colorScale = chartOpt.colorScale
+    this.series = chartOpt.series
+    this.height = chartOpt.height
   }
 
   drawHeatmap3dLegend () {
@@ -114,7 +112,7 @@ export default class Legend {
       })
       box.addEventListener('click', () => {
         item.enabled = !item.enabled
-        this.redrawCallback()
+        this.master.send('redraw', null)
       })
       const text = document.createElement('span')
       Object.assign(text.style, { display: 'inline-block', verticalAlign: 'middle' })

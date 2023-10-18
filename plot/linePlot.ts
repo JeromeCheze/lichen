@@ -1,29 +1,109 @@
-import { ColorScaleOptions, LineOptions } from './types'
-import DataUtils from './dataUtils'
+import { ColorScaleOptions, DataFromPos, LineOptions, TooltipHandlerResponse } from '../types'
+import MasterInterface from '../masterInterface'
+import AbstractPlot from './abstractPlot.js'
 
 const FILL_OPACITY = 0.2
 
-export default class LinePlot {
+export default class LinePlot extends AbstractPlot {
 
   opt: LineOptions[];
-  dataUtils: DataUtils;
-  canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
   colorScale: ColorScaleOptions;
 
-  constructor (container: HTMLElement, opt: LineOptions[], dataUtils: DataUtils, colorScale: ColorScaleOptions) {
-    this.opt = opt
-    this.canvas = document.createElement('canvas')
-    this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
-    this.dataUtils = dataUtils
-    this.canvas.width = dataUtils.width
-    this.canvas.height = dataUtils.height
-    Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 10 })
-    this.colorScale = colorScale
-    container.appendChild(this.canvas)
+  constructor(container: HTMLElement, master: MasterInterface) {
+    super(container, master)
+    this.opt = this.master.getRegistered('CHART').opt.series
+    this.colorScale = this.master.getRegistered('CHART').opt.colorScale
+    for (const serie of this.opt) {
+      serie.enabled = true
+    }
   }
 
-  setSerieColor (serie: LineOptions) {
+  tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
+    ctx.save()
+    ctx.fillStyle = 'white'
+    const xPos = this.dataUtils.xPosFromValue(x)
+    const data = this.dataFromXPos(xPos)
+    let xValue = null
+    const yValues = []
+    for (const [i, s] of this.opt.entries()) {
+      if (data[i] == null) {
+        continue
+      }
+      xValue = data[i].xDataValue
+      const value = data[i].yDataValue
+      const color = s.color != null ? s.color : this.dataUtils.getColor(value, this.colorScale, true) as string
+      yValues.push({
+        color,
+        value,
+        name: s.name,
+        textValue: s.tooltipFormatter != null ? s.tooltipFormatter(value) : `${value}`
+      })
+      ctx.strokeStyle = color
+      ctx.beginPath()
+      ctx.ellipse(data[i].xDataValuePos, data[i].yDataValuePos, 3, 3, 0, 0, 2 * Math.PI)
+      ctx.fill()
+      ctx.stroke()
+    }
+    ctx.restore()
+    return { xValue, yValues }
+  }
+
+  dataFromXPos(xPos: number): (DataFromPos | null)[] {
+    const result: (DataFromPos | null)[] = Array.from({ length: this.opt.length }, () => null)
+    if (this.dataUtils.start == null || this.dataUtils.end == null) {
+      return result
+    }
+    const xValue = this.dataUtils.xValueFromPos(xPos)
+    if (xValue == null) {
+      return result
+    }
+    for (const [i, serie] of this.opt.entries()) {
+      const c = this.dataUtils.computed.series[i]
+      if (c == null) {
+        continue
+      }
+      const index = Math.round(serie.data.length * (xValue - serie.start) / (serie.data.length * serie.step))
+      const xDataValue = serie.start + index * serie.step
+      const yDataValue = serie.data[index]
+      result[i] = {
+        index,
+        xDataValue,
+        xDataValuePos: this.dataUtils.xPosFromValue(xDataValue)!,
+        yDataValuePos: this.dataUtils.yPosFromValue(yDataValue),
+        yDataValue
+      }
+    }
+    return result
+  }
+
+  xRange() {
+    let minStart: number | null = null
+    let maxEnd: number | null = null
+    for (const serie of this.opt) {
+      const end = serie.start + serie.data.length * serie.step
+      minStart = minStart == null ? serie.start : Math.min(serie.start, minStart)
+      maxEnd = maxEnd == null ? end : Math.max(end, maxEnd)
+    }
+    return [minStart, maxEnd] as [number, number]
+  }
+
+  getXRangeIndex(serie: LineOptions) {
+    return [
+      Math.max(0, Math.floor((this.dataUtils.start - serie.start) / serie.step)),
+      Math.min(1 + Math.floor((this.dataUtils.end - serie.start) / serie.step), serie.data.length)
+    ]
+  }
+
+  getProcessingData() {
+    const result = []
+    for (const serie of this.opt) {
+      const [i1, i2] = this.getXRangeIndex(serie)
+      result.push(serie.enabled ? serie.data.slice(i1, i2) : [])
+    }
+    return result
+  }
+
+  setSerieColor(serie: LineOptions) {
     const ctx = this.ctx
     if (this.colorScale != null) {
       const min = this.colorScale.min
@@ -56,7 +136,7 @@ export default class LinePlot {
     }
   }
 
-  update () {
+  update() {
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     ctx.save()
@@ -67,17 +147,20 @@ export default class LinePlot {
       }
       const serie = this.opt[serieIndex]
       this.setSerieColor(serie)
-      let xPos = this.dataUtils.xPosFromValue(computed.dataStart)
+      const [i1, i2] = this.getXRangeIndex(serie)
+      let x0 = serie.start + serie.step * i1
+      let xPos = this.dataUtils.xPosFromValue(x0)
+      const xRatio = (this.dataUtils.end - this.dataUtils.start) / (serie.step * this.dataUtils.width)
       let xStep = 1
-      let indexStep = computed.xRatio
-      if (computed.xRatio <= 1) {
-        xStep = 1 / computed.xRatio
+      let indexStep = xRatio
+      if (xRatio <= 1) {
+        xStep = 1 / xRatio
         indexStep = 1
       }
       ctx.lineWidth = serie.linewidth ? serie.linewidth : 1
       let prev = null
       if (serie.area === true) {
-        for (let i = computed.minIndex; i < computed.maxIndex; i += indexStep) {
+        for (let i = i1; i < i2; i += indexStep) {
           const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
           if (group.length > 0) {
             let minValue: number | null = null
@@ -112,9 +195,9 @@ export default class LinePlot {
         }
       }
       ctx.beginPath()
-      xPos = this.dataUtils.xPosFromValue(computed.dataStart)
+      xPos = this.dataUtils.xPosFromValue(x0)
       prev = null
-      for (let i = computed.minIndex; i < computed.maxIndex; i += indexStep) {
+      for (let i = i1; i < i2; i += indexStep) {
         const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
         if (group.length > 0) {
           let minValue: number | null = null

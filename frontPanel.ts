@@ -1,34 +1,39 @@
-import DataUtils from "./dataUtils";
-import EventUtils from "./eventUtils";
-import { ColorScaleOptions, CrosshairOptions, Heatmap2dOptions, LineOptions, SequenceOptions } from "./types";
+import MasterInterface from "./masterInterface"
+import DataUtils from "./dataUtils"
+import { ColorScaleOptions, CrosshairOptions, Heatmap2dOptions, LineOptions, SequenceOptions, VLine } from "./types"
 
 export default class FrontPanel {
 
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
+  master: MasterInterface;
   dataUtils: DataUtils;
-  eventUtils: EventUtils;
   colorScale: ColorScaleOptions | null;
   tooltip: boolean;
   crosshair: CrosshairOptions;
+  vLines: VLine[];
+  selected: VLine[];
   tooltipDiv: HTMLElement;
+  state: Record<string, any>;
 
-  constructor (
+  constructor(
     container: HTMLElement,
-    dataUtils: DataUtils,
-    colorScale: ColorScaleOptions | null,
-    tooltip: boolean,
-    crosshair: CrosshairOptions
+    master: MasterInterface
   ) {
-    this.tooltip = tooltip
-    this.crosshair = crosshair
-    this.colorScale = colorScale
+    master.register('FRONT_PANEL', this)
+    this.master = master
+    const mapOpt = master.getRegistered('CHART').opt
+    this.tooltip = mapOpt.tooltip
+    this.crosshair = mapOpt.crosshair
+    this.vLines = mapOpt.vLines
+    this.selected = []
+    this.colorScale = mapOpt.colorScale
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
-    this.dataUtils = dataUtils
-    this.canvas.width = dataUtils.width
-    this.canvas.height = dataUtils.height
-    if (tooltip) {
+    this.dataUtils = master.getRegistered('DATA_UTILS')
+    this.canvas.width = this.dataUtils.width
+    this.canvas.height = this.dataUtils.height
+    if (this.tooltip) {
       this.tooltipDiv = document.createElement('div')
       Object.assign(this.tooltipDiv.style, {
         display: 'none',
@@ -43,110 +48,61 @@ export default class FrontPanel {
     }
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 100 })
     container.appendChild(this.canvas)
+    this.state = {
+      active: false,
+      cursorPos: null
+    }
+    this.master
+      .on('click', (x) => this.handleClick(x))
+      .on('active', (x) => this.state.active = x)
+      .on('cursor', (x) => this.state.cursorPos = x)
   }
 
-  setEventUtils (eventUtils: EventUtils) {
-    this.eventUtils = eventUtils
-  }
-
-  drawTooltip (value: number) {
+  drawTooltip(value: number) {
     const ctx = this.ctx
-    const xPos = this.dataUtils.xPosFromValue(value)
-    ctx.save()
-    const text = {
-      time: null,
-      series: [] as {color: string; name: string; value: number; textValue: string;}[]
-    }
-    if (this.dataUtils.type === 'line' || this.dataUtils.type === 'stacked') {
-      ctx.fillStyle = 'white'
-      const data = this.dataUtils.dataFromXPos(xPos)
-      let stackedValue = 0
-      for (const [i, serie] of this.dataUtils.getSeries().entries()) {
-        text.time = data[i].xDataValue
-        const value = data[i].yDataValue
-        if (value == null) {
-          continue
-        }
-        const s = serie as LineOptions
-        const color = s.color != null ? s.color : this.dataUtils.getColor(value, this.colorScale, true) as string
-        text.series.push({
-          color,
-          value,
-          name: s.name,
-          textValue: s.tooltipFormatter != null ? s.tooltipFormatter(value) : `${value}`
-        })
-        ctx.strokeStyle = color
-        ctx.beginPath()
-        stackedValue += value
-        const yPos = this.dataUtils.type === 'stacked' ? this.dataUtils.yPosFromValue(stackedValue) : data[i].yDataValuePos
-        ctx.ellipse(data[i].xDataValuePos, yPos, 3, 3, 0, 0, 2 * Math.PI)
-        ctx.fill()
-        ctx.stroke()
-      }
-    } else if (this.dataUtils.type === 'heatmap2d') {
-      const data = this.dataUtils.dataFromXPos(xPos)
-      for (const [i, serie] of this.dataUtils.getSeries().entries()) {
-        text.time = data[i].xDataValue
-        const value = data[i].yDataValue
-        if (value == null) {
-          continue
-        }
-        const s = serie as Heatmap2dOptions
-        text.series.push({
-          color: 'black',
-          value,
-          name: s.name,
-          textValue: s.tooltipFormatter != null ? s.tooltipFormatter(value) : `${value}`
-        })
-      }
-    } else if (this.dataUtils.type === 'sequence') {
-      const data = this.dataUtils.dataFromXPos(xPos)
-      for (const [i, serie] of this.dataUtils.getSeries().entries()) {
-        text.time = data[i].xDataValue
-        const value = data[i].yDataValue
-        if (value == null) {
-          continue
-        }
-        const s = serie as SequenceOptions
-        text.series.push({
-          color: 'black',
-          value,
-          name: 'value',
-          textValue: s.valueMap.filter(x => x.value === value)[0].name
-        })
-      }
-    }
-    if (text.time == null) {
+    const content = this.master.getRegistered('PLOT').tooltipHandler(value, ctx)
+    if (content.xValue == null) {
+      this.tooltipDiv.style.display = 'none'
       return
     }
-    text.series.sort((a, b) => {
+    ctx.save()
+    content.yValues.sort((a, b) => {
       const aa = a.value
       const bb = b.value
       return aa < bb ? -1 : aa > bb ? 1 : 0
     })
     this.tooltipDiv.innerHTML = ''
-    if (this.eventUtils.state.cursorPos.pageX > (document.body.clientWidth / 2)) {
-      this.tooltipDiv.style.right = `${document.body.clientWidth - this.eventUtils.state.cursorPos.pageX + 30}px`
+    if (this.state.cursorPos.pageX > (document.body.clientWidth / 2)) {
+      this.tooltipDiv.style.right = `${document.body.clientWidth - this.state.cursorPos.pageX + 50}px`
       this.tooltipDiv.style.left = 'auto'
     } else {
-      this.tooltipDiv.style.left = `${this.eventUtils.state.cursorPos.pageX + 20}px`
+      this.tooltipDiv.style.left = `${this.state.cursorPos.pageX + 40}px`
       this.tooltipDiv.style.right = 'auto'
     }
-    const timeDiv = document.createElement('div')
-    Object.assign(timeDiv.style, { fontWeight: 'bold' })
-    timeDiv.innerHTML = new Date(text.time).toISOString().replace('T', ' ').replace('Z', '')
-    this.tooltipDiv.appendChild(timeDiv)
+    const xDiv = document.createElement('div')
+    Object.assign(xDiv.style, { fontWeight: 'bold' })
+    const xAxis = this.master.getRegistered('X_AXIS')
+    if (xAxis.opt.datetime) {
+      xDiv.innerHTML = new Date(content.xValue).toISOString().replace('T', ' ').replace('Z', '')
+    } else {
+      xDiv.innerHTML = `${xAxis.opt.title != null ? xAxis.opt.title : 'x'}: ${content.xValue}`
+    }
+    this.tooltipDiv.appendChild(xDiv)
     const serieTable = document.createElement('table')
     this.tooltipDiv.appendChild(serieTable)
     const serieTableBody = document.createElement('tbody')
     serieTable.appendChild(serieTableBody)
-    for (const serie of text.series) {
+    for (const serie of content.yValues) {
+      const serieDot = document.createElement('tr')
       const serieRow = document.createElement('tr')
       const serieName = document.createElement('th')
-      Object.assign(serieName.style, {color: serie.color, fontWeight: 'bold'})
+      // Object.assign(serieName.style, { color: serie.color, fontWeight: 'bold' })
+      Object.assign(serieName.style, { fontWeight: 'bold' })
       serieName.innerHTML = `${serie.name}:`
       const serieValue = document.createElement('td')
       serieValue.innerHTML = serie.textValue
+      serieDot.innerHTML = `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:${serie.color};"></span>`
+      serieRow.appendChild(serieDot)
       serieRow.appendChild(serieName)
       serieRow.appendChild(serieValue)
       serieTableBody.appendChild(serieRow)
@@ -154,24 +110,74 @@ export default class FrontPanel {
     Object.assign(this.tooltipDiv.style, {
       display: 'block',
       position: 'absolute',
-      top: `${this.eventUtils.state.cursorPos.pageY + 20 - this.tooltipDiv.getBoundingClientRect().height / 2}px`,
+      top: `${this.state.cursorPos.pageY + 20 - this.tooltipDiv.getBoundingClientRect().height / 2}px`,
       color: 'black'
     })
     ctx.restore()
   }
 
-  drawCrosshair (value: number) {
+  drawVLines() {
+    const ctx = this.ctx
+    ctx.save()
+    for (const vline of this.vLines) {
+      if (vline.range) {
+        ctx.fillStyle = `rgba(${vline.color.slice(4, -1)}, 0.2)`
+        const x0 = this.dataUtils.xPosFromValue(vline.x - vline.range[0])
+        const x1 = this.dataUtils.xPosFromValue(vline.x + vline.range[1])
+        ctx.fillRect(x0, 0, x1 - x0, this.canvas.height)
+      }
+      ctx.fillStyle = vline.color
+      const xPos = Math.floor(this.dataUtils.xPosFromValue(vline.x))
+      ctx.fillRect(xPos - 0.5, 0, 1, this.canvas.height)
+      if (vline.arrow != null) {
+        ctx.beginPath()
+        if (vline.arrow === 'top') { 
+          ctx.moveTo(xPos, 0)
+          ctx.lineTo(xPos + 4.5, 10)
+          ctx.lineTo(xPos - 4.5, 10)
+        } else {
+          ctx.moveTo(xPos, this.canvas.height)
+          ctx.lineTo(xPos + 4.5, this.canvas.height - 10)
+          ctx.lineTo(xPos - 4.5, this.canvas.height - 10)
+        }
+        ctx.closePath()
+        ctx.fill()
+      }
+      if (this.selected.indexOf(vline) >= 0) {
+        ctx.setLineDash([4, 1])
+        ctx.strokeStyle = '#888'
+        ctx.lineWidth = 1
+        ctx.strokeRect(xPos - 3.5, -1, 7, this.canvas.height + 2)
+      }
+      ctx.font = '10px sans-serif'
+      ctx.textBaseline = vline.position === 'top' ? 'top' : 'bottom'
+      ctx.textAlign = 'left'
+      const yPos = vline.position === 'top' ? 5 : this.canvas.height - 5
+      ctx.fillText(vline.text, this.dataUtils.xPosFromValue(vline.x) + 10, yPos)
+    }
+    ctx.restore()
+  }
+
+  handleClick(data: { xPos: number; yPos: number; x: number; y: number }) {
+    this.selected = []
+    for (const vline of this.vLines) {
+      const vlinePos = this.dataUtils.xPosFromValue(vline.x)
+      if (vline.selectable === true && Math.abs(vlinePos - data.xPos) < 5) {
+        this.selected.push(vline)
+      }
+    }
+  }
+
+  drawCrosshair(value: number) {
     const ctx = this.ctx
     let xPos = this.dataUtils.xPosFromValue(value)
-    if (this.crosshair.sticky && this.dataUtils.type !== 'heatmap3d') {
-      const data = this.dataUtils.dataFromXPos(xPos)
-      for (const d of data) {
-        if (d == null) {
-          continue
-        }
-        xPos = d.xDataValuePos
-        break
+    const data = this.master.getRegistered('PLOT').dataFromXPos(xPos)
+    for (const d of data) {
+      if (d == null) {
+        continue
       }
+      xPos = d.xDataValuePos
+      break
     }
     ctx.save()
     ctx.fillStyle = 'grey'
@@ -185,7 +191,7 @@ export default class FrontPanel {
     ctx.restore()
   }
 
-  selection (x: [number | null, number | null], y: [number | null, number | null]) {
+  selection(x: [number | null, number | null], y: [number | null, number | null]) {
     this.drawCrosshair(null)
     const ctx = this.ctx
     ctx.save()
@@ -206,13 +212,14 @@ export default class FrontPanel {
     ctx.restore()
   }
 
-  update (value: number | null) {
+  update(value: number | null) {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.drawVLines()
     if (value != null) {
       if (this.crosshair.enabled) {
         this.drawCrosshair(value)
       }
-      if (this.tooltip) {
+      if (this.state.active && this.tooltip) {
         this.drawTooltip(value)
       }
     } else {

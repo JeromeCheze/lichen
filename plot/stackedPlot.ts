@@ -1,36 +1,117 @@
-import { ColorScaleOptions, StackedDataOptions, StackedOptions } from './types'
-import DataUtils from './dataUtils'
+import { ColorScaleOptions, DataFromPos, StackedDataOptions, StackedOptions, TooltipHandlerResponse } from '../types'
+import MasterInterface from '../masterInterface'
+import AbstractPlot from './abstractPlot.js'
 
-export default class StackedPlot {
+export default class StackedPlot extends AbstractPlot {
 
   opt: StackedOptions;
-  dataUtils: DataUtils;
-  canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
   colorScale: ColorScaleOptions;
 
-  constructor (container: HTMLElement, opt: StackedOptions, dataUtils: DataUtils, colorScale: ColorScaleOptions) {
-    this.opt = opt
-    this.canvas = document.createElement('canvas')
-    this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
-    this.dataUtils = dataUtils
-    this.canvas.width = dataUtils.width
-    this.canvas.height = dataUtils.height
-    Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 10 })
-    this.colorScale = colorScale
-    container.appendChild(this.canvas)
+  constructor(container: HTMLElement, master: MasterInterface) {
+    super(container, master)
+    this.opt = this.master.getRegistered('CHART').opt.series
+    this.colorScale = this.master.getRegistered('CHART').opt.colorScale
+    for (const serie of this.opt.data) {
+      serie.enabled = true
+    }
   }
 
-  setSerieColor (serie: StackedDataOptions) {
+  tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
+    ctx.save()
+    ctx.fillStyle = 'white'
+    const xPos = this.dataUtils.xPosFromValue(x)
+    const data = this.dataFromXPos(xPos)
+    let xValue = null
+    const yValues = []
+    let stackedValue = 0
+    for (const [i, s] of this.opt.data.entries()) {
+      xValue = data[i].xDataValue
+      const value = data[i].yDataValue
+      if (value == null) {
+        continue
+      }
+      const color = s.color != null ? s.color : this.dataUtils.getColor(value, this.colorScale, true) as string
+      yValues.push({
+        color,
+        value,
+        name: s.name,
+        textValue: `${value}`
+      })
+      ctx.strokeStyle = color
+      ctx.beginPath()
+      stackedValue += value
+      ctx.ellipse(data[i].xDataValuePos, this.dataUtils.yPosFromValue(stackedValue), 3, 3, 0, 0, 2 * Math.PI)
+      ctx.fill()
+      ctx.stroke()
+    }
+    ctx.restore()
+    return { xValue, yValues }
+  }
+
+  dataFromXPos(xPos: number): (DataFromPos | null)[] {
+    const result: (DataFromPos | null)[] = Array.from({ length: this.opt.data.length }, () => null)
+    if (this.dataUtils.start == null || this.dataUtils.end == null) {
+      return result
+    }
+    const xValue = this.dataUtils.xValueFromPos(xPos)
+    if (xValue == null) {
+      return result
+    }
+    for (const [i, serie] of this.opt.data.entries()) {
+      const c = this.dataUtils.computed.series[i]
+      if (c == null) {
+        continue
+      }
+      const index = Math.round(serie.data.length * (xValue - this.opt.start) / (serie.data.length * this.opt.step))
+      const xDataValue = this.opt.start + index * this.opt.step
+      const yDataValue = serie.data[index]
+      result[i] = {
+        index,
+        xDataValue,
+        xDataValuePos: this.dataUtils.xPosFromValue(xDataValue)!,
+        yDataValuePos: this.dataUtils.yPosFromValue(yDataValue),
+        yDataValue
+      }
+    }
+    return result
+  }
+
+  isDataStacked() {
+    return true
+  }
+
+  xRange() {
+    return [this.opt.start, this.opt.start + this.opt.data[0].data.length * this.opt.step] as [number, number]
+  }
+
+  getXRangeIndex() {
+    return [
+      Math.max(0, Math.floor((this.dataUtils.start - this.opt.start) / this.opt.step)),
+      Math.min(1 + Math.floor((this.dataUtils.end - this.opt.start) / this.opt.step), this.opt.data[0].data.length)
+    ]
+  }
+
+  getProcessingData() {
+    const result = []
+    const [i1, i2] = this.getXRangeIndex()
+    for (const serie of this.opt.data) {
+      result.push(serie.enabled ? serie.data.slice(i1, i2) : [])
+    }
+    return result
+  }
+
+  setSerieColor(serie: StackedDataOptions) {
     const ctx = this.ctx
     ctx.fillStyle = serie.color ? serie.color : '#000000'
     ctx.strokeStyle = serie.color ? serie.color : 'rgb(0,0,0)'
   }
 
-  update () {
+  update() {
     // prepare data
     const stackedValues: (null | (null | [number, number])[])[] = this.opt.data.map(x => [])
     let prevSerieIndex = null
+    const [i1, i2] = this.getXRangeIndex()
+    const xRatio = (this.dataUtils.end - this.dataUtils.start) / (this.opt.step * this.dataUtils.width)
     for (const [serieIndex, computed] of this.dataUtils.computed.series.entries()) {
       if (computed == null) {
         stackedValues[serieIndex] = null
@@ -38,9 +119,9 @@ export default class StackedPlot {
         continue
       }
       const serie = this.opt.data[serieIndex]
-      let indexStep = computed.xRatio <= 1 ? 1 : computed.xRatio
+      let indexStep = xRatio <= 1 ? 1 : xRatio
       let indexPos = 0
-      for (let i = computed.minIndex; i < computed.maxIndex; i += indexStep) {
+      for (let i = i1; i < i2; i += indexStep) {
         const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
         if (group.length > 0) {
           let minValue: number | null = null
@@ -74,11 +155,12 @@ export default class StackedPlot {
         console.log(`Skip draw for serie #${serieIndex}`)
         continue
       }
-      let xPos = this.dataUtils.xPosFromValue(computed.dataStart) as number
-      const xStep = computed.xRatio <= 1 ? 1 / computed.xRatio : 1
+      let x0 = this.opt.start + this.opt.step * i1
+      let xPos = this.dataUtils.xPosFromValue(x0) as number
+      const xStep = xRatio <= 1 ? 1 / xRatio : 1
 
       this.setSerieColor(serie)
-      
+
       let prev = null
       if (this.opt.area) {
         // draw area
@@ -114,7 +196,7 @@ export default class StackedPlot {
       }
 
       // draw line
-      xPos = this.dataUtils.xPosFromValue(computed.dataStart)
+      xPos = this.dataUtils.xPosFromValue(x0)
       prev = null
       ctx.beginPath()
       for (let i = 0; i < serieStacked.length; i++) {

@@ -1,4 +1,5 @@
 import DataUtils from './dataUtils'
+import MasterInterface from './masterInterface';
 import { YAxisOptions } from './types'
 
 const TEXT_PADDING = 4
@@ -10,118 +11,188 @@ export default class YAxis {
   opt: YAxisOptions;
   dataUtils: DataUtils;
   categories: null | string[];
+  master: MasterInterface;
 
-  constructor (
+  constructor(
     container: HTMLElement,
-    opt: YAxisOptions,
-    dataUtils: DataUtils,
+    master: MasterInterface,
+
   ) {
-    this.opt = opt
+    this.master = master
+    master.register('Y_AXIS', this)
+    this.opt = master.getRegistered('CHART').opt.yAxis
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
-    this.dataUtils = dataUtils
-    this.canvas.width = opt.enabled ? opt.width + dataUtils.width : dataUtils.width
-    this.canvas.height = dataUtils.height + 1
+    this.dataUtils = master.getRegistered('DATA_UTILS')
+    this.canvas.width = this.opt.enabled ? this.opt.width + this.dataUtils.width : this.dataUtils.width
+    this.canvas.height = this.dataUtils.height + 1
     this.categories = null
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, left: 0, zIndex: 0 })
     container.appendChild(this.canvas)
   }
 
-  drawLinearAxis () {
-    const o = this.opt
+  // drawLinearAxis() {
+  //   const o = this.opt
+  //   const ctx = this.ctx
+  //   ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+  //   ctx.save()
+  //   ctx.font = `${o.fontSize}px sans-serif`
+  //   ctx.textBaseline = 'middle'
+  //   ctx.textAlign = 'right'
+  //   const height = this.dataUtils.height
+  //   const xPos = o.enabled ? o.width - 1 : 0
+  //   const gridWidth = o.enabled ? this.canvas.width - o.width + 1 : this.canvas.width
+  //   if (this.dataUtils.yMax == null || this.dataUtils.yMin == null) {
+  //     ctx.restore()
+  //     return
+  //   }
+  //   let a = o.fontSize * 2 * (this.dataUtils.yMax - this.dataUtils.yMin) / height
+  //   let pow = 0
+  //   if (a === 0) {
+  //     ctx.restore()
+  //     return
+  //   }
+  //   if (a > 10) {
+  //     while (a >= 10) {
+  //       a /= 10
+  //       pow++
+  //     }
+  //   } else {
+  //     while (a < 1) {
+  //       a *= 10
+  //       pow--
+  //     }
+  //   }
+  //   a = Math.round(a) * Math.pow(10, pow)
+  //   if (o.enabled) {
+  //     ctx.fillStyle = o.textColor
+  //     ctx.fillRect(xPos, 0, o.lineWidth, height + 1)
+  //   }
+  //   let y = this.dataUtils.yMin - (this.dataUtils.yMin % a)
+  //   while (y <= this.dataUtils.yMax) {
+  //     const yPos = this.dataUtils.yPosFromValue(y)
+  //     if (yPos - height <= 0) {
+  //       if (o.gridEnabled) {
+  //         ctx.fillStyle = o.gridColor
+  //         ctx.fillRect(xPos, yPos, gridWidth, 1)
+  //       }
+  //       if (!o.enabled) {
+  //         y += a
+  //         continue
+  //       }
+  //       const tickText = (
+  //         o.powerOfTen === false
+  //           ? y.toFixed(2)
+  //           : pow >= 9
+  //             ? (y / 1e9).toFixed(0) + 'e9'
+  //             : pow >= 6
+  //               ? (y / 1e6).toFixed(0) + 'e6'
+  //               : pow >= 3
+  //                 ? (y / 1e3).toFixed(0) + 'e3'
+  //                 : pow <= -9
+  //                   ? (y * 1e9).toFixed(0) + 'e-9'
+  //                   : pow <= -6
+  //                     ? (y * 1e6).toFixed(0) + 'e-6'
+  //                     : pow <= -3
+  //                       ? (y * 1e3).toFixed(0) + 'e-3'
+  //                       : y.toFixed(2)
+  //       )
+  //       ctx.fillStyle = o.textColor
+  //       ctx.fillRect(xPos - o.tickLength, yPos, o.tickLength, o.tickWidth)
+  //       ctx.fillText(tickText, xPos - o.tickLength - TEXT_PADDING, yPos)
+  //     }
+  //     y += a
+  //   }
+  //   ctx.restore()
+  // }
+
+  drawLinearAxis() {
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     ctx.save()
-    ctx.font = `${o.fontSize}px sans-serif`
+    ctx.font = `${this.opt.fontSize}px sans-serif`
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'right'
-    const height = this.dataUtils.height
-    const xPos = o.enabled ? o.width - 1 : 0
-    const gridWidth = o.enabled ? this.canvas.width - o.width + 1 : this.canvas.width
-    if (this.dataUtils.yMax == null || this.dataUtils.yMin == null) {
+    const delta = this.dataUtils.yMax - this.dataUtils.yMin
+    const xPos = this.opt.enabled ? this.opt.width - 1 : 0
+    const gridWidth = this.opt.enabled ? this.canvas.width - this.opt.width + 1 : this.canvas.width
+    const height = this.canvas.height
+    const minTick = height / 15
+    const scales = [100, 50, 25, 20, 10]
+    if (this.opt.enabled) {
+      ctx.fillStyle = this.opt.textColor
+      ctx.fillRect(xPos, 0, this.opt.lineWidth, height + 1)
+    }
+    if (delta == 0) {
       ctx.restore()
       return
     }
-    let a = o.fontSize * 2 * (this.dataUtils.yMax - this.dataUtils.yMin) / height
     let pow = 0
-    if (a === 0) {
-      ctx.restore()
-      return
-    }
-    if (a > 10) {
-      while (a >= 10) {
-        a /= 10
+    if (delta > scales[0]) {
+      while (delta > scales[0] * Math.pow(10, pow)) {
         pow++
       }
-    } else {
-      while (a < 1) {
-        a *= 10
+    }
+    if (delta < scales[0]) {
+      while (delta < scales[0] * Math.pow(10, pow)) {
         pow--
       }
     }
-    a = Math.round(a) * Math.pow(10, pow)
-    if (o.enabled) {
-      ctx.fillStyle = o.textColor
-      ctx.fillRect(xPos, 0, o.lineWidth, height + 1)
-    }
-    let y = this.dataUtils.yMin - (this.dataUtils.yMin % a)
-    while (y <= this.dataUtils.yMax) {
-      const yPos = this.dataUtils.yPosFromValue(y)
-      if (yPos - height <= 0) {
-        if (o.gridEnabled) {
-          ctx.fillStyle = o.gridColor
-          ctx.fillRect(xPos, yPos, gridWidth, 1)
-        }
-        if (!o.enabled) {
-          y += a
-          continue
-        }
-        const tickText = (
-          o.powerOfTen === false
-            ? y.toFixed(2)
-            : pow >= 9
-              ? (y / 1e9).toFixed(0) + 'e9'
-              : pow >= 6
-                ? (y / 1e6).toFixed(0) + 'e6'
-                : pow >= 3
-                  ? (y / 1e3).toFixed(0) + 'e3'
-                  : pow <= -9
-                    ? (y * 1e9).toFixed(0) + 'e-9'
-                    : pow <= -6
-                      ? (y * 1e6).toFixed(0) + 'e-6'
-                      : pow <= -3
-                        ? (y * 1e3).toFixed(0) + 'e-3'
-                        : y.toFixed(2)
-        )
-        ctx.fillStyle = o.textColor
-        ctx.fillRect(xPos - o.tickLength, yPos, o.tickLength, o.tickWidth)
-        ctx.fillText(tickText, xPos - o.tickLength - TEXT_PADDING, yPos)
+    scales.reverse()
+    let step = null
+    for (let s of scales) {
+      step = s
+      if (delta / (s * Math.pow(10, pow)) < minTick) {
+        break
       }
-      y += a
+    }
+    const start = this.dataUtils.yMin / Math.pow(10, pow)
+    const end = this.dataUtils.yMax / Math.pow(10, pow)
+    let y = start - (start % step)
+    while (y < end) {
+      const yPos = this.dataUtils.yPosFromValue(y * Math.pow(10, pow))
+      if (this.opt.gridEnabled) {
+        ctx.fillStyle = this.opt.gridColor
+        ctx.fillRect(xPos, yPos, gridWidth, 1)
+      }
+      if (!this.opt.enabled) {
+        y += step
+        continue
+      }
+      ctx.fillStyle = this.opt.textColor
+      ctx.fillRect(xPos - this.opt.tickLength, yPos, this.opt.tickLength, this.opt.tickWidth)
+      const tickText = y === 0
+        ? '0'
+        : Math.abs(pow) > 3
+          ? `${y}e${pow}`
+          : pow < 0
+            ? `${y / Math.pow(10, -1 * pow)}`
+            : `${y * Math.pow(10, pow)}`
+      ctx.fillText(tickText, xPos - this.opt.tickLength - TEXT_PADDING, yPos)
+      y += step
     }
     ctx.restore()
   }
 
-  drawCategories () {
-    const o = this.opt
+  drawCategories() {
     const ctx = this.ctx
     const serieHeight = this.dataUtils.height / this.categories.length
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     ctx.save()
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'right'
-    ctx.fillStyle = o.textColor
-    ctx.font = `${o.fontSize}px sans-serif`
+    ctx.fillStyle = this.opt.textColor
+    ctx.font = `${this.opt.fontSize}px sans-serif`
     let yPos = 1 + serieHeight / 2
     for (const name of this.categories) {
-      ctx.fillText(name, o.width - o.tickLength, yPos)
+      ctx.fillText(name, this.opt.width - this.opt.tickLength, yPos)
       yPos += serieHeight
     }
-    ctx.fillRect(o.width - 1, 0, o.lineWidth, this.dataUtils.height + 1)
+    ctx.fillRect(this.opt.width - 1, 0, this.opt.lineWidth, this.dataUtils.height + 1)
     ctx.restore()
   }
 
-  update () {
+  update() {
     if (this.categories == null) {
       this.drawLinearAxis()
     } else {

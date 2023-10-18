@@ -14,7 +14,7 @@ window.COLORMAPS = COLORMAPS
 window.synced = []
 window.chart0 = new Lichen(container, {
   header: {
-    title: 'test line',
+    title: 'test line 1',
     position: 'left'
   },
   type: 'line',
@@ -30,6 +30,46 @@ window.chart0 = new Lichen(container, {
       [1, [39, 200, 19]]
     ]
   },
+  zoom: 'x',
+  series: [{
+    name: 'power supply',
+    start: lineData.timestamp * 1e3,
+    step: lineData.step * 1e3,
+    data: lineData.data,
+    linewidth: 2,
+    // color: 'rgb(0,0,255)',
+    area: true
+  }],
+  synced: () => window.synced
+})
+
+window.chart0bis = new Lichen(container, {
+  header: {
+    title: 'test line 2',
+    position: 'left'
+  },
+  type: 'line',
+  xAxis: {
+    enabled: true
+  },
+  colorScale: {
+    min: 9,
+    max: 12,
+    stops: [
+      [0, [255, 0, 0]],
+      [0.333, [215, 130, 30]],
+      [1, [39, 200, 19]]
+    ]
+  },
+  vLines: [{
+    x: lineData.timestamp * 1e3 + 86400e3,
+    color: 'rgb(0, 255, 50)',
+    text: 'Test',
+    position: 'bottom',
+    range: [300e3, 300e3],
+    selectable: true,
+    arrow: 'bottom'
+  }],
   zoom: 'x',
   series: [{
     name: 'power supply',
@@ -238,4 +278,35 @@ window.chart4 = new Lichen(container, {
       { value: 6, name: 'Sauvegarde' }
     ]
   }
+})
+
+
+/*
+ * TEST SCATTER
+ */
+window.chart5 = new Lichen(container, {
+  header: {
+    title: 'test scatter'
+  },
+  xAxis: {
+    datetime: false,
+    title: 'Toto'
+  },
+  yAxis: {
+    min: -1,
+    max: 1
+  },
+  type: 'scatter',
+  series: [{
+    name: 'serie 0',
+    color: 'blue',
+    shape: 'circle',
+    data: [{x: 2, y: 0.5, name: 'p0.0'}, {x: 3.5, y: -0.2, name: 'p0.1'}, {x: 4.1, y: 0.8, name: 'p0.2'}]
+  },
+  {
+    name: 'serie 1',
+    color: 'red',
+    shape: 'diamond',
+    data: [{x: 2.3, y: 0.9, name: 'p1.0'}, {x: 3.2, y: 0.6, name: 'p1.1', color: 'lime'}, {x: 5.1, y: -0.1, name: 'p1.2'}]
+  }]
 })

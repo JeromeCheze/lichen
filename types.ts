@@ -14,9 +14,12 @@ export interface GlobalAxisOptions {
   tickLength: number;
   tickWidth: number;
   gridColor: string;
+  title?: string;
 }
 
-export interface XAxisOptions extends GlobalAxisOptions {}
+export interface XAxisOptions extends GlobalAxisOptions {
+  datetime: boolean;
+}
 
 export interface YAxisOptions extends GlobalAxisOptions {
   min?: number;
@@ -56,6 +59,7 @@ export interface SequenceOptions {
   color: string;
   valueMap: { value: number; name: string }[];
   data: (number | null)[];
+  tooltipFormatter?: (x: number) => string;
 }
 
 export interface StackedDataOptions {
@@ -71,6 +75,19 @@ export interface StackedOptions {
   area?: boolean;
   linewidth?: number;
   data: StackedDataOptions[];
+}
+
+export interface ScatterOptions {
+  name: string;
+  color: string;
+  shape: 'circle' | 'diamond';
+  data: {
+    x: number;
+    y: number;
+    name: string;
+    color?: string;
+  }[];
+  tooltipFormatter?: (x: number) => string;
 }
 
 export interface Heatmap2dOptions {
@@ -116,12 +133,37 @@ export interface CrosshairOptions {
   text: string;
 }
 
+export interface VLine {
+  x: number;
+  color: string;
+  text: string;
+  position: 'top' | 'bottom';
+  range?: [number, number];
+  selectable?: boolean;
+  arrow?: 'top' | 'bottom';
+}
+
+export interface EventChannelSubscription {
+  [name: string]: ((data?: any) => void)[];
+}
+
+export interface TooltipHandlerResponse {
+  xValue: number;
+  yValues: {
+    color: string;
+    value: number;
+    name: string;
+    textValue: string;
+  }[];
+}
+
 export interface LichenOptions {
   title?: string;
   header: HeaderOptions;
-  type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence';
+  type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence' | 'scatter';
   legend: LegendOptions;
   crosshair: CrosshairOptions;
+  vLines: VLine[];
   tooltip: boolean;
   height: number;
   stacked: boolean;
@@ -130,16 +172,23 @@ export interface LichenOptions {
   colorScale?: ColorScaleOptions;
   xAxis: XAxisOptions;
   yAxis: YAxisOptions;
-  series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions;
+  series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions | ScatterOptions[];
   synced: () => Lichen[];
 }
 
+// export interface DataUtilsComputedSerieData {
+//   dataStart: number;
+//   dataEnd: number;
+//   xRatio: number;
+//   minIndex: number;
+//   maxIndex: number;
+//   minValue: number;
+//   maxValue: number;
+//   avgValue: number;
+//   rmsValue: number;
+// }
+
 export interface DataUtilsComputedSerieData {
-  dataStart: number;
-  dataEnd: number;
-  xRatio: number;
-  minIndex: number;
-  maxIndex: number;
   minValue: number;
   maxValue: number;
   avgValue: number;
@@ -152,8 +201,8 @@ export interface DataUtilsComputedData {
   series: (DataUtilsComputedSerieData | null)[];
 }
 
-export interface DataUtilsDataFromPos {
-  index: number;
+export interface DataFromPos {
+  index: number | null;
   xDataValue: number;
   xDataValuePos: number;
   yDataValue: number | null;

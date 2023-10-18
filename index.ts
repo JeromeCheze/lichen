@@ -1,21 +1,31 @@
 import defaultOptions from './defaultOptions.js'
-import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendOptions, LichenOptions, LineOptions, SequenceOptions, StackedOptions } from './types.js'
+import { ColorScaleOptions, LichenOptions } from './types.js'
 import DataUtils from './dataUtils.js'
 import EventUtils from './eventUtils.js'
 import XAxis from './xAxis.js'
 import YAxis from './yAxis.js'
-import LinePlot from './linePlot.js'
-import Heatmap2dPlot from './heatmap2dPlot.js'
-import Heatmap3dPlot from './heatmap3dPlot.js'
-import StackedPlot from './stackedPlot.js'
-import SequencePlot from './sequencePlot.js'
+import LinePlot from './plot/linePlot.js'
+import Heatmap2dPlot from './plot/heatmap2dPlot.js'
+import Heatmap3dPlot from './plot/heatmap3dPlot.js'
+import StackedPlot from './plot/stackedPlot.js'
+import SequencePlot from './plot/sequencePlot.js'
+import ScatterPlot from './plot/scatterPlot.js'
 import FrontPanel from './frontPanel.js'
 import Legend from './legend.js'
+import MasterInterface from './masterInterface.js'
 import * as COLORMAPS from './colormaps.js'
 
 export { COLORMAPS }
 
 const PADDING = 10
+const PLOT_MAP = {
+  line: LinePlot,
+  heatmap2d: Heatmap2dPlot,
+  heatmap3d: Heatmap3dPlot,
+  stacked: StackedPlot,
+  sequence: SequencePlot,
+  scatter: ScatterPlot
+}
 
 export class Lichen {
 
@@ -24,12 +34,15 @@ export class Lichen {
   xAxis: XAxis;
   dataUtils: DataUtils;
   eventUtils: EventUtils;
-  plot: LinePlot | Heatmap2dPlot | Heatmap3dPlot | StackedPlot | SequencePlot;
+  plot: LinePlot | Heatmap2dPlot | Heatmap3dPlot | StackedPlot | SequencePlot | ScatterPlot;
   legend: Legend;
   frontPanel: FrontPanel;
   ready: boolean;
+  master: MasterInterface;
 
-  constructor (container: HTMLElement, opt: LichenOptions, drawOnCreation: boolean = true) {
+  constructor(container: HTMLElement, opt: LichenOptions, drawOnCreation: boolean = true) {
+    this.master = new MasterInterface()
+    this.master.register('CHART', this)
     this.ready = false
     this.opt = this.mergeOptions(opt)
     this.init(container)
@@ -44,19 +57,14 @@ export class Lichen {
           }
         }
       }
-      const xRanges = this.opt.synced().map(chart => chart.dataUtils.xRange())
+      const xRanges = this.opt.synced().map(chart => chart.master.getRegistered('PLOT').xRange())
       this.dataUtils.start = Math.min.apply(null, xRanges.map(x => x[0]))
       this.dataUtils.end = Math.max.apply(null, xRanges.map(x => x[1]))
-      if (this.opt.type === 'heatmap3d') {
-        const [yMin, yMax] = this.dataUtils.yRange()
-        this.dataUtils.yMin = yMin
-        this.dataUtils.yMax = yMax
-      }
       this.draw()
     }
   }
 
-  mergeOptions (opt: LichenOptions): LichenOptions {
+  mergeOptions(opt: LichenOptions): LichenOptions {
     // deepcopy default options
     const result = JSON.parse(JSON.stringify(defaultOptions))
     // overwrite default options with given options
@@ -76,38 +84,10 @@ export class Lichen {
       const instance = []
       result.synced = () => instance
     }
-    if ((result.type === 'heatmap2d' || result.type === 'sequence') && result.zoom === 'xy') {
-      result.zoom = 'x'
-    }
-    if (result.type === 'line') {
-      for (const serie of result.series) {
-        serie.enabled = true
-      }
-    } else if (result.type === 'stacked') {
-      for (const serie of result.series.data) {
-        serie.enabled = true
-      }
-    }
     return result
   }
 
-  getHeight () {
-    if (this.opt.type === 'line') {
-      return this.opt.height
-    } else if (this.opt.type === 'heatmap2d') {
-      const series = this.opt.series as Heatmap2dOptions[]
-      return this.opt.serieHeight * series.length
-    } else if (this.opt.type === 'heatmap3d') {
-      return this.opt.height
-    } else if (this.opt.type === 'stacked') {
-      return this.opt.height
-    } else if (this.opt.type === 'sequence') {
-      const series = this.opt.series as SequenceOptions
-      return this.opt.serieHeight * series.valueMap.length
-    }
-  }
-
-  buildStructure (container: HTMLElement) {
+  buildStructure(container: HTMLElement) {
     const wrapper = document.createElement('div')
     const header = document.createElement('div')
     const title = document.createElement('div')
@@ -139,88 +119,75 @@ export class Lichen {
     Object.assign(canvasWrapperContainer.style, { display: 'inline-block', width: `${canvasWrapperContainerWidth}px`, verticalAlign: 'middle' })
     const sizes = canvasWrapperContainer.getBoundingClientRect()
     const plotWidth = this.opt.yAxis.enabled ? sizes.width - this.opt.yAxis.width : sizes.width
-    this.dataUtils = new DataUtils(this.opt.type, this.opt.series, plotWidth, this.getHeight())
-    this.yAxis = new YAxis(canvasWrapper, this.opt.yAxis, this.dataUtils)
-    this.xAxis = new XAxis(canvasWrapper, this.opt.xAxis, this.dataUtils)
+    const PlotClass = PLOT_MAP[this.opt.type]
+    this.dataUtils = new DataUtils(this.master, plotWidth, PlotClass.getHeight(this.master))
+    this.yAxis = new YAxis(canvasWrapper, this.master)
+    this.xAxis = new XAxis(canvasWrapper, this.master)
     canvasWrapper.style.height = `${this.xAxis.canvas.height}px`
-    if (this.opt.type === 'line') {
-      this.plot = new LinePlot(canvasWrapper, this.opt.series as LineOptions[], this.dataUtils, this.opt.colorScale)
-    } else if (this.opt.type === 'stacked') {
-      this.plot = new StackedPlot(canvasWrapper, this.opt.series as StackedOptions, this.dataUtils, this.opt.colorScale)
-    } else if (this.opt.type === 'heatmap2d') {
-      const series = this.opt.series as Heatmap2dOptions[]
-      this.yAxis.categories = series.map(x => x.name)
-      this.plot = new Heatmap2dPlot(canvasWrapper, series, this.dataUtils, this.opt.colorScale)
-    } else if (this.opt.type === 'heatmap3d') {
-      const series = this.opt.series as Heatmap3dOptions
-      this.plot = new Heatmap3dPlot(canvasWrapper, series, this.dataUtils, this.opt.colorScale)
-    } else if (this.opt.type === 'sequence') {
-      const series = this.opt.series as SequenceOptions
-      this.yAxis.categories = series.valueMap.map(x => x.name)
-      this.plot = new SequencePlot(canvasWrapper, series, this.dataUtils)
-    }
-    this.frontPanel = new FrontPanel(canvasWrapper, this.dataUtils, this.opt.colorScale, this.opt.tooltip, this.opt.crosshair)
-    this.legend = new Legend(legend, this.opt.legend, this.opt.type, this.opt.height, this.opt.colorScale, this.opt.series, () => {
-      this.draw()
-      this.legend.update()
-    })
+    this.plot = new PlotClass(canvasWrapper, this.master)
+    this.frontPanel = new FrontPanel(canvasWrapper, this.master)
+    this.legend = new Legend(legend, this.master)
     this.legend.update()
   }
 
-  init (container: HTMLElement) {
+  init(container: HTMLElement) {
     this.buildStructure(container)
-    this.eventUtils = new EventUtils(this.frontPanel.canvas, this.dataUtils)
-    this.eventUtils
-      .active((value: boolean) => {
+    this.eventUtils = new EventUtils(this.master, this.master.getRegistered('FRONT_PANEL').canvas)
+    this.master
+      .on('active', (value: boolean) => {
         if (value === false) {
           for (const chart of this.opt.synced()) {
             chart.frontPanel.update(null)
           }
         }
       })
-      .move((value: [number, number]) => {
+      .on('move', (value: [number, number]) => {
         for (const chart of this.opt.synced()) {
           chart.frontPanel.update(value[0])
         }
       })
-      .selecting((value: { x: [number | null, number | null], y: [number | null, number | null] }) => {
+      .on('selecting', (value: { x: [number | null, number | null], y: [number | null, number | null] }) => {
         for (const chart of this.opt.synced()) {
           chart.frontPanel.update(null)
           chart.setSelection(value.x, value.y)
         }
       })
-      .xRangeChange((value: [number, number]) => {
+      .on('xRangeChange', (value: [number, number]) => {
         for (const chart of this.opt.synced()) {
           chart.setXRange(value[0], value[1])
         }
       })
-      .yRangeChange((value: [number, number]) => {
+      .on('yRangeChange', (value: [number, number]) => {
         for (const chart of this.opt.synced()) {
           chart.setYRange(value[0], value[1])
         }
       })
-      .resetDisplay(() => {
+      .on('resetDisplay', () => {
         for (const chart of this.opt.synced()) {
-          let [yMin, yMax] = [null, null]
-          if (chart.opt.type === 'heatmap3d') {
-            [yMin, yMax] = chart.dataUtils.yRange()
-          }
-          const [xMin, xMax] = chart.dataUtils.xRange()
-          chart.setYRange(yMin, yMax, false)
-          chart.setXRange(xMin, xMax)
+          const dataUtils = chart.master.getRegistered('DATA_UTILS')
+          const plot = chart.master.getRegistered('PLOT')
+          const [xMin, xMax] = plot.xRange()
+          // const [yMin, yMax] = plot.yRange()
+          dataUtils.resetComputed()
+          dataUtils.setXRange(xMin, xMax)
+          dataUtils.setYRange(null, null)
+          chart.draw()
         }
       })
-    this.frontPanel.setEventUtils(this.eventUtils)
+      .on('redraw', () => {
+        this.draw()
+        this.legend.update()
+      })
     this.ready = true
   }
 
-  setColorScale (colorScale: ColorScaleOptions) {
+  setColorScale(colorScale: ColorScaleOptions) {
     Object.assign(this.opt.colorScale, colorScale)
     this.plot.update(true)
     this.legend.update()
   }
 
-  setXRange (x1: number, x2: number, draw = true) {
+  setXRange(x1: number, x2: number, draw = true) {
     this.frontPanel.update(null)
     this.dataUtils.start = x1
     this.dataUtils.end = x2
@@ -229,7 +196,7 @@ export class Lichen {
     }
   }
 
-  setYRange (y1: number, y2: number, draw = true) {
+  setYRange(y1: number, y2: number, draw = true) {
     this.dataUtils.yMin = y1
     this.dataUtils.yMax = y2
     if (draw) {
@@ -237,7 +204,7 @@ export class Lichen {
     }
   }
 
-  setSelection (x: [number | null, number | null], y: [number | null, number | null]) {
+  setSelection(x: [number | null, number | null], y: [number | null, number | null]) {
     if (this.opt.zoom != null) {
       if (this.opt.zoom.indexOf('x') < 0) {
         x = [null, null]
@@ -249,21 +216,20 @@ export class Lichen {
     this.frontPanel.selection(x, y)
   }
 
-  draw () {
-    if (this.opt.type === 'line' || this.opt.type === 'heatmap2d' || this.opt.type === 'stacked' || this.opt.type === 'sequence') {
-      this.dataUtils.computeData()
-      if (this.dataUtils.yMin == null || this.dataUtils.yMax == null || this.opt.zoom.indexOf('y') < 0) {
-        let [yMin, yMax] = this.dataUtils.yRange()
-        let amplitude = yMax - yMin
-        if (amplitude === 0) {
-          amplitude = 0.1
-        }
-        this.dataUtils.yMin = this.opt.yAxis.min != null ? this.opt.yAxis.min : yMin - 0.1 * amplitude
-        this.dataUtils.yMax = this.opt.yAxis.max != null ? this.opt.yAxis.max : yMax + 0.1 * amplitude
+  draw() {
+    this.dataUtils.processData()
+    if (this.dataUtils.yMin == null || this.dataUtils.yMax == null || this.opt.zoom.indexOf('y') < 0) {
+      const [yMin, yMax] = this.master.getRegistered('PLOT').yRange()
+      let amplitude = yMax - yMin
+      if (amplitude === 0) {
+        amplitude = 0.1
       }
+      this.dataUtils.yMin = this.opt.yAxis.min != null ? this.opt.yAxis.min : yMin - 0.1 * amplitude
+      this.dataUtils.yMax = this.opt.yAxis.max != null ? this.opt.yAxis.max : yMax + 0.1 * amplitude
     }
     this.xAxis.update()
     this.yAxis.update()
     this.plot.update()
+    this.frontPanel.update(null)
   }
 }

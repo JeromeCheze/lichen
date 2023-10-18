@@ -1,9 +1,10 @@
-import { DataUtilsComputedData, DataUtilsDataFromPos, DataUtilsComputedSerieData, LineOptions, Heatmap2dOptions, Heatmap3dOptions, ColorScaleOptions, StackedOptions, SequenceOptions, StackedDataOptions } from './types'
+import MasterInterface from './masterInterface'
+import { DataUtilsComputedData, LineOptions, Heatmap2dOptions, Heatmap3dOptions, ColorScaleOptions, StackedOptions, SequenceOptions, StackedDataOptions, ScatterOptions } from './types'
 
 export default class DataUtils {
 
-  type: string;
-  opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions;
+  type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence' | 'scatter';
+  opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions | ScatterOptions[];
   width: number;
   height: number;
   computed: DataUtilsComputedData;
@@ -11,15 +12,17 @@ export default class DataUtils {
   yMax: number | null;
   start: number | null;
   end: number | null;
+  master: MasterInterface;
 
-  constructor (
-    type: string,
-    opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions,
+  constructor(
+    master: MasterInterface,
     width: number,
     height: number
   ) {
-    this.type = type
-    this.opt = opt
+    master.register('DATA_UTILS', this)
+    this.master = master
+    this.type = master.getRegistered('CHART').opt.type
+    this.opt = master.getRegistered('CHART').opt.series
     this.width = width
     this.height = height
     this.yMin = null
@@ -28,107 +31,64 @@ export default class DataUtils {
     this.end = null
   }
 
-  xRange (): [number, number] {
-    if (this.type === 'line' || this.type === 'heatmap2d') {
-      let minStart: number | null = null
-      let maxEnd: number | null = null
-      const opt = this.opt as LineOptions[] | Heatmap2dOptions[]
-      for (const serie of opt) {
-        const end = serie.start + serie.data.length * serie.step
-        minStart = minStart == null || serie.start < minStart ? serie.start : minStart
-        maxEnd = maxEnd == null || maxEnd < end ? end : maxEnd
-      }
-      return [minStart, maxEnd]
-    } else if (this.type === 'heatmap3d') {
-      const opt = this.opt as Heatmap3dOptions
-      return [opt.start, opt.start + opt.data.length * opt.step]
-    } else if (this.type === 'stacked') {
-      const opt = this.opt as StackedOptions
-      return [opt.start, opt.start + opt.data[0].data.length * opt.step]
-    } else if (this.type === 'sequence') {
-      const opt = this.opt as SequenceOptions
-      return [opt.start, opt.start + opt.data.length * opt.step]
-    }
+  setXRange(x1: number, x2: number) {
+    this.start = x1
+    this.end = x2
   }
 
-  yRange (): [number, number] {
-    if (this.type === 'line' || this.type === 'heatmap2d' || this.type === 'stacked' || this.type === 'sequence') {
-      return [this.computed.minValue, this.computed.maxValue]
-    } else if (this.type === 'heatmap3d') {
-      const opt = this.opt as Heatmap3dOptions
-      return [opt.yMin, opt.yMax]
-    }
+  setYRange(y1: number, y2: number) {
+    this.yMin = y1
+    this.yMax = y2
   }
 
-  xValueFromPos (xPos: number): null | number {
+  xValueFromPos(xPos: number): null | number {
     if (this.start == null || this.end == null) {
       return null
     }
     return this.start + (xPos / this.width) * (this.end - this.start)
   }
 
-  yValueFromPos (yPos: number): number {
+  yValueFromPos(yPos: number): number {
     return this.yMax - (yPos / this.height) * (this.yMax - this.yMin)
   }
 
-  xPosFromValue (xValue: number): null | number {
+  xPosFromValue(xValue: number): null | number {
     if (this.start == null || this.end == null) {
       return null
     }
     return this.width * (xValue - this.start) / (this.end - this.start)
   }
 
-  yPosFromValue (yValue: number | null): null | number {
+  yPosFromValue(yValue: number | null): null | number {
     if (yValue == null || this.yMin == null || this.yMax == null) {
       return null
     }
     return this.height * (this.yMax - yValue) / (this.yMax - this.yMin)
   }
 
-  yPosFromStackedValues(index: number, serieIndex: number) {
-    if (this.yMin == null || this.yMax == null) {
+  toScientificNotation(value: number | null, precision = 2) {
+    if (value == null) {
       return null
     }
-    let value = 0
-    const series = this.getSeries()
-    for (let s = series.length - 1; s >= serieIndex; s--) {
-      value += series[s][index]
+    if (value === 0) {
+      return '0'
     }
-    return this.yPosFromValue(value)
-  }
-
-  dataFromXPos (xPos: number) {
-    const series = this.getSeries()
-    const result: (DataUtilsDataFromPos | null)[] = Array.from({ length: series.length }, () => null)
-    if (this.start == null || this.end == null) {
-      return result
-    }
-    const xValue = this.xValueFromPos(xPos)
-    if (xValue == null) {
-      return result
-    }
-    for (const [i, serie] of series.entries()) {
-      const c = this.computed.series[i]
-      if (c == null) {
-        result.push(null)
-        continue
+    let pow = 0
+    if (value > 10) {
+      while (value >= 10) {
+        value /= 10
+        pow++
       }
-      const [start, step] = this.getSerieStartAndStep(i)
-      const index = Math.round(serie.data.length * (xValue - start) / (serie.data.length * step))
-      const xDataValue = start + index * step
-      const yDataValue = serie.data[index]
-      result[i] = {
-        index,
-        xDataValue,
-        xDataValuePos: this.xPosFromValue(xDataValue)!,
-        yDataValuePos: this.yPosFromValue(yDataValue),
-        yDataValue
+    } else {
+      while (value < 1) {
+        value *= 10
+        pow--
       }
     }
-    return result
+    return `${value.toFixed(precision)}e${pow}`
   }
 
-  getSeries () {
+  getSeries() {
     if (this.type === 'stacked') {
       const opt = this.opt as StackedOptions
       return opt.data
@@ -144,147 +104,72 @@ export default class DataUtils {
     }
   }
 
-  getSerieStartAndStep (index: number) {
-    if (this.type === 'stacked') {
-      const series = this.opt as StackedOptions
-      return [series.start, series.step]
-    } else if (this.type === 'heatmap2d') {
-      const series = this.getSeries() as Heatmap2dOptions[]
-      return [series[index].start, series[index].step]
-    } else if (this.type === 'line') {
-      const series = this.getSeries() as LineOptions[]
-      return [series[index].start, series[index].step]
-    } else if (this.type === 'sequence') {
-      const series = this.getSeries() as SequenceOptions[]
-      return [series[0].start, series[0].step]
-    }
-  }
-
-  computeData () {
-    if (this.start == null || this.end == null) {
-      return
-    }
-    const series = this.getSeries()
+  resetComputed() {
     this.computed = {
       minValue: null,
       maxValue: null,
-      series: Array.from({ length: series.length }, () => null)
+      series: []
     }
-    const computed: (DataUtilsComputedSerieData | null)[] = []
-    let globalMinValue: number | null = null
-    let globalMaxValue: number | null = null
-    for (const [index, serie] of series.entries()) {
-      const [start, step] = this.getSerieStartAndStep(index)
-      const xRatio = (this.end - this.start) / (step * this.width)
-      let minIndex = Math.floor((this.start - start) / step)
-      const maxIndex = Math.min(1 + (this.end - start) / step, serie.data.length - 1)
-      const dataStart = minIndex < 0 ? start : start + minIndex * step
-      const dataEnd = dataStart + maxIndex * step
-      if (minIndex < 0) {
-        minIndex = 0
-      }
-      if (minIndex >= serie.data.length || maxIndex <= 0) {
-        computed.push(null)
-        continue
-      }
-      if (this.type === 'line' || this.type === 'stacked') {
-        const toggledSerie = serie as LineOptions | StackedDataOptions
-        if (toggledSerie.enabled != null && toggledSerie.enabled === false) {
-          computed.push(null)
-          continue
-        }
-      }
+  }
+
+  processData() {
+    this.resetComputed()
+    const dataCollection = this.master.getRegistered('PLOT').getProcessingData()
+    for (const data of dataCollection) {
       let minValue: null | number = null
       let maxValue: null | number = null
       let valueSum = 0
       let valueSqSum = 0
       let valueCount = 0
-      for (let i = minIndex; i < maxIndex; i++) {
-        const v = serie.data[i]
-        if (v == null) {
+      for (const v of data) {
+        if (v == null) { 
           continue
         }
-        minValue = minValue == null || v < minValue ? v : minValue
-        maxValue = maxValue == null || maxValue < v ? v : maxValue
+        minValue = minValue == null ? v : Math.min(minValue, v)
+        maxValue = maxValue == null ? v : Math.max(maxValue, v)
         valueSum += v
         valueSqSum += v * v
         valueCount++
       }
       if (valueCount === 0) {
-        computed.push(null)
+        this.computed.series.push(null)
         continue
       }
       const avgValue = valueSum / valueCount
-      globalMinValue = globalMinValue == null || minValue! < globalMinValue ? minValue : globalMinValue
-      globalMaxValue = globalMaxValue == null || globalMaxValue < maxValue! ? maxValue : globalMaxValue
-      computed.push({
-        dataStart,
-        dataEnd,
-        xRatio,
-        minIndex,
-        maxIndex,
-        minValue: minValue!,
-        maxValue: maxValue!,
+      this.computed.minValue = this.computed.minValue == null ? minValue : Math.min(this.computed.minValue, minValue)
+      this.computed.maxValue = this.computed.maxValue == null ? maxValue : Math.max(this.computed.maxValue, maxValue)
+      this.computed.series.push({
+        minValue: minValue,
+        maxValue: maxValue,
         avgValue,
         rmsValue: Math.sqrt((valueSqSum - 2 * avgValue * valueSum + valueCount * avgValue * avgValue) / valueCount)
       })
     }
-
-    let maxStacked = null
-    if (this.type === 'stacked') {
-      let minIndex = null
-      let maxIndex = null
-      for (const c of computed) {
-        if (c != null) {
-          minIndex = c.minIndex
-          maxIndex = c.maxIndex
-          break
+    if (this.master.getRegistered('PLOT').isDataStacked() && dataCollection.length > 0) {
+      for (let i = 0; i < dataCollection[0].length; i++) {
+        let currentSum = 0
+        for (const data of dataCollection) {
+          const v = data[i]
+          currentSum = v == null ? currentSum : currentSum + v
         }
+        this.computed.maxValue = Math.max(this.computed.maxValue, currentSum)
       }
-      if (minIndex != null && maxIndex != null) {
-        for (let i = minIndex; i < maxIndex; i++) {
-          let currentSum = null
-          for (const [index, serie] of series.entries()) {
-            if (computed[index] == null) {
-              continue
-            }
-            if (serie.data[i] == null) {
-              break
-            } else if (currentSum == null) {
-              currentSum = serie.data[i]
-            } else {
-              currentSum += serie.data[i]
-            }
-          }
-          if (maxStacked == null) {
-            maxStacked = currentSum
-          } else if (currentSum != null) {
-            maxStacked = Math.max(maxStacked, currentSum)
-          }
-        }
-      }
-    }
-
-    this.computed = {
-      minValue: globalMinValue,
-      maxValue: this.type === 'stacked' && maxStacked != null ? maxStacked : globalMaxValue,
-      series: computed
     }
   }
 
-  getRatio (v: number, min: number, max: number) {
+  getRatio(v: number, min: number, max: number) {
     return (v - min) / (max - min)
   }
 
-  toRGB (c: [number, number, number]) {
+  toRGB(c: [number, number, number]) {
     return `rgb(${c[0]},${c[1]},${c[2]})`
   }
 
-  toRGBA (c: [number, number, number], a: number) {
+  toRGBA(c: [number, number, number], a: number) {
     return `rgba(${c[0]},${c[1]},${c[2]},${a})`
   }
 
-  getColor (value: number, colorScale: ColorScaleOptions, text = true) {
+  getColor(value: number, colorScale: ColorScaleOptions, text = true) {
     let min = colorScale.min
     let max = colorScale.max
     if (colorScale.logarithmic) {

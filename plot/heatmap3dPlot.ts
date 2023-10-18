@@ -1,30 +1,48 @@
-import { ColorScaleOptions, Heatmap3dOptions } from './types'
-import DataUtils from './dataUtils'
+import { ColorScaleOptions, DataFromPos, Heatmap3dOptions, TooltipHandlerResponse } from '../types'
+import MasterInterface from '../masterInterface'
+import AbstractPlot from './abstractPlot.js'
 
-export default class Heatmap3dPlot {
+export default class Heatmap3dPlot extends AbstractPlot {
 
   opt: Heatmap3dOptions;
-  dataUtils: DataUtils;
-  canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
   colorScale: ColorScaleOptions;
   image: HTMLImageElement;
   imageWidth: number;
   imageHeight: number;
 
-  constructor (container: HTMLElement, opt: Heatmap3dOptions, dataUtils: DataUtils, colorScale: ColorScaleOptions) {
-    this.opt = opt
-    this.canvas = document.createElement('canvas')
-    this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
-    this.dataUtils = dataUtils
-    this.canvas.width = dataUtils.width
-    this.canvas.height = dataUtils.height
-    Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 10 })
-    this.colorScale = colorScale
-    container.appendChild(this.canvas)
+  constructor(container: HTMLElement, master: MasterInterface) {
+    super(container, master)
+    this.opt = this.master.getRegistered('CHART').opt.series
+    this.colorScale = this.master.getRegistered('CHART').opt.colorScale
+    const [yMin, yMax] = this.yRange()
+    this.dataUtils.yMin = yMin
+    this.dataUtils.yMax = yMax
+    const yAxis = this.master.getRegistered('Y_AXIS')
+    yAxis.opt.min = yMin
+    yAxis.opt.max = yMax
   }
 
-  createImage () {
+  tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
+    return { xValue: null, yValues: null }
+  }
+
+  dataFromXPos(xPos: number): (DataFromPos | null)[] {
+    return [null]
+  }
+
+  xRange() {
+    return [this.opt.start, this.opt.start + this.opt.data.length * this.opt.step] as [number, number]
+  }
+
+  yRange(): [number, number] {
+    return [this.opt.yMin, this.opt.yMax]
+  }
+
+  getProcessingData() {
+    return []
+  }
+
+  createImage() {
     const o = this.opt
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
@@ -56,7 +74,7 @@ export default class Heatmap3dPlot {
     this.imageHeight = canvas.height
   }
 
-  update (forceRedraw = false) {
+  update(forceRedraw = false) {
     // console.log(this.image)
     let delay = false
     if (this.image == null || forceRedraw) {
@@ -70,8 +88,8 @@ export default class Heatmap3dPlot {
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     ctx.imageSmoothingEnabled = false
     // console.log(this.image)
-    const [sStart, sEnd] = this.dataUtils.xRange()
-    const [sYMin, sYmax] = this.dataUtils.yRange()
+    const [sStart, sEnd] = this.xRange()
+    const [sYMin, sYmax] = this.yRange()
     const [dStart, dEnd] = [this.dataUtils.start, this.dataUtils.end]
     const [dYmin, dYmax] = [this.dataUtils.yMin, this.dataUtils.yMax]
     const sx = Math.max(0, this.dataUtils.getRatio(dStart, sStart, sEnd) * this.imageWidth)

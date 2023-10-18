@@ -1,4 +1,5 @@
-import { EvenUtilsEventHandlerMap } from './types';
+import { EvenUtilsEventHandlerMap } from './types'
+import MasterInterface from './masterInterface'
 import DataUtils from './dataUtils'
 
 const THRESHOLD = 5
@@ -11,11 +12,15 @@ export default class EventUtils {
   handler: EvenUtilsEventHandlerMap;
   registered: Record<string, ((e:any) => void)[]>;
   state: Record<string, any>;
+  master: MasterInterface;
 
-  constructor (element: HTMLElement, dataUtils: DataUtils) {
+  constructor(master: MasterInterface, element: HTMLElement) {
+    master.register('EVENT_UTILS', this)
+    this.master = master
     this.element = element
-    this.dataUtils = dataUtils
+    this.dataUtils = master.getRegistered('DATA_UTILS')
     this.handler = {
+      'click': { el: element, callback: (e: MouseEvent) => this.handleClick(e) },
       'mouseleave': { el: element, callback: (e: MouseEvent) => this.handleMouseLeave(e) },
       'mousemove': { el: element, callback: (e: MouseEvent) => this.handleMouseMove(e) },
       'mousedown': { el: element, callback: (e: MouseEvent) => this.handleMouseDown(e) },
@@ -52,18 +57,22 @@ export default class EventUtils {
     }
   }
 
-  executeCallback (name: string, opt: any) {
-    for (const callback of this.registered[name]) {
-      callback.call(null, opt)
-    }
-  }
-
-  getRelativePosition (e: MouseEvent | Touch) {
+  getRelativePosition(e: MouseEvent | Touch) {
     const bcr = this.element.getBoundingClientRect()
     return [e.clientX - bcr.x, e.clientY - bcr.y]
   }
 
-  handleMouseLeave (e?: MouseEvent) {
+  handleClick(e: MouseEvent) {
+    const [xPos, yPos] = this.getRelativePosition(e)
+    this.master.send('click', {
+      xPos,
+      yPos,
+      x: this.dataUtils.xValueFromPos(xPos),
+      y: this.dataUtils.yValueFromPos(yPos)
+    })
+  }
+
+  handleMouseLeave(e?: MouseEvent) {
     if (e != null) {
       this.handleMouseUp(e)
     }
@@ -71,13 +80,13 @@ export default class EventUtils {
     this.state.shiftKey = false
     this.state.ctrlKey = false
     this.state.cursorPos = null
-    this.executeCallback('active', false)
+    this.master.send('active', false)
   }
 
-  handleMouseMove (e: MouseEvent) {
+  handleMouseMove(e: MouseEvent) {
     if (this.state.active === false) {
       this.state.active = true
-      this.executeCallback('active', true)
+      this.master.send('active', true)
     }
     const [x, y] = this.getRelativePosition(e)
     if (this.state.mouseDownPos != null) {
@@ -94,7 +103,7 @@ export default class EventUtils {
           y1 = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1])
           y2 = this.dataUtils.yValueFromPos(y)
         }
-        this.executeCallback('selecting', {
+        this.master.send('selecting', {
           x: x1 != null && x2 != null ? [Math.min(x1, x2), Math.max(x1, x2)] : [null, null],
           y: y1 != null && y2 != null ? [Math.min(y1, y2), Math.max(y1, y2)] : [null, null]
         })
@@ -104,7 +113,7 @@ export default class EventUtils {
         if (Math.abs(deltaX) > THRESHOLD) {
           const valueDeltaX = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0]) - this.dataUtils.xValueFromPos(x)
           this.state.mouseDownPos = [x, this.state.mouseDownPos[1]]
-          this.executeCallback('xRangeChange', [
+          this.master.send('xRangeChange', [
             this.dataUtils.start + valueDeltaX,
             this.dataUtils.end + valueDeltaX
           ])
@@ -112,7 +121,7 @@ export default class EventUtils {
         if (Math.abs(deltaY) > THRESHOLD) {
           const valueDeltaY = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1]) - this.dataUtils.yValueFromPos(y)
           this.state.mouseDownPos = [this.state.mouseDownPos[0], y]
-          this.executeCallback('yRangeChange', [
+          this.master.send('yRangeChange', [
             this.dataUtils.yMin + valueDeltaY,
             this.dataUtils.yMax + valueDeltaY
           ])
@@ -120,55 +129,56 @@ export default class EventUtils {
       }
     } else {
       this.state.cursorPos = e
-      this.executeCallback('move', [
+      this.master.send('cursor', e)
+      this.master.send('move', [
         this.dataUtils.xValueFromPos(x),
         this.dataUtils.yValueFromPos(y)
       ])
     }
   }
 
-  handleMouseDown (e: MouseEvent) {
+  handleMouseDown(e: MouseEvent) {
     this.state.mouseDownPos = this.getRelativePosition(e)
   }
 
-  handleMouseUp (e: MouseEvent) {
+  handleMouseUp(e: MouseEvent) {
     if (this.state.shiftKey && this.state.mouseDownPos != null) {
       const [x, y] = this.getRelativePosition(e)
       if (Math.abs(x - this.state.mouseDownPos[0]) > SELECT_THRESHOLD) {
         const x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])
         const x2 = this.dataUtils.xValueFromPos(x)
-        this.executeCallback('xRangeChange', [Math.min(x1, x2), Math.max(x1, x2)])
+        this.master.send('xRangeChange', [Math.min(x1, x2), Math.max(x1, x2)])
       }
       if (Math.abs(y - this.state.mouseDownPos[1]) > SELECT_THRESHOLD) {
         const y1 = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1])
         const y2 = this.dataUtils.yValueFromPos(y)
-        this.executeCallback('yRangeChange', [Math.min(y1, y2), Math.max(y1, y2)])
+        this.master.send('yRangeChange', [Math.min(y1, y2), Math.max(y1, y2)])
       }
     }
     this.state.mouseDownPos = null
   }
 
-  handleDblClick (e: MouseEvent | TouchEvent) {
+  handleDblClick(e: MouseEvent | TouchEvent) {
     e.preventDefault()
     e.stopPropagation()
-    this.executeCallback('resetDisplay', this.dataUtils.xRange())
+    this.master.send('resetDisplay', null)
     this.clearSelection()
   }
 
-  handleWheel (e: WheelEvent) {
+  handleWheel(e: WheelEvent) {
     if (this.state.shiftKey) {
       e.preventDefault()
       e.stopPropagation()
       const sign = Math.sign(e.deltaY)
       if (this.state.ctrlKey) {
         const ratio = 0.1 * (this.dataUtils.yMax - this.dataUtils.yMin)
-        this.executeCallback('yRangeChange', [
+        this.master.send('yRangeChange', [
           this.dataUtils.yMin + sign * ratio,
           this.dataUtils.yMax - sign * ratio
         ])
       } else {
         const ratio = 0.1 * (this.dataUtils.end - this.dataUtils.start)
-        this.executeCallback('xRangeChange', [
+        this.master.send('xRangeChange', [
           this.dataUtils.start + sign * ratio,
           this.dataUtils.end - sign * ratio
         ])
@@ -176,7 +186,7 @@ export default class EventUtils {
     }
   }
 
-  getAngle (x1: number, y1: number, x2: number, y2: number) {
+  getAngle(x1: number, y1: number, x2: number, y2: number) {
     const x1x2 = Math.abs(x2 - x1)
     const y1y2 = Math.abs(y2 - y1)
     let rad = Math.atan(y1y2 / x1x2)
@@ -190,11 +200,14 @@ export default class EventUtils {
     return rad * 180 / Math.PI
   }
 
-  getDistance (x1: number, y1: number, x2: number, y2: number) {
+  getDistance(x1: number, y1: number, x2: number, y2: number) {
     return Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2))
   }
 
-  getPanning (refX1: number, refY1: number, refX2: number, refY2: number, curX1: number, curY1: number, curX2: number, curY2: number) {
+  getPanning(
+    refX1: number, refY1: number, refX2: number, refY2: number,
+    curX1: number, curY1: number, curX2: number, curY2: number
+  ) {
     const refMiddleX = (refX1 + refX2) / 2
     const refMiddleY = (refY1 + refY2) / 2
     const curMiddleX = (curX1 + curX2) / 2
@@ -202,7 +215,7 @@ export default class EventUtils {
     return [curMiddleX - refMiddleX, refMiddleY - curMiddleY]
   }
 
-  handleTouchStart (e: TouchEvent) {
+  handleTouchStart(e: TouchEvent) {
     e.preventDefault()
     if (e.touches.length === 1) {
       if (this.state.lastTouchTime == null) {
@@ -226,18 +239,23 @@ export default class EventUtils {
     }
   }
   
-  handleTouchEnd (e: TouchEvent) {
+  handleTouchEnd(e: TouchEvent) {
     this.state.touches = []
     this.state.lastDistance = null
     this.handleMouseLeave()
   }
   
-  handleTouchMove (e: TouchEvent) {
+  handleTouchMove(e: TouchEvent) {
     e.preventDefault()
+    if (this.state.active === false) {
+      this.state.active = true
+      this.master.send('active', true)
+    }
     if (e.touches.length === 1) {
       this.state.cursorPos = e.touches[0]
+      this.master.send('cursor', this.state.cursorPos)
       const [x, y] = this.getRelativePosition(e.touches[0])
-      this.executeCallback('move', [
+      this.master.send('move', [
         this.dataUtils.xValueFromPos(x),
         this.dataUtils.yValueFromPos(y)
       ])
@@ -264,7 +282,7 @@ export default class EventUtils {
         this.state.touches = cur
         this.state.lastDistance = dist
         const valueDeltaX = this.dataUtils.xValueFromPos(0) - this.dataUtils.xValueFromPos(panX)
-        this.executeCallback('xRangeChange', [
+        this.master.send('xRangeChange', [
           this.dataUtils.start + valueDeltaX,
           this.dataUtils.end + valueDeltaX
         ])
@@ -272,7 +290,7 @@ export default class EventUtils {
         this.state.touches = cur
         this.state.lastDistance = dist
         const valueDeltaY = this.dataUtils.yValueFromPos(0) - this.dataUtils.yValueFromPos(panY)
-        this.executeCallback('yRangeChange', [
+        this.master.send('yRangeChange', [
           this.dataUtils.yMin - valueDeltaY,
           this.dataUtils.yMax - valueDeltaY
         ])
@@ -280,71 +298,71 @@ export default class EventUtils {
     }
   }
 
-  pinchX (level: number) {
+  pinchX(level: number) {
     const ratio = 0.1 * (this.dataUtils.end - this.dataUtils.start)
     const sign = Math.sign(level)
-    this.executeCallback('xRangeChange', [
+    this.master.send('xRangeChange', [
       this.dataUtils.start + sign * ratio,
       this.dataUtils.end - sign * ratio
     ])
   }
 
-  pinchY (level: number) {
+  pinchY(level: number) {
     const ratio = 0.1 * (this.dataUtils.yMax - this.dataUtils.yMin)
     const sign = Math.sign(level)
-    this.executeCallback('yRangeChange', [
+    this.master.send('yRangeChange', [
       this.dataUtils.yMin + sign * ratio,
       this.dataUtils.yMax - sign * ratio
     ])
   }
 
-  handleKeyDown (e: KeyboardEvent) {
+  handleKeyDown(e: KeyboardEvent) {
     if (this.state.active) {
       this.state.shiftKey = e.shiftKey
       this.state.ctrlKey = e.ctrlKey
     }
   }
 
-  handleKeyUp (e: KeyboardEvent) {
+  handleKeyUp(e: KeyboardEvent) {
     if (this.state.active) {
       this.state.shiftKey = e.shiftKey
       this.state.ctrlKey = e.ctrlKey
     }
   }
 
- clearSelection () {
+ clearSelection() {
     if (window.getSelection) {
       const sel = window.getSelection()
       sel.removeAllRanges()
     }
   }
 
-  active (callback) {
+  active(callback) {
     this.registered.active.push(callback)
     return this
   }
 
-  move (callback) {
+  move(callback) {
     this.registered.move.push(callback)
     return this
   }
 
-  xRangeChange (callback) {
+  xRangeChange(callback) {
     this.registered.xRangeChange.push(callback)
     return this
   }
 
-  yRangeChange (callback) {
+  yRangeChange(callback) {
     this.registered.yRangeChange.push(callback)
     return this
   }
 
-  selecting (callback) {
+  selecting(callback) {
     this.registered.selecting.push(callback)
     return this
   }
 
-  resetDisplay (callback) {
+  resetDisplay(callback) {
     this.registered.resetDisplay.push(callback)
     return this
   }
