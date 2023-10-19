@@ -54,14 +54,18 @@ export default class Heatmap2dPlot extends AbstractPlot {
         continue
       }
       const index = Math.round(serie.data.length * (xValue - serie.start) / (serie.data.length * serie.step))
-      const xDataValue = serie.start + index * serie.step
-      const yDataValue = serie.data[index]
-      result[i] = {
-        index,
-        xDataValue,
-        xDataValuePos: this.dataUtils.xPosFromValue(xDataValue)!,
-        yDataValuePos: this.dataUtils.yPosFromValue(yDataValue),
-        yDataValue
+      if (index >= 0 && index < serie.data.length) {
+        const xDataValue = serie.start + index * serie.step
+        const yDataValue = serie.data[index]
+        if (yDataValue != null) {
+          result[i] = {
+            index,
+            xDataValue,
+            xDataValuePos: this.dataUtils.xPosFromValue(xDataValue)!,
+            yDataValuePos: this.dataUtils.yPosFromValue(yDataValue),
+            yDataValue
+          }
+        }
       }
     }
     return result

@@ -1,0 +1,65 @@
+[lichen](../README.md) / [Exports](../modules.md) / [types](../modules/types.md) / StackedOptions
+
+# Interface: StackedOptions
+
+[types](../modules/types.md).StackedOptions
+
+## Table of contents
+
+### Properties
+
+- [area](types.StackedOptions.md#area)
+- [data](types.StackedOptions.md#data)
+- [linewidth](types.StackedOptions.md#linewidth)
+- [start](types.StackedOptions.md#start)
+- [step](types.StackedOptions.md#step)
+
+## Properties
+
+### area
+
+• `Optional` **area**: `boolean`
+
+#### Defined in
+
+types.ts:75
+
+___
+
+### data
+
+• **data**: [`StackedDataOptions`](types.StackedDataOptions.md)[]
+
+#### Defined in
+
+types.ts:77
+
+___
+
+### linewidth
+
+• `Optional` **linewidth**: `number`
+
+#### Defined in
+
+types.ts:76
+
+___
+
+### start
+
+• **start**: `number`
+
+#### Defined in
+
+types.ts:73
+
+___
+
+### step
+
+• **step**: `number`
+
+#### Defined in
+
+types.ts:74

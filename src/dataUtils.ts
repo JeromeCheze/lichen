@@ -14,6 +14,12 @@ export default class DataUtils {
   end: number | null;
   master: MasterInterface;
 
+  /**
+   * 
+   * @param master
+   * @param width 
+   * @param height 
+   */
   constructor(
     master: MasterInterface,
     width: number,
@@ -31,16 +37,31 @@ export default class DataUtils {
     this.end = null
   }
 
+  /**
+   * Set X range to use for data processing
+   * @param x1 
+   * @param x2 
+   */
   setXRange(x1: number, x2: number) {
     this.start = x1
     this.end = x2
   }
 
+  /**
+   * Set the Y range to use for data processing
+   * @param y1 
+   * @param y2 
+   */
   setYRange(y1: number, y2: number) {
     this.yMin = y1
     this.yMax = y2
   }
 
+  /**
+   * Convert the given X position to the corresponding data value
+   * @param xPos - the position in px
+   * @returns the data value
+   */
   xValueFromPos(xPos: number): null | number {
     if (this.start == null || this.end == null) {
       return null
@@ -48,10 +69,20 @@ export default class DataUtils {
     return this.start + (xPos / this.width) * (this.end - this.start)
   }
 
+  /**
+   * Convert the given Y position to the corresponding data value
+   * @param yPos - the position in px
+   * @returns the data value
+   */
   yValueFromPos(yPos: number): number {
     return this.yMax - (yPos / this.height) * (this.yMax - this.yMin)
   }
 
+  /**
+   * Convert the given data value to the corresponding X position
+   * @param xValue - the data value
+   * @returns the X position coordinate
+   */
   xPosFromValue(xValue: number): null | number {
     if (this.start == null || this.end == null) {
       return null
@@ -59,6 +90,11 @@ export default class DataUtils {
     return this.width * (xValue - this.start) / (this.end - this.start)
   }
 
+  /**
+   * Convert the given data value to the corresponding Y position
+   * @param yValue - the data value
+   * @returns the Y position coordinate
+   */
   yPosFromValue(yValue: number | null): null | number {
     if (yValue == null || this.yMin == null || this.yMax == null) {
       return null
@@ -86,22 +122,6 @@ export default class DataUtils {
       }
     }
     return `${value.toFixed(precision)}e${pow}`
-  }
-
-  getSeries() {
-    if (this.type === 'stacked') {
-      const opt = this.opt as StackedOptions
-      return opt.data
-    } else if (this.type === 'line') {
-      const opt = this.opt as LineOptions[]
-      return opt
-    } else if (this.type === 'heatmap2d') {
-      const opt = this.opt as Heatmap2dOptions[]
-      return opt
-    } else if (this.type === 'sequence') {
-      const opt = this.opt as SequenceOptions
-      return [opt]
-    }
   }
 
   resetComputed() {

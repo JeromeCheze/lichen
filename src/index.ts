@@ -15,8 +15,6 @@ import Legend from './legend.js'
 import MasterInterface from './masterInterface.js'
 import * as COLORMAPS from './colormaps.js'
 
-export { COLORMAPS }
-
 const PADDING = 10
 const PLOT_MAP = {
   line: LinePlot,
@@ -27,7 +25,8 @@ const PLOT_MAP = {
   scatter: ScatterPlot
 }
 
-export class Lichen {
+
+export default class Lichen {
 
   opt: LichenOptions;
   yAxis: YAxis;
@@ -39,7 +38,12 @@ export class Lichen {
   frontPanel: FrontPanel;
   ready: boolean;
   master: MasterInterface;
-
+  
+  /**
+   * @param container - The HTML element container
+   * @param opt - Charts options object
+   * @param drawOnCreation - Wether to draw the charts immediately after creation or not.
+   */
   constructor(container: HTMLElement, opt: LichenOptions, drawOnCreation: boolean = true) {
     this.master = new MasterInterface()
     this.master.register('CHART', this)
@@ -64,6 +68,20 @@ export class Lichen {
     }
   }
 
+  /**
+   * Give the requested colorscale object
+   * @param name the colorscale name
+   * @returns the requested colorscale object
+   */
+  static getColorScale(name: 'PARULA' | 'VIRIDIS' | 'PLASMA' | 'INFERNO' | 'MAGMA' | 'CIVIDIS') {
+    return COLORMAPS[name]
+  }
+
+  /**
+   * Merge the given options with the default built-in options
+   * @param opt - Lichen options
+   * @returns The Lichen options merged
+   */
   mergeOptions(opt: LichenOptions): LichenOptions {
     // deepcopy default options
     const result = JSON.parse(JSON.stringify(defaultOptions))
@@ -87,6 +105,10 @@ export class Lichen {
     return result
   }
 
+  /**
+   * Create all the structure and instantiate all charts components
+   * @param container - The HTML element container 
+   */
   buildStructure(container: HTMLElement) {
     const wrapper = document.createElement('div')
     const header = document.createElement('div')
@@ -130,6 +152,10 @@ export class Lichen {
     this.legend.update()
   }
 
+  /**
+   * Initialize the chart construction
+   * @param container - The HTML element container 
+   */
   init(container: HTMLElement) {
     this.buildStructure(container)
     this.eventUtils = new EventUtils(this.master, this.master.getRegistered('FRONT_PANEL').canvas)
@@ -176,19 +202,29 @@ export class Lichen {
       })
       .on('redraw', () => {
         this.draw()
-        this.legend.update()
+        this.master.getRegistered('LEGEND').update()
       })
     this.ready = true
   }
 
+  /**
+   * Set the given color scale object to use and updates the plot and the legend
+   * @param colorScale
+   */
   setColorScale(colorScale: ColorScaleOptions) {
     Object.assign(this.opt.colorScale, colorScale)
-    this.plot.update(true)
-    this.legend.update()
+    this.master.getRegistered('PLOT').update(true)
+    this.master.getRegistered('LEGEND').update()
   }
 
+  /**
+   * Set the X range for next draw
+   * @param x1 - the start range
+   * @param x2 - the end range
+   * @param draw - call the {@link Lichen.draw} method if `true`
+   */
   setXRange(x1: number, x2: number, draw = true) {
-    this.frontPanel.update(null)
+    this.master.getRegistered('FRONT_PANEL').update(null)
     this.dataUtils.start = x1
     this.dataUtils.end = x2
     if (draw) {
@@ -196,6 +232,12 @@ export class Lichen {
     }
   }
 
+  /**
+   * Set the X range for next draw
+   * @param y1 - the start range
+   * @param y2 - the end range
+   * @param draw - call the {@link Lichen.draw} method if `true`
+   */
   setYRange(y1: number, y2: number, draw = true) {
     this.dataUtils.yMin = y1
     this.dataUtils.yMax = y2
@@ -204,6 +246,11 @@ export class Lichen {
     }
   }
 
+  /**
+   * Set the selection to draw on front panel
+   * @param x - the X range
+   * @param y - the Y range
+   */
   setSelection(x: [number | null, number | null], y: [number | null, number | null]) {
     if (this.opt.zoom != null) {
       if (this.opt.zoom.indexOf('x') < 0) {
@@ -213,23 +260,27 @@ export class Lichen {
         y = [null, null]
       }
     }
-    this.frontPanel.selection(x, y)
+    this.master.getRegistered('FRONT_PANEL').selection(x, y)
   }
 
+  /**
+   * The main draw method of Lichen
+   */
   draw() {
-    this.dataUtils.processData()
-    if (this.dataUtils.yMin == null || this.dataUtils.yMax == null || this.opt.zoom.indexOf('y') < 0) {
+    const dataUtils = this.master.getRegistered('DATA_UTILS')
+    dataUtils.processData()
+    if (dataUtils.yMin == null || dataUtils.yMax == null || this.opt.zoom.indexOf('y') < 0) {
       const [yMin, yMax] = this.master.getRegistered('PLOT').yRange()
       let amplitude = yMax - yMin
       if (amplitude === 0) {
         amplitude = 0.1
       }
-      this.dataUtils.yMin = this.opt.yAxis.min != null ? this.opt.yAxis.min : yMin - 0.1 * amplitude
-      this.dataUtils.yMax = this.opt.yAxis.max != null ? this.opt.yAxis.max : yMax + 0.1 * amplitude
+      dataUtils.yMin = this.opt.yAxis.min != null ? this.opt.yAxis.min : yMin - 0.1 * amplitude
+      dataUtils.yMax = this.opt.yAxis.max != null ? this.opt.yAxis.max : yMax + 0.1 * amplitude
     }
-    this.xAxis.update()
-    this.yAxis.update()
-    this.plot.update()
-    this.frontPanel.update(null)
+    this.master.getRegistered('X_AXIS').update()
+    this.master.getRegistered('Y_AXIS').update()
+    this.master.getRegistered('PLOT').update()
+    this.master.getRegistered('FRONT_PANEL').update(null)
   }
 }

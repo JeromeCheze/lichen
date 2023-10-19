@@ -1,4 +1,4 @@
-import { Lichen } from './index'
+import Lichen from './index'
 
 export interface Coordinates {
   x: number;

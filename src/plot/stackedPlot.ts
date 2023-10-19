@@ -25,11 +25,11 @@ export default class StackedPlot extends AbstractPlot {
     const yValues = []
     let stackedValue = 0
     for (const [i, s] of this.opt.data.entries()) {
-      xValue = data[i].xDataValue
-      const value = data[i].yDataValue
-      if (value == null) {
+      if (data[i] == null) {
         continue
       }
+      xValue = data[i].xDataValue
+      const value = data[i].yDataValue
       const color = s.color != null ? s.color : this.dataUtils.getColor(value, this.colorScale, true) as string
       yValues.push({
         color,
@@ -63,14 +63,18 @@ export default class StackedPlot extends AbstractPlot {
         continue
       }
       const index = Math.round(serie.data.length * (xValue - this.opt.start) / (serie.data.length * this.opt.step))
-      const xDataValue = this.opt.start + index * this.opt.step
-      const yDataValue = serie.data[index]
-      result[i] = {
-        index,
-        xDataValue,
-        xDataValuePos: this.dataUtils.xPosFromValue(xDataValue)!,
-        yDataValuePos: this.dataUtils.yPosFromValue(yDataValue),
-        yDataValue
+      if (index >= 0 && index < serie.data.length) {
+        const xDataValue = this.opt.start + index * this.opt.step
+        const yDataValue = serie.data[index]
+        if (yDataValue != null) {
+          result[i] = {
+            index,
+            xDataValue,
+            xDataValuePos: this.dataUtils.xPosFromValue(xDataValue),
+            yDataValuePos: this.dataUtils.yPosFromValue(yDataValue),
+            yDataValue
+          }
+        }
       }
     }
     return result
@@ -121,7 +125,7 @@ export default class StackedPlot extends AbstractPlot {
       const serie = this.opt.data[serieIndex]
       let indexStep = xRatio <= 1 ? 1 : xRatio
       let indexPos = 0
-      for (let i = i1; i < i2; i += indexStep) {
+      for (let i = i1; i <= i2; i += indexStep) {
         const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
         if (group.length > 0) {
           let minValue: number | null = null

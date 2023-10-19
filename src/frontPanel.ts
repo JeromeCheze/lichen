@@ -166,6 +166,7 @@ export default class FrontPanel {
         this.selected.push(vline)
       }
     }
+    this.update(data.x)
   }
 
   drawCrosshair(value: number) {

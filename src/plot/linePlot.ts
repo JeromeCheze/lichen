@@ -63,14 +63,18 @@ export default class LinePlot extends AbstractPlot {
         continue
       }
       const index = Math.round(serie.data.length * (xValue - serie.start) / (serie.data.length * serie.step))
-      const xDataValue = serie.start + index * serie.step
-      const yDataValue = serie.data[index]
-      result[i] = {
-        index,
-        xDataValue,
-        xDataValuePos: this.dataUtils.xPosFromValue(xDataValue)!,
-        yDataValuePos: this.dataUtils.yPosFromValue(yDataValue),
-        yDataValue
+      if (index >= 0 && index < serie.data.length) {
+        const xDataValue = serie.start + index * serie.step
+        const yDataValue = serie.data[index]
+        if (yDataValue != null) {
+          result[i] = {
+            index,
+            xDataValue,
+            xDataValuePos: this.dataUtils.xPosFromValue(xDataValue)!,
+            yDataValuePos: this.dataUtils.yPosFromValue(yDataValue),
+            yDataValue
+          }
+        }
       }
     }
     return result
@@ -160,7 +164,7 @@ export default class LinePlot extends AbstractPlot {
       ctx.lineWidth = serie.linewidth ? serie.linewidth : 1
       let prev = null
       if (serie.area === true) {
-        for (let i = i1; i < i2; i += indexStep) {
+        for (let i = i1; i <= i2; i += indexStep) {
           const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
           if (group.length > 0) {
             let minValue: number | null = null
@@ -197,7 +201,7 @@ export default class LinePlot extends AbstractPlot {
       ctx.beginPath()
       xPos = this.dataUtils.xPosFromValue(x0)
       prev = null
-      for (let i = i1; i < i2; i += indexStep) {
+      for (let i = i1; i <= i2; i += indexStep) {
         const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
         if (group.length > 0) {
           let minValue: number | null = null

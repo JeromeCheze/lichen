@@ -1,4 +1,4 @@
-import { Lichen, COLORMAPS } from '../dist/index.js'
+import Lichen from '../dist/index.js'
 import heatmap3dData from './heatmap3d_data.js'
 import heatmap2dData from './heatmap2d_data.js'
 import lineData from './line_data.js'
@@ -7,7 +7,6 @@ import sequenceData from './sequence_data.js'
 
 let container = document.querySelector('#chart')
 
-window.COLORMAPS = COLORMAPS
 /*
  * TEST LINE
  */
@@ -199,7 +198,7 @@ window.chart2 = new Lichen(container, {
   colorScale: {
     min: 0,
     max: zMax,
-    stops: COLORMAPS.MAGMA,
+    stops: Lichen.getColorScale('MAGMA'),
     logarithmic: true
   },
   legend: {
