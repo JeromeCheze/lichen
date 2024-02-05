@@ -8,10 +8,6 @@ export default class FrontPanel {
   ctx: CanvasRenderingContext2D;
   master: MasterInterface;
   dataUtils: DataUtils;
-  colorScale: ColorScaleOptions | null;
-  tooltip: boolean;
-  crosshair: CrosshairOptions;
-  vLines: VLine[];
   selected: VLine[];
   tooltipDiv: HTMLElement;
   state: Record<string, any>;
@@ -23,11 +19,7 @@ export default class FrontPanel {
     master.register('FRONT_PANEL', this)
     this.master = master
     const mapOpt = master.getRegistered('CHART').opt
-    this.tooltip = mapOpt.tooltip
-    this.crosshair = mapOpt.crosshair
-    this.vLines = mapOpt.vLines
     this.selected = []
-    this.colorScale = mapOpt.colorScale
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
     this.dataUtils = master.getRegistered('DATA_UTILS')
@@ -58,6 +50,22 @@ export default class FrontPanel {
       .on('cursor', (x) => this.state.cursorPos = x)
   }
 
+  get tooltip(): boolean {
+    return this.master.getRegistered('CHART').opt.tooltip
+  }
+
+  get vLines(): VLine[] {
+    return this.master.getRegistered('CHART').opt.vLines
+  }
+
+  get crosshair(): CrosshairOptions {
+    return this.master.getRegistered('CHART').opt.crosshair
+  }
+
+  get colorScale(): ColorScaleOptions | null {
+    return this.master.getRegistered('CHART').opt.colorScale
+  }
+
   drawTooltip(value: number) {
     const ctx = this.ctx
     const content = this.master.getRegistered('PLOT').tooltipHandler(value, ctx)
@@ -82,10 +90,15 @@ export default class FrontPanel {
     const xDiv = document.createElement('div')
     Object.assign(xDiv.style, { fontWeight: 'bold' })
     const xAxis = this.master.getRegistered('X_AXIS')
+    let textValue = xAxis.opt.tooltipFormatter != null
+      ? xAxis.opt.tooltipFormatter(content.xValue)
+      : xAxis.opt.datetime
+        ? new Date(content.xValue).toISOString().replace('T', ' ').replace('Z', '')
+        : content.xValue
     if (xAxis.opt.datetime) {
-      xDiv.innerHTML = new Date(content.xValue).toISOString().replace('T', ' ').replace('Z', '')
+      xDiv.innerHTML = textValue
     } else {
-      xDiv.innerHTML = `${xAxis.opt.title != null ? xAxis.opt.title : 'x'}: ${content.xValue}`
+      xDiv.innerHTML = `${xAxis.opt.title != null ? xAxis.opt.title : 'x'}: ${textValue}`
     }
     this.tooltipDiv.appendChild(xDiv)
     const serieTable = document.createElement('table')
@@ -149,11 +162,13 @@ export default class FrontPanel {
         ctx.lineWidth = 1
         ctx.strokeRect(xPos - 3.5, -1, 7, this.canvas.height + 2)
       }
-      ctx.font = '10px sans-serif'
-      ctx.textBaseline = vline.position === 'top' ? 'top' : 'bottom'
-      ctx.textAlign = 'left'
-      const yPos = vline.position === 'top' ? 5 : this.canvas.height - 5
-      ctx.fillText(vline.text, this.dataUtils.xPosFromValue(vline.x) + 10, yPos)
+      if (vline.text != null) {
+        ctx.font = '10px sans-serif'
+        ctx.textBaseline = vline.position === 'top' ? 'top' : 'bottom'
+        ctx.textAlign = 'left'
+        const yPos = vline.position == null || vline.position === 'top' ? 5 : this.canvas.height - 5
+        ctx.fillText(vline.text, this.dataUtils.xPosFromValue(vline.x) + 10, yPos)
+      }
     }
     ctx.restore()
   }
@@ -166,19 +181,23 @@ export default class FrontPanel {
         this.selected.push(vline)
       }
     }
+    this.master.send('vlineSelection', this.selected)
     this.update(data.x)
   }
 
   drawCrosshair(value: number) {
     const ctx = this.ctx
     let xPos = this.dataUtils.xPosFromValue(value)
-    const data = this.master.getRegistered('PLOT').dataFromXPos(xPos)
-    for (const d of data) {
-      if (d == null) {
-        continue
+    const chart = this.master.getRegistered('CHART')
+    if (chart.opt.crosshair.sticky) {
+      const data = this.master.getRegistered('PLOT').dataFromXPos(xPos)
+      for (const d of data) {
+        if (d == null) {
+          continue
+        }
+        xPos = d.xDataValuePos
+        break
       }
-      xPos = d.xDataValuePos
-      break
     }
     ctx.save()
     ctx.fillStyle = 'grey'
@@ -193,19 +212,35 @@ export default class FrontPanel {
   }
 
   selection(x: [number | null, number | null], y: [number | null, number | null]) {
+    const selectionOpt = this.master.getRegistered('CHART').opt.selection
+    if (selectionOpt == null) {
+      return
+    }
     this.drawCrosshair(null)
     const ctx = this.ctx
     ctx.save()
     ctx.fillStyle = 'rgba(127,127,127,0.5)'
-    if (x[0] != null && x[1] != null) {
+    ctx.strokeStyle = 'grey'
+    if (selectionOpt === 'xy' && x[0] != null && x[1] != null && y[0] != null && y[1] != null) {
+      let [x1, x2] = [this.dataUtils.xPosFromValue(x[0]), this.dataUtils.xPosFromValue(x[1])]
+      let [y1, y2] = [this.dataUtils.yPosFromValue(y[0]), this.dataUtils.yPosFromValue(y[1])]
+      if (x1 > x2) {
+        [x1, x2] = [x2, x1]
+      }
+      if (y2 > y1) {
+        [y1, y2] = [y2, y1]
+      }
+      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+      ctx.clearRect(x1, y2, x2 - x1, y1 - y2)
+      ctx.strokeRect(x1, y2, x2 - x1, y1 - y2)
+    } else if (selectionOpt.indexOf('x') >= 0 && x[0] != null && x[1] != null) {
       const [x1, x2] = [this.dataUtils.xPosFromValue(x[0]), this.dataUtils.xPosFromValue(x[1])]
       ctx.fillRect(0, 0, x1, this.canvas.height)
       ctx.fillRect(x2, 0, this.canvas.width - x2, this.canvas.height)
       ctx.fillStyle = 'grey'
       ctx.fillRect(x1, 0, 1, this.canvas.height)
       ctx.fillRect(x2, 0, 1, this.canvas.height)
-    }
-    if (y[0] != null && y[1] != null) {
+    } else if (selectionOpt.indexOf('y') >= 0 && y[0] != null && y[1] != null) {
       const [y1, y2] = [this.dataUtils.yPosFromValue(y[0]), this.dataUtils.yPosFromValue(y[1])]
       ctx.fillRect(0, 0, this.canvas.width, y2)
       ctx.fillRect(0, y1, this.canvas.width, this.canvas.height - y1)

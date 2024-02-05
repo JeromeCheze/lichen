@@ -1,25 +1,26 @@
-import { ColorScaleOptions, DataFromPos, Heatmap3dOptions, TooltipHandlerResponse } from '../types'
+import { DataFromPos, Heatmap3dOptions, TooltipHandlerResponse } from '../types'
 import MasterInterface from '../masterInterface'
 import AbstractPlot from './abstractPlot.js'
+import DataUtils from '../dataUtils'
 
 export default class Heatmap3dPlot extends AbstractPlot {
 
-  opt: Heatmap3dOptions;
-  colorScale: ColorScaleOptions;
-  image: HTMLImageElement;
-  imageWidth: number;
-  imageHeight: number;
+  image: HTMLImageElement
+  imageWidth: number
+  imageHeight: number
 
   constructor(container: HTMLElement, master: MasterInterface) {
     super(container, master)
-    this.opt = this.master.getRegistered('CHART').opt.series
-    this.colorScale = this.master.getRegistered('CHART').opt.colorScale
     const [yMin, yMax] = this.yRange()
     this.dataUtils.yMin = yMin
     this.dataUtils.yMax = yMax
     const yAxis = this.master.getRegistered('Y_AXIS')
     yAxis.opt.min = yMin
     yAxis.opt.max = yMax
+  }
+
+  get opt(): Heatmap3dOptions {
+    return this.master.getRegistered('CHART').opt.series
   }
 
   tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
@@ -58,7 +59,7 @@ export default class Heatmap3dPlot extends AbstractPlot {
     for (let y = firstNotNull.length - 1; y >= 0; y--) {
       for (let x = 0; x < o.data.length; x++) {
         if (o.data[x] != null) {
-          const [r, g, b] = this.dataUtils.getColor(o.data[x][y], this.colorScale, false)
+          const [r, g, b] = DataUtils.getColor(o.data[x][y], this.colorScale, false)
           img.data[i + 0] = r
           img.data[i + 1] = g
           img.data[i + 2] = b
@@ -92,14 +93,14 @@ export default class Heatmap3dPlot extends AbstractPlot {
     const [sYMin, sYmax] = this.yRange()
     const [dStart, dEnd] = [this.dataUtils.start, this.dataUtils.end]
     const [dYmin, dYmax] = [this.dataUtils.yMin, this.dataUtils.yMax]
-    const sx = Math.max(0, this.dataUtils.getRatio(dStart, sStart, sEnd) * this.imageWidth)
-    const dx = Math.max(0, this.dataUtils.getRatio(sStart, dStart, dEnd) * ctx.canvas.width)
-    const sy = Math.max(0, this.imageHeight - this.dataUtils.getRatio(dYmax, sYMin, sYmax) * this.imageHeight)
-    const dy = Math.max(0, ctx.canvas.height - this.dataUtils.getRatio(sYmax, dYmin, dYmax) * ctx.canvas.height)
-    const sWidth = Math.min(this.imageWidth - sx, this.dataUtils.getRatio(dEnd, sStart, sEnd) * this.imageWidth - sx)
-    const sHeight = Math.min(this.imageHeight - sy, this.imageHeight - this.dataUtils.getRatio(dYmin, sYMin, sYmax) * this.imageHeight - sy)
-    const dWidth = Math.min(ctx.canvas.width - dx, this.dataUtils.getRatio(sEnd, dStart, dEnd) * ctx.canvas.width - dx)
-    const dHeight = Math.min(ctx.canvas.height - dy, ctx.canvas.height - this.dataUtils.getRatio(sYMin, dYmin, dYmax) * ctx.canvas.height - dy)
+    const sx = Math.max(0, DataUtils.getRatio(dStart, sStart, sEnd) * this.imageWidth)
+    const dx = Math.max(0, DataUtils.getRatio(sStart, dStart, dEnd) * ctx.canvas.width)
+    const sy = Math.max(0, this.imageHeight - DataUtils.getRatio(dYmax, sYMin, sYmax) * this.imageHeight)
+    const dy = Math.max(0, ctx.canvas.height - DataUtils.getRatio(sYmax, dYmin, dYmax) * ctx.canvas.height)
+    const sWidth = Math.min(this.imageWidth - sx, DataUtils.getRatio(dEnd, sStart, sEnd) * this.imageWidth - sx)
+    const sHeight = Math.min(this.imageHeight - sy, this.imageHeight - DataUtils.getRatio(dYmin, sYMin, sYmax) * this.imageHeight - sy)
+    const dWidth = Math.min(ctx.canvas.width - dx, DataUtils.getRatio(sEnd, dStart, dEnd) * ctx.canvas.width - dx)
+    const dHeight = Math.min(ctx.canvas.height - dy, ctx.canvas.height - DataUtils.getRatio(sYMin, dYmin, dYmax) * ctx.canvas.height - dy)
     // console.log({ sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight })
     if (delay) {
       setTimeout(() => {

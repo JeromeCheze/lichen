@@ -7,12 +7,12 @@ const SELECT_THRESHOLD = 20
 
 export default class EventUtils {
 
-  element: HTMLElement;
-  dataUtils: DataUtils;
-  handler: EvenUtilsEventHandlerMap;
-  registered: Record<string, ((e:any) => void)[]>;
-  state: Record<string, any>;
-  master: MasterInterface;
+  element: HTMLElement
+  dataUtils: DataUtils
+  handler: EvenUtilsEventHandlerMap
+  // registered: Record<string, ((e:any) => void)[]>
+  state: Record<string, any>
+  master: MasterInterface
 
   constructor(master: MasterInterface, element: HTMLElement) {
     master.register('EVENT_UTILS', this)
@@ -20,13 +20,12 @@ export default class EventUtils {
     this.element = element
     this.dataUtils = master.getRegistered('DATA_UTILS')
     this.handler = {
-      'click': { el: element, callback: (e: MouseEvent) => this.handleClick(e) },
       'mouseleave': { el: element, callback: (e: MouseEvent) => this.handleMouseLeave(e) },
       'mousemove': { el: element, callback: (e: MouseEvent) => this.handleMouseMove(e) },
       'mousedown': { el: element, callback: (e: MouseEvent) => this.handleMouseDown(e) },
       'mouseup': { el: element, callback: (e: MouseEvent) => this.handleMouseUp(e) },
       'dblclick': { el: element, callback: (e: MouseEvent) => this.handleDblClick(e) },
-      'wheel': { el: element, callback: (e: WheelEvent) => this.handleWheel(e) },
+      'wheel': { el: element, callback: (e: WheelEvent) => this.handleWheel(e), passive: false },
       'touchstart': { el: element, callback: (e: TouchEvent) => this.handleTouchStart(e) },
       'touchend': { el: element, callback: (e: TouchEvent) => this.handleTouchEnd(e) },
       'touchcancel': { el: element, callback: (e: TouchEvent) => this.handleTouchEnd(e) },
@@ -35,16 +34,20 @@ export default class EventUtils {
       'keyup': { el: document.body, callback: (e: KeyboardEvent) => this.handleKeyUp(e) }
     }
     for (const [eventName, o] of Object.entries(this.handler)) {
-      o.el.addEventListener(eventName, o.callback)
+      if (o.passive === false) {
+        o.el.addEventListener(eventName, o.callback, { passive: false })
+      } else {
+        o.el.addEventListener(eventName, o.callback)
+      }
     }
-    this.registered = {
-      active: [],
-      move: [],
-      xRangeChange: [],
-      yRangeChange: [],
-      resetDisplay: [],
-      selecting: [],
-    }
+    // this.registered = {
+    //   active: [],
+    //   move: [],
+    //   xRangeChange: [],
+    //   yRangeChange: [],
+    //   resetDisplay: [],
+    //   selecting: [],
+    // }
     this.state = {
       active: false,
       cursorPos: null,
@@ -60,16 +63,6 @@ export default class EventUtils {
   getRelativePosition(e: MouseEvent | Touch) {
     const bcr = this.element.getBoundingClientRect()
     return [e.clientX - bcr.x, e.clientY - bcr.y]
-  }
-
-  handleClick(e: MouseEvent) {
-    const [xPos, yPos] = this.getRelativePosition(e)
-    this.master.send('click', {
-      xPos,
-      yPos,
-      x: this.dataUtils.xValueFromPos(xPos),
-      y: this.dataUtils.yValueFromPos(yPos)
-    })
   }
 
   handleMouseLeave(e?: MouseEvent) {
@@ -107,6 +100,7 @@ export default class EventUtils {
           x: x1 != null && x2 != null ? [Math.min(x1, x2), Math.max(x1, x2)] : [null, null],
           y: y1 != null && y2 != null ? [Math.min(y1, y2), Math.max(y1, y2)] : [null, null]
         })
+        this.clearSelection()
       } else {
         const deltaX = this.state.mouseDownPos[0] - x
         const deltaY = this.state.mouseDownPos[0] - y
@@ -142,45 +136,70 @@ export default class EventUtils {
   }
 
   handleMouseUp(e: MouseEvent) {
-    if (this.state.shiftKey && this.state.mouseDownPos != null) {
-      const [x, y] = this.getRelativePosition(e)
-      if (Math.abs(x - this.state.mouseDownPos[0]) > SELECT_THRESHOLD) {
-        const x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])
-        const x2 = this.dataUtils.xValueFromPos(x)
-        this.master.send('xRangeChange', [Math.min(x1, x2), Math.max(x1, x2)])
+    const [x, y] = this.getRelativePosition(e)
+    if (this.state.mouseDownPos != null) {
+      if (this.state.shiftKey) {
+        let xRange: (number | null)[] = [null, null]
+        let yRange: (number | null)[] = [null, null]
+        if (Math.abs(x - this.state.mouseDownPos[0]) > SELECT_THRESHOLD) {
+          const x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])
+          const x2 = this.dataUtils.xValueFromPos(x)
+          xRange = [Math.min(x1, x2), Math.max(x1, x2)]
+        }
+        if (Math.abs(y - this.state.mouseDownPos[1]) > SELECT_THRESHOLD) {
+          const y1 = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1])
+          const y2 = this.dataUtils.yValueFromPos(y)
+          yRange = [Math.min(y1, y2), Math.max(y1, y2)]
+        }
+        const chart = this.master.getRegistered('CHART')
+        if (chart.opt.hooks.beforeSelection(xRange, yRange) === true) {
+          if (chart.opt.selection != null) {
+            if (chart.opt.selection.indexOf('x') >= 0) {
+              this.master.send('xRangeChange', xRange)
+            }
+            if (chart.opt.selection.indexOf('y') >= 0) {
+              this.master.send('yRangeChange', yRange)
+            }
+          }
+        }
+      } else {
+        console.log('mouseUp')
+        this.master.send('click', {
+          xPos: x,
+          yPos: y,
+          x: this.dataUtils.xValueFromPos(x),
+          y: this.dataUtils.yValueFromPos(y)
+        })
       }
-      if (Math.abs(y - this.state.mouseDownPos[1]) > SELECT_THRESHOLD) {
-        const y1 = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1])
-        const y2 = this.dataUtils.yValueFromPos(y)
-        this.master.send('yRangeChange', [Math.min(y1, y2), Math.max(y1, y2)])
-      }
+      this.state.mouseDownPos = null
     }
-    this.state.mouseDownPos = null
   }
 
   handleDblClick(e: MouseEvent | TouchEvent) {
     e.preventDefault()
     e.stopPropagation()
+    const ev = e instanceof MouseEvent ? e : e.touches[0]
+    const [x, y] = this.getRelativePosition(ev)
+    this.master.send('dblclick', this.dataUtils.xValueFromPos(x))
     this.master.send('resetDisplay', null)
     this.clearSelection()
   }
 
   handleWheel(e: WheelEvent) {
-    if (this.state.shiftKey) {
+    if (e.shiftKey) {
       e.preventDefault()
-      e.stopPropagation()
       const sign = Math.sign(e.deltaY)
-      if (this.state.ctrlKey) {
+      if (e.ctrlKey) {
         const ratio = 0.1 * (this.dataUtils.yMax - this.dataUtils.yMin)
         this.master.send('yRangeChange', [
-          this.dataUtils.yMin + sign * ratio,
-          this.dataUtils.yMax - sign * ratio
+          this.dataUtils.yMin - sign * ratio,
+          this.dataUtils.yMax + sign * ratio
         ])
       } else {
         const ratio = 0.1 * (this.dataUtils.end - this.dataUtils.start)
         this.master.send('xRangeChange', [
-          this.dataUtils.start + sign * ratio,
-          this.dataUtils.end - sign * ratio
+          this.dataUtils.start - sign * ratio,
+          this.dataUtils.end + sign * ratio
         ])
       }
     }
@@ -317,54 +336,50 @@ export default class EventUtils {
   }
 
   handleKeyDown(e: KeyboardEvent) {
-    if (this.state.active) {
-      this.state.shiftKey = e.shiftKey
-      this.state.ctrlKey = e.ctrlKey
-    }
+    this.state.shiftKey = e.shiftKey
+    this.state.ctrlKey = e.ctrlKey
   }
 
   handleKeyUp(e: KeyboardEvent) {
-    if (this.state.active) {
-      this.state.shiftKey = e.shiftKey
-      this.state.ctrlKey = e.ctrlKey
-    }
+    this.state.shiftKey = e.shiftKey
+    this.state.ctrlKey = e.ctrlKey
   }
 
- clearSelection() {
+  clearSelection() {
     if (window.getSelection) {
       const sel = window.getSelection()
       sel.removeAllRanges()
     }
   }
 
-  active(callback) {
-    this.registered.active.push(callback)
-    return this
-  }
+  // active(callback) {
+  //   this.registered.active.push(callback)
+  //   return this
+  // }
 
-  move(callback) {
-    this.registered.move.push(callback)
-    return this
-  }
+  // move(callback) {
+  //   this.registered.move.push(callback)
+  //   return this
+  // }
 
-  xRangeChange(callback) {
-    this.registered.xRangeChange.push(callback)
-    return this
-  }
+  // xRangeChange(callback) {
+  //   this.registered.xRangeChange.push(callback)
+  //   return this
+  // }
 
-  yRangeChange(callback) {
-    this.registered.yRangeChange.push(callback)
-    return this
-  }
+  // yRangeChange(callback) {
+  //   this.registered.yRangeChange.push(callback)
+  //   return this
+  // }
 
-  selecting(callback) {
-    this.registered.selecting.push(callback)
-    return this
-  }
+  // selecting(callback) {
+  //   this.registered.selecting.push(callback)
+  //   return this
+  // }
 
-  resetDisplay(callback) {
-    this.registered.resetDisplay.push(callback)
-    return this
-  }
+  // resetDisplay(callback) {
+  //   this.registered.resetDisplay.push(callback)
+  //   return this
+  // }
 
 }

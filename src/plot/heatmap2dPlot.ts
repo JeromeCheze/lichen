@@ -1,20 +1,20 @@
-import { ColorScaleOptions, DataFromPos, Heatmap2dOptions, TooltipHandlerResponse } from '../types'
+import { DataFromPos, Heatmap2dOptions, TooltipHandlerResponse } from '../types'
 import MasterInterface from '../masterInterface'
 import AbstractPlot from './abstractPlot.js'
+import DataUtils from '../dataUtils'
 
 const MARGIN = 1
 
 export default class Heatmap2dPlot extends AbstractPlot {
 
-  opt: Heatmap2dOptions[];
-  colorScale: ColorScaleOptions;
-
   constructor (container: HTMLElement, master: MasterInterface) {
     super(container, master)
-    this.opt = this.master.getRegistered('CHART').opt.series
     this.master.getRegistered('Y_AXIS').categories = this.opt.map(x => x.name)
-    this.colorScale = this.master.getRegistered('CHART').opt.colorScale
     this.master.getRegistered('CHART').opt.zoom = 'x'
+  }
+
+  get opt(): Heatmap2dOptions[] {
+    return this.master.getRegistered('CHART').opt.series
   }
 
   tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
@@ -30,7 +30,7 @@ export default class Heatmap2dPlot extends AbstractPlot {
       const value = data[i].yDataValue
       yValues.push({
         // color: 'black',
-        color: this.dataUtils.getColor(value, this.colorScale),
+        color: DataUtils.getColor(value, this.colorScale),
         value,
         name: s.name,
         textValue: s.tooltipFormatter != null ? s.tooltipFormatter(value) : `${value}`
@@ -127,7 +127,7 @@ export default class Heatmap2dPlot extends AbstractPlot {
       for (let i = i1; i < i2; i += indexStep) {
         const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
         if (group.length > 0) {
-          ctx.fillStyle = this.dataUtils.getColor(Math.max.apply(null, group), this.colorScale) as string
+          ctx.fillStyle = DataUtils.getColor(Math.max.apply(null, group), this.colorScale) as string
           ctx.fillRect(Math.floor(xPos), yPos + MARGIN, Math.floor(xStep) + 1, serieHeight - 2 * MARGIN)
         }
         xPos += xStep

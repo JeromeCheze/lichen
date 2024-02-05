@@ -6,7 +6,6 @@ const TEXT_PADDING = 4
 
 export default class XAxis {
 
-  opt: XAxisOptions;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   dataUtils: DataUtils;
@@ -18,7 +17,6 @@ export default class XAxis {
   ) {
     master.register('X_AXIS', this)
     this.master = master
-    this.opt = master.getRegistered('CHART').opt.xAxis
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
     this.dataUtils = master.getRegistered('DATA_UTILS')
@@ -29,6 +27,10 @@ export default class XAxis {
     }
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 0 })
     container.appendChild(this.canvas)
+  }
+
+  get opt(): XAxisOptions {
+    return this.master.getRegistered('CHART').opt.xAxis
   }
 
   drawLinearAxis() {

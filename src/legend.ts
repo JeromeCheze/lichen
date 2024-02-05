@@ -3,13 +3,8 @@ import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendItem, Lege
 
 export default class Legend {
   
-  master: MasterInterface;
-  container: HTMLElement;
-  opt: LegendOptions;
-  type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence' | 'scatter';
-  colorScale: null | ColorScaleOptions;
-  height: number;
-  series: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions | ScatterOptions[];
+  master: MasterInterface
+  container: HTMLElement
 
   constructor (
     container: HTMLElement,
@@ -17,13 +12,27 @@ export default class Legend {
   ) {
     master.register('LEGEND', this)
     this.master = master
-    const chartOpt = master.getRegistered('CHART').opt
     this.container = container
-    this.opt = chartOpt.legend
-    this.type = chartOpt.type
-    this.colorScale = chartOpt.colorScale
-    this.series = chartOpt.series
-    this.height = chartOpt.height
+  }
+
+  get opt(): LegendOptions {
+    return this.master.getRegistered('CHART').opt.legend
+  }
+
+  get type(): 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence' | 'scatter' {
+    return this.master.getRegistered('CHART').opt.type
+  }
+
+  get colorScale(): null | ColorScaleOptions {
+    return this.master.getRegistered('CHART').opt.colorScale
+  }
+
+  get series(): LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions | ScatterOptions[] {
+    return this.master.getRegistered('CHART').opt.series
+  }
+
+  get height(): number {
+    return this.master.getRegistered('CHART').opt.height
   }
 
   drawHeatmap3dLegend () {

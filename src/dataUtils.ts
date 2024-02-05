@@ -3,16 +3,14 @@ import { DataUtilsComputedData, LineOptions, Heatmap2dOptions, Heatmap3dOptions,
 
 export default class DataUtils {
 
-  type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence' | 'scatter';
-  opt: LineOptions[] | Heatmap2dOptions[] | Heatmap3dOptions | StackedOptions | SequenceOptions | ScatterOptions[];
-  width: number;
-  height: number;
-  computed: DataUtilsComputedData;
-  yMin: number | null;
-  yMax: number | null;
-  start: number | null;
-  end: number | null;
-  master: MasterInterface;
+  width: number
+  height: number
+  computed: DataUtilsComputedData
+  yMin: number | null
+  yMax: number | null
+  start: number | null
+  end: number | null
+  master: MasterInterface
 
   /**
    * 
@@ -27,8 +25,6 @@ export default class DataUtils {
   ) {
     master.register('DATA_UTILS', this)
     this.master = master
-    this.type = master.getRegistered('CHART').opt.type
-    this.opt = master.getRegistered('CHART').opt.series
     this.width = width
     this.height = height
     this.yMin = null
@@ -177,11 +173,11 @@ export default class DataUtils {
     }
   }
 
-  getRatio(v: number, min: number, max: number) {
+  static getRatio(v: number, min: number, max: number) {
     return (v - min) / (max - min)
   }
 
-  toRGB(c: [number, number, number]) {
+  static toRGB(c: [number, number, number]) {
     return `rgb(${c[0]},${c[1]},${c[2]})`
   }
 
@@ -189,7 +185,7 @@ export default class DataUtils {
     return `rgba(${c[0]},${c[1]},${c[2]},${a})`
   }
 
-  getColor(value: number, colorScale: ColorScaleOptions, text = true) {
+  static getColor(value: number, colorScale: ColorScaleOptions, text = true) {
     let min = colorScale.min
     let max = colorScale.max
     if (colorScale.logarithmic) {

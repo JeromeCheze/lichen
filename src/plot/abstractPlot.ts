@@ -1,6 +1,6 @@
 import DataUtils from "../dataUtils"
 import MasterInterface from "../masterInterface"
-import { DataFromPos, TooltipHandlerResponse } from "../types"
+import { ColorScaleOptions, DataFromPos, TooltipHandlerResponse } from "../types"
 
 export default abstract class AbstractPlot {
 
@@ -19,6 +19,10 @@ export default abstract class AbstractPlot {
     this.canvas.height = this.dataUtils.height
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 10 })
     container.appendChild(this.canvas)
+  }
+
+  get colorScale(): ColorScaleOptions {
+    return this.master.getRegistered('CHART').opt.colorScale
   }
 
   static getHeight(master: MasterInterface) {

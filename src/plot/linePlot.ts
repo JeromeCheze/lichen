@@ -1,21 +1,21 @@
-import { ColorScaleOptions, DataFromPos, LineOptions, TooltipHandlerResponse } from '../types'
+import { DataFromPos, LineOptions, TooltipHandlerResponse } from '../types'
 import MasterInterface from '../masterInterface'
 import AbstractPlot from './abstractPlot.js'
+import DataUtils from '../dataUtils'
 
 const FILL_OPACITY = 0.2
 
 export default class LinePlot extends AbstractPlot {
 
-  opt: LineOptions[];
-  colorScale: ColorScaleOptions;
-
   constructor(container: HTMLElement, master: MasterInterface) {
     super(container, master)
-    this.opt = this.master.getRegistered('CHART').opt.series
-    this.colorScale = this.master.getRegistered('CHART').opt.colorScale
     for (const serie of this.opt) {
       serie.enabled = true
     }
+  }
+
+  get opt(): LineOptions[] {
+    return this.master.getRegistered('CHART').opt.series
   }
 
   tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
@@ -31,7 +31,7 @@ export default class LinePlot extends AbstractPlot {
       }
       xValue = data[i].xDataValue
       const value = data[i].yDataValue
-      const color = s.color != null ? s.color : this.dataUtils.getColor(value, this.colorScale, true) as string
+      const color = s.color != null ? s.color : DataUtils.getColor(value, this.colorScale, true) as string
       yValues.push({
         color,
         value,
@@ -127,7 +127,7 @@ export default class LinePlot extends AbstractPlot {
         0, this.dataUtils.yPosFromValue(max)
       )
       for (const stop of this.colorScale.stops) {
-        strokeGrad.addColorStop(stop[0], this.dataUtils.toRGB(stop[1]))
+        strokeGrad.addColorStop(stop[0], DataUtils.toRGB(stop[1]))
       }
       ctx.strokeStyle = strokeGrad
     } else {

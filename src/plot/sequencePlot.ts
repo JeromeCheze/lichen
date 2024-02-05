@@ -6,13 +6,14 @@ const MARGIN = 1
 
 export default class SequencePlot extends AbstractPlot {
 
-  opt: SequenceOptions;
-
   constructor(container: HTMLElement, master: MasterInterface) {
     super(container, master)
-    this.opt = this.master.getRegistered('CHART').opt.series
     this.master.getRegistered('Y_AXIS').categories = this.opt.valueMap.map(x => x.name)
     this.master.getRegistered('CHART').opt.zoom = 'x'
+  }
+
+  get opt(): SequenceOptions {
+    return this.master.getRegistered('CHART').opt.series
   }
 
   tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {

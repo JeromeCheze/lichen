@@ -1,19 +1,19 @@
-import { ColorScaleOptions, DataFromPos, StackedDataOptions, StackedOptions, TooltipHandlerResponse } from '../types'
+import { DataFromPos, StackedDataOptions, StackedOptions, TooltipHandlerResponse } from '../types'
 import MasterInterface from '../masterInterface'
 import AbstractPlot from './abstractPlot.js'
+import DataUtils from '../dataUtils'
 
 export default class StackedPlot extends AbstractPlot {
 
-  opt: StackedOptions;
-  colorScale: ColorScaleOptions;
-
   constructor(container: HTMLElement, master: MasterInterface) {
     super(container, master)
-    this.opt = this.master.getRegistered('CHART').opt.series
-    this.colorScale = this.master.getRegistered('CHART').opt.colorScale
     for (const serie of this.opt.data) {
       serie.enabled = true
     }
+  }
+
+  get opt(): StackedOptions {
+    return this.master.getRegistered('CHART').opt.series
   }
 
   tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
@@ -30,7 +30,7 @@ export default class StackedPlot extends AbstractPlot {
       }
       xValue = data[i].xDataValue
       const value = data[i].yDataValue
-      const color = s.color != null ? s.color : this.dataUtils.getColor(value, this.colorScale, true) as string
+      const color = s.color != null ? s.color : DataUtils.getColor(value, this.colorScale, true) as string
       yValues.push({
         color,
         value,

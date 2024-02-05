@@ -8,11 +8,12 @@ const RADIUS = 4
 
 export default class ScatterPlot extends AbstractPlot {
 
-  opt: ScatterOptions[];
-
   constructor(container: HTMLElement, master: MasterInterface) {
     super(container, master)
-    this.opt = this.master.getRegistered('CHART').opt.series
+  }
+
+  get opt(): ScatterOptions[] {
+    return this.master.getRegistered('CHART').opt.series
   }
 
   tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
@@ -95,6 +96,7 @@ export default class ScatterPlot extends AbstractPlot {
   }
 
   xRange() {
+    const xAxis = this.master.getRegistered('X_AXIS')
     let minStart: number | null = null
     let maxEnd: number | null = null
     for (const serie of this.opt) {
@@ -104,7 +106,10 @@ export default class ScatterPlot extends AbstractPlot {
       }
     }
     const padding = (maxEnd - minStart) * 0.01
-    return [minStart - padding, maxEnd + padding] as [number, number]
+    return [
+      xAxis.opt.min != null ? xAxis.opt.min : minStart - padding,
+      xAxis.opt.max != null ? xAxis.opt.max : maxEnd + padding
+    ] as [number, number]
   }
 
   getProcessingData() {

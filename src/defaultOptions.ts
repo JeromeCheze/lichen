@@ -16,6 +16,7 @@ export default {
     width: 80
   },
   zoom: 'xy',
+  selection: 'xy',
   xAxis: {
     enabled: AXIS_ENABLED,
     gridEnabled: GRID_ENABLED,
@@ -49,6 +50,11 @@ export default {
     enabled: true,
     sticky: true,
     text: ''
+  },
+  hooks: {
+    beforeUpdate: (chart) => true,
+    beforeSelection: (x, y) => true,
+    beforeResetDisplay: () => true
   },
   vLines: [],
   height: 120,
