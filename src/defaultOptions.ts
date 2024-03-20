@@ -38,6 +38,7 @@ export default {
     tickWidth: TICK_WIDTH,
     gridColor: GRID_COLOR,
     powerOfTen: false,
+    logarithmic: false,
     width: 50
   },
   legend: {

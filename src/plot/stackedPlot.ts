@@ -1,7 +1,7 @@
 import { DataFromPos, StackedDataOptions, StackedOptions, TooltipHandlerResponse } from '../types'
 import MasterInterface from '../masterInterface'
 import AbstractPlot from './abstractPlot.js'
-import DataUtils from '../dataUtils'
+import DataUtils from '../dataUtils.js'
 
 export default class StackedPlot extends AbstractPlot {
 

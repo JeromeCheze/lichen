@@ -1,7 +1,7 @@
 import { DataFromPos, Heatmap3dOptions, TooltipHandlerResponse } from '../types'
 import MasterInterface from '../masterInterface'
 import AbstractPlot from './abstractPlot.js'
-import DataUtils from '../dataUtils'
+import DataUtils from '../dataUtils.js'
 
 export default class Heatmap3dPlot extends AbstractPlot {
 
@@ -87,7 +87,7 @@ export default class Heatmap3dPlot extends AbstractPlot {
     }
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    ctx.imageSmoothingEnabled = false
+    ctx.imageSmoothingEnabled = this.opt.smoothing != null ? this.opt.smoothing : false
     // console.log(this.image)
     const [sStart, sEnd] = this.xRange()
     const [sYMin, sYmax] = this.yRange()

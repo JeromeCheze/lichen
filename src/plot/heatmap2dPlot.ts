@@ -1,7 +1,7 @@
 import { DataFromPos, Heatmap2dOptions, TooltipHandlerResponse } from '../types'
 import MasterInterface from '../masterInterface'
 import AbstractPlot from './abstractPlot.js'
-import DataUtils from '../dataUtils'
+import DataUtils from '../dataUtils.js'
 
 const MARGIN = 1
 

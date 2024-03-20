@@ -1,5 +1,5 @@
 import MasterInterface from './masterInterface'
-import { DataUtilsComputedData, LineOptions, Heatmap2dOptions, Heatmap3dOptions, ColorScaleOptions, StackedOptions, SequenceOptions, StackedDataOptions, ScatterOptions } from './types'
+import { DataUtilsComputedData, ColorScaleOptions } from './types'
 
 export default class DataUtils {
 
@@ -94,6 +94,9 @@ export default class DataUtils {
   yPosFromValue(yValue: number | null): null | number {
     if (yValue == null || this.yMin == null || this.yMax == null) {
       return null
+    }
+    if (this.master.getRegistered('Y_AXIS').opt.logarithmic) {
+      return this.height * (Math.log10(this.yMax) - Math.log10(yValue)) / (Math.log10(this.yMax) - Math.log10(this.yMin))
     }
     return this.height * (this.yMax - yValue) / (this.yMax - this.yMin)
   }

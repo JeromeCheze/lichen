@@ -95,17 +95,22 @@ export default class Lichen {
    * @param dest 
    */
   deepCopy(src: any, dest={}) {
-    if (src instanceof Object) {
+    if (src instanceof Function) {
+      return src
+    } else if (src instanceof Array) {
+      return src.map(item => this.deepCopy(item))
+    } else if (src instanceof Object) {
       for (const [k, v] of Object.entries(src)) {
-        if (v instanceof Function) {
-          dest[k] = v
-        } else if (v instanceof Array) {
-          dest[k] = v.map(item => this.deepCopy(item))
-        } else if (v instanceof Object) {
-          dest[k] = this.deepCopy(v, dest[k])
-        } else if (v !== undefined){
-          dest[k] = v
-        }
+        dest[k] = this.deepCopy(v, dest[k])
+        // if (v instanceof Function) {
+        //   dest[k] = v
+        // } else if (v instanceof Array) {
+        //   dest[k] = v.map(item => this.deepCopy(item))
+        // } else if (v instanceof Object) {
+        //   dest[k] = this.deepCopy(v, dest[k])
+        // } else if (v !== undefined){
+        //   dest[k] = v
+        // }
       }
       return dest
     } else {
@@ -122,7 +127,6 @@ export default class Lichen {
     // deepcopy default options
     const result = this.deepCopy(defaultOptions) as LichenOptions
     this.deepCopy(opt, result)
-    // console.log(result)
     // overwrite default options with given options
     // for (const [k, v] of Object.entries(opt)) {
     //   if (v instanceof Function) {
@@ -245,9 +249,12 @@ export default class Lichen {
       })
       .on('yRangeChange', (value: [number, number]) => {
         const ratio = (value[1] - value[0]) / (this.dataUtils.yMax - this.dataUtils.yMin)
+        const newMid = (value[0] + value[1]) / 2
+        const prevMid = (this.dataUtils.yMin + this.dataUtils.yMax) / 2
+        const deltaY = newMid - prevMid
         for (const chart of Object.values(this.opt.synced())) {
           const delta = chart.dataUtils.yMax - chart.dataUtils.yMin
-          const mid = delta / 2
+          const mid = deltaY + (chart.dataUtils.yMax + chart.dataUtils.yMin) / 2
           const halfAmp = delta * ratio / 2
           chart.setYRange(mid - halfAmp, mid + halfAmp)
         }
@@ -293,7 +300,7 @@ export default class Lichen {
     this.init(container, true)
     this.setYRange(saveBounds.yMin, saveBounds.yMax, false)
     this.setXRange(saveBounds.start, saveBounds.end)
-    this.draw()
+    // this.draw()
   }
 
   handleResize() {
@@ -308,8 +315,9 @@ export default class Lichen {
   resetDisplay() {
     if (this.opt.hooks.beforeResetDisplay() === true) {
       const dataUtils = this.master.getRegistered('DATA_UTILS')
-      const plot = this.master.getRegistered('PLOT')
-      const [xMin, xMax] = plot.xRange()
+      const xRanges = Object.values(this.opt.synced()).map(chart => chart.master.getRegistered('PLOT').xRange())
+      const xMin = Math.min.apply(null, xRanges.map(x => x[0]))
+      const xMax = Math.max.apply(null, xRanges.map(x => x[1]))
       dataUtils.resetComputed()
       dataUtils.setXRange(xMin, xMax)
       dataUtils.setYRange(null, null)

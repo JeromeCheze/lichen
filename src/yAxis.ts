@@ -33,7 +33,7 @@ export default class YAxis {
     return this.master.getRegistered('CHART').opt.yAxis
   }
 
-  drawLinearAxis() {
+  drawAxis() {
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     ctx.save()
@@ -125,7 +125,7 @@ export default class YAxis {
 
   update() {
     if (this.categories == null) {
-      this.drawLinearAxis()
+      this.drawAxis()
     } else {
       this.drawCategories()
     }

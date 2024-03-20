@@ -154,10 +154,10 @@ export default class EventUtils {
         const chart = this.master.getRegistered('CHART')
         if (chart.opt.hooks.beforeSelection(xRange, yRange) === true) {
           if (chart.opt.selection != null) {
-            if (chart.opt.selection.indexOf('x') >= 0) {
+            if (chart.opt.selection.indexOf('x') >= 0 && xRange[0] != null) {
               this.master.send('xRangeChange', xRange)
             }
-            if (chart.opt.selection.indexOf('y') >= 0) {
+            if (chart.opt.selection.indexOf('y') >= 0 && yRange[0] != null) {
               this.master.send('yRangeChange', yRange)
             }
           }

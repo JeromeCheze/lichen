@@ -26,6 +26,7 @@ export interface XAxisOptions extends GlobalAxisOptions {
 
 export interface YAxisOptions extends GlobalAxisOptions {
   powerOfTen?: boolean
+  logarithmic?: boolean
   width?: number
 }
 
@@ -108,6 +109,7 @@ export interface Heatmap3dOptions {
   yMax: number
   zMin: number
   zMax: number
+  smoothing?: boolean
 }
 
 export interface HeaderOptions {

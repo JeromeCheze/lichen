@@ -1,7 +1,7 @@
 import { DataFromPos, LineOptions, TooltipHandlerResponse } from '../types'
 import MasterInterface from '../masterInterface'
 import AbstractPlot from './abstractPlot.js'
-import DataUtils from '../dataUtils'
+import DataUtils from '../dataUtils.js'
 
 const FILL_OPACITY = 0.2
 
