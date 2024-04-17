@@ -1,4 +1,4 @@
-import { EventChannelSubscription } from './types'
+import type { EventChannelSubscription } from './types'
 
 export default class MasterInterface {
 
@@ -18,7 +18,7 @@ export default class MasterInterface {
     return this
   }
 
-  send (name, data: any) {
+  send (name: string, data: any) {
     if (this.subscription[name] != null) {
       for (const callback of this.subscription[name]) {
         callback.call(null, data)

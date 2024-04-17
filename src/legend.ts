@@ -1,5 +1,5 @@
 import MasterInterface from './masterInterface'
-import { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendItem, LegendOptions, LineOptions, SequenceOptions, StackedOptions, ScatterOptions } from './types'
+import type { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendItem, LegendOptions, LineOptions, SequenceOptions, StackedOptions, ScatterOptions } from './types'
 
 export default class Legend {
   
@@ -39,17 +39,17 @@ export default class Legend {
     this.container.innerHTML = ''
     const canvas = document.createElement('canvas')
     this.container.appendChild(canvas)
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     ctx.save()
-    const min = this.colorScale.logarithmic && this.colorScale.min != 0 ? Math.log2(this.colorScale.min) : this.colorScale.min
-    const max = this.colorScale.logarithmic && this.colorScale.max != 0 ? Math.log2(this.colorScale.max) : this.colorScale.max
+    const min = this.colorScale!.logarithmic && this.colorScale!.min != 0 ? Math.log2(this.colorScale!.min) : this.colorScale!.min
+    const max = this.colorScale!.logarithmic && this.colorScale!.max != 0 ? Math.log2(this.colorScale!.max) : this.colorScale!.max
     if (this.opt.position === 'bottom') {
       Object.assign(this.container.style, { paddingTop: '10px' })
       Object.assign(canvas.style, { display: 'block', margin: 'auto' })
       canvas.width = Math.min(400, this.container.getBoundingClientRect().width)
       canvas.height = 40
       const grad = ctx.createLinearGradient(20, 0, canvas.width - 20, 0)
-      for (const stop of this.colorScale.stops) {
+      for (const stop of this.colorScale!.stops) {
         grad.addColorStop(stop[0], `rgb(${stop[1][0]},${stop[1][1]},${stop[1][2]})`)
       }
       ctx.fillStyle = grad
@@ -60,18 +60,18 @@ export default class Legend {
       ctx.font = `${this.opt.fontSize}px sans-serif`
       ctx.textBaseline = 'top'
       ctx.textAlign = 'center'
-      for (const stop of this.colorScale.stops) {
+      for (const stop of this.colorScale!.stops) {
         const x = 20 + (canvas.width - 40) * stop[0]
-        const v = this.colorScale.logarithmic ? Math.pow(2, stop[0] * max - min) : stop[0] * (max - min)
+        const v = this.colorScale!.logarithmic ? Math.pow(2, stop[0] * max - min) : stop[0] * (max - min)
         ctx.fillRect(x, 11, 1, 4)
         ctx.fillText(`${Math.round(v)}`, x, 18)
       }
     } else {
       Object.assign(this.container.style, { paddingLeft: '10px' })
-      canvas.width = this.opt.width
+      canvas.width = this.opt.width!
       canvas.height = this.height
       const grad = ctx.createLinearGradient(0, canvas.height, 0, 0)
-      for (const stop of this.colorScale.stops) {
+      for (const stop of this.colorScale!.stops) {
         grad.addColorStop(stop[0], `rgb(${stop[1][0]},${stop[1][1]},${stop[1][2]})`)
       }
       ctx.fillStyle = grad
@@ -83,9 +83,9 @@ export default class Legend {
       ctx.textBaseline = 'middle'
       ctx.textAlign = 'left'
       const drawHeight = canvas.height - 21
-      for (const stop of this.colorScale.stops) {
+      for (const stop of this.colorScale!.stops) {
         const y =  11 + drawHeight - drawHeight * stop[0]
-        const v = this.colorScale.logarithmic ? Math.pow(2, stop[0] * max - min) : stop[0] * (max - min)
+        const v = this.colorScale!.logarithmic ? Math.pow(2, stop[0] * max - min) : stop[0] * (max - min)
         ctx.fillRect(11, Math.floor(y - 1), 4, 1)
         ctx.fillText(`${Math.round(v)}`, 19, y)
       }

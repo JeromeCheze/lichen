@@ -1,6 +1,6 @@
+import type { ColorScaleOptions, CrosshairOptions, Heatmap2dOptions, LineOptions, SequenceOptions, VLine, TooltipHandlerResponse } from "./types"
 import MasterInterface from "./masterInterface"
 import DataUtils from "./dataUtils"
-import { ColorScaleOptions, CrosshairOptions, Heatmap2dOptions, LineOptions, SequenceOptions, VLine } from "./types"
 
 export default class FrontPanel {
 
@@ -25,19 +25,17 @@ export default class FrontPanel {
     this.dataUtils = master.getRegistered('DATA_UTILS')
     this.canvas.width = this.dataUtils.width
     this.canvas.height = this.dataUtils.height
-    if (this.tooltip) {
-      this.tooltipDiv = document.createElement('div')
-      Object.assign(this.tooltipDiv.style, {
-        display: 'none',
-        padding: '10px', 
-        borderRadius: '4px', 
-        zIndex: 1000, 
-        background: 'white',
-        color: 'black',
-        fontSize: '10px'
-      })
-      document.body.appendChild(this.tooltipDiv)
-    }
+    this.tooltipDiv = document.createElement('div')
+    Object.assign(this.tooltipDiv.style, {
+      display: 'none',
+      padding: '10px',
+      borderRadius: '4px',
+      zIndex: 3000,
+      background: 'white',
+      color: 'black',
+      fontSize: '10px'
+    })
+    document.body.appendChild(this.tooltipDiv)
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 100 })
     container.appendChild(this.canvas)
     this.state = {
@@ -46,7 +44,7 @@ export default class FrontPanel {
     }
     this.master
       .on('click', (x) => this.handleClick(x))
-      .on('active', (x) => this.state.active = x)
+      .on('active', (x) => this.handleActive(x))
       .on('cursor', (x) => this.state.cursorPos = x)
   }
 
@@ -66,27 +64,24 @@ export default class FrontPanel {
     return this.master.getRegistered('CHART').opt.colorScale
   }
 
-  drawTooltip(value: number) {
-    const ctx = this.ctx
-    const content = this.master.getRegistered('PLOT').tooltipHandler(value, ctx)
-    if (content.xValue == null) {
+  handleActive(value: boolean) {
+    this.state.active = value
+    if (!value) {
       this.tooltipDiv.style.display = 'none'
-      return
     }
-    ctx.save()
+  }
+
+  getDataTooltipContent(value: number) {
+    const result: HTMLElement[] = []
+    const content = this.master.getRegistered('PLOT').tooltipHandler(value, this.ctx) as TooltipHandlerResponse
+    if (content.xValue == null) {
+      return result
+    }
     content.yValues.sort((a, b) => {
       const aa = a.value
       const bb = b.value
       return aa < bb ? -1 : aa > bb ? 1 : 0
     })
-    this.tooltipDiv.innerHTML = ''
-    if (this.state.cursorPos.pageX > (document.body.clientWidth / 2)) {
-      this.tooltipDiv.style.right = `${document.body.clientWidth - this.state.cursorPos.pageX + 50}px`
-      this.tooltipDiv.style.left = 'auto'
-    } else {
-      this.tooltipDiv.style.left = `${this.state.cursorPos.pageX + 40}px`
-      this.tooltipDiv.style.right = 'auto'
-    }
     const xDiv = document.createElement('div')
     Object.assign(xDiv.style, { fontWeight: 'bold' })
     const xAxis = this.master.getRegistered('X_AXIS')
@@ -100,9 +95,7 @@ export default class FrontPanel {
     } else {
       xDiv.innerHTML = `${xAxis.opt.title != null ? xAxis.opt.title : 'x'}: ${textValue}`
     }
-    this.tooltipDiv.appendChild(xDiv)
     const serieTable = document.createElement('table')
-    this.tooltipDiv.appendChild(serieTable)
     const serieTableBody = document.createElement('tbody')
     serieTable.appendChild(serieTableBody)
     for (const serie of content.yValues) {
@@ -120,13 +113,54 @@ export default class FrontPanel {
       serieRow.appendChild(serieValue)
       serieTableBody.appendChild(serieRow)
     }
+    result.push(xDiv)
+    result.push(serieTable)
+    return result
+  }
+
+  getVLineTooltipContent(value: number) {
+    const result: HTMLElement[] = []
+    const xPos = this.dataUtils.xPosFromValue(value)!
+    for (const vline of this.vLines) {
+      if (vline.tooltip != null) {
+        const vlinePos = this.dataUtils.xPosFromValue(vline.x)!
+        if (Math.abs(vlinePos - xPos) < 5) {
+          const el = document.createElement('div')
+          el.innerHTML = vline.tooltip
+          result.push(el)
+        }
+      }
+    }
+    return result
+  }
+
+  drawTooltip(value: number) {
+    const dataContent = this.tooltip ? this.getDataTooltipContent(value) : []
+    const vlineContent = this.getVLineTooltipContent(value)
+    if (dataContent.length === 0 && vlineContent.length === 0) {
+      this.tooltipDiv.style.display = 'none'
+      return
+    }
+    this.tooltipDiv.innerHTML = ''
+    if (this.state.cursorPos.pageX > (document.body.clientWidth / 2)) {
+      this.tooltipDiv.style.right = `${document.body.clientWidth - this.state.cursorPos.pageX + 50}px`
+      this.tooltipDiv.style.left = 'auto'
+    } else {
+      this.tooltipDiv.style.left = `${this.state.cursorPos.pageX + 40}px`
+      this.tooltipDiv.style.right = 'auto'
+    }
+    for (const el of dataContent) {
+      this.tooltipDiv.appendChild(el)
+    }
+    for (const el of vlineContent) {
+      this.tooltipDiv.appendChild(el)
+    }
     Object.assign(this.tooltipDiv.style, {
       display: 'block',
       position: 'absolute',
       top: `${this.state.cursorPos.pageY + 20 - this.tooltipDiv.getBoundingClientRect().height / 2}px`,
       color: 'black'
     })
-    ctx.restore()
   }
 
   drawVLines() {
@@ -135,12 +169,12 @@ export default class FrontPanel {
     for (const vline of this.vLines) {
       if (vline.range) {
         ctx.fillStyle = `rgba(${vline.color.slice(4, -1)}, 0.2)`
-        const x0 = this.dataUtils.xPosFromValue(vline.x - vline.range[0])
-        const x1 = this.dataUtils.xPosFromValue(vline.x + vline.range[1])
+        const x0 = this.dataUtils.xPosFromValue(vline.x - vline.range[0])!
+        const x1 = this.dataUtils.xPosFromValue(vline.x + vline.range[1])!
         ctx.fillRect(x0, 0, x1 - x0, this.canvas.height)
       }
       ctx.fillStyle = vline.color
-      const xPos = Math.floor(this.dataUtils.xPosFromValue(vline.x))
+      const xPos = Math.floor(this.dataUtils.xPosFromValue(vline.x)!)
       ctx.fillRect(xPos - 0.5, 0, 1, this.canvas.height)
       if (vline.arrow != null) {
         ctx.beginPath()
@@ -167,7 +201,7 @@ export default class FrontPanel {
         ctx.textBaseline = vline.position === 'top' ? 'top' : 'bottom'
         ctx.textAlign = 'left'
         const yPos = vline.position == null || vline.position === 'top' ? 5 : this.canvas.height - 5
-        ctx.fillText(vline.text, this.dataUtils.xPosFromValue(vline.x) + 10, yPos)
+        ctx.fillText(vline.text, this.dataUtils.xPosFromValue(vline.x)! + 10, yPos)
       }
     }
     ctx.restore()
@@ -176,7 +210,7 @@ export default class FrontPanel {
   handleClick(data: { xPos: number; yPos: number; x: number; y: number }) {
     this.selected = []
     for (const vline of this.vLines) {
-      const vlinePos = this.dataUtils.xPosFromValue(vline.x)
+      const vlinePos = this.dataUtils.xPosFromValue(vline.x)!
       if (vline.selectable === true && Math.abs(vlinePos - data.xPos) < 5) {
         this.selected.push(vline)
       }
@@ -187,7 +221,7 @@ export default class FrontPanel {
 
   drawCrosshair(value: number) {
     const ctx = this.ctx
-    let xPos = this.dataUtils.xPosFromValue(value)
+    let xPos = this.dataUtils.xPosFromValue(value)!
     const chart = this.master.getRegistered('CHART')
     if (chart.opt.crosshair.sticky) {
       const data = this.master.getRegistered('PLOT').dataFromXPos(xPos)
@@ -206,7 +240,7 @@ export default class FrontPanel {
       ctx.font = '10px sans-serif'
       ctx.textBaseline = 'top'
       ctx.textAlign = 'left'
-      ctx.fillText(this.crosshair.text, xPos + 4, 4)
+      ctx.fillText(this.crosshair.text!, xPos + 4, 4)
     }
     ctx.restore()
   }
@@ -216,14 +250,14 @@ export default class FrontPanel {
     if (selectionOpt == null) {
       return
     }
-    this.drawCrosshair(null)
+    // this.drawCrosshair(null)
     const ctx = this.ctx
     ctx.save()
     ctx.fillStyle = 'rgba(127,127,127,0.5)'
     ctx.strokeStyle = 'grey'
     if (selectionOpt === 'xy' && x[0] != null && x[1] != null && y[0] != null && y[1] != null) {
-      let [x1, x2] = [this.dataUtils.xPosFromValue(x[0]), this.dataUtils.xPosFromValue(x[1])]
-      let [y1, y2] = [this.dataUtils.yPosFromValue(y[0]), this.dataUtils.yPosFromValue(y[1])]
+      let [x1, x2] = [this.dataUtils.xPosFromValue(x[0])!, this.dataUtils.xPosFromValue(x[1])!]
+      let [y1, y2] = [this.dataUtils.yPosFromValue(y[0])!, this.dataUtils.yPosFromValue(y[1])!]
       if (x1 > x2) {
         [x1, x2] = [x2, x1]
       }
@@ -234,14 +268,14 @@ export default class FrontPanel {
       ctx.clearRect(x1, y2, x2 - x1, y1 - y2)
       ctx.strokeRect(x1, y2, x2 - x1, y1 - y2)
     } else if (selectionOpt.indexOf('x') >= 0 && x[0] != null && x[1] != null) {
-      const [x1, x2] = [this.dataUtils.xPosFromValue(x[0]), this.dataUtils.xPosFromValue(x[1])]
+      const [x1, x2] = [this.dataUtils.xPosFromValue(x[0])!, this.dataUtils.xPosFromValue(x[1])!]
       ctx.fillRect(0, 0, x1, this.canvas.height)
       ctx.fillRect(x2, 0, this.canvas.width - x2, this.canvas.height)
       ctx.fillStyle = 'grey'
       ctx.fillRect(x1, 0, 1, this.canvas.height)
       ctx.fillRect(x2, 0, 1, this.canvas.height)
     } else if (selectionOpt.indexOf('y') >= 0 && y[0] != null && y[1] != null) {
-      const [y1, y2] = [this.dataUtils.yPosFromValue(y[0]), this.dataUtils.yPosFromValue(y[1])]
+      const [y1, y2] = [this.dataUtils.yPosFromValue(y[0])!, this.dataUtils.yPosFromValue(y[1])!]
       ctx.fillRect(0, 0, this.canvas.width, y2)
       ctx.fillRect(0, y1, this.canvas.width, this.canvas.height - y1)
     }
@@ -255,7 +289,7 @@ export default class FrontPanel {
       if (this.crosshair.enabled) {
         this.drawCrosshair(value)
       }
-      if (this.state.active && this.tooltip) {
+      if (this.state.active) {
         this.drawTooltip(value)
       }
     } else {

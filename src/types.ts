@@ -146,6 +146,7 @@ export interface VLine {
   selectable?: boolean
   arrow?: 'top' | 'bottom'
   data?: any
+  tooltip?: string
 }
 
 export interface EventChannelSubscription {
@@ -181,6 +182,8 @@ export interface LichenOptions {
   vLines?: VLine[]
   tooltip?: boolean
   height?: number
+  width?: number
+  autoResize?: boolean
   stacked?: boolean
   serieHeight?: number
   zoom?: null | 'x' | 'y' | 'xy'

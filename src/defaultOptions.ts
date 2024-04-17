@@ -1,4 +1,5 @@
-import { LichenOptions } from  './types'
+// import type { LichenOptions } from  './types'
+import Lichen from './index'
 
 const AXIS_ENABLED = true
 const GRID_ENABLED = true
@@ -53,12 +54,13 @@ export default {
     text: ''
   },
   hooks: {
-    beforeUpdate: (chart) => true,
-    beforeSelection: (x, y) => true,
+    beforeUpdate: (chart: Lichen) => true,
+    beforeSelection: (x: number, y: number) => true,
     beforeResetDisplay: () => true
   },
   vLines: [],
   height: 120,
+  autoResize: true,
   stacked: false,
   serieHeight: 15
-} as LichenOptions
+}

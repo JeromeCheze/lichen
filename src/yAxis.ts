@@ -1,6 +1,6 @@
 import DataUtils from './dataUtils'
 import MasterInterface from './masterInterface';
-import { YAxisOptions } from './types'
+import { type YAxisOptions } from './types'
 
 const TEXT_PADDING = 4
 
@@ -22,7 +22,7 @@ export default class YAxis {
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
     this.dataUtils = master.getRegistered('DATA_UTILS')
-    this.canvas.width = this.opt.enabled ? this.opt.width + this.dataUtils.width : this.dataUtils.width
+    this.canvas.width = this.opt.enabled ? this.opt.width! + this.dataUtils.width : this.dataUtils.width
     this.canvas.height = this.dataUtils.height + 1
     this.categories = null
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, left: 0, zIndex: 0 })
@@ -40,15 +40,15 @@ export default class YAxis {
     ctx.font = `${this.opt.fontSize}px sans-serif`
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'right'
-    const delta = this.dataUtils.yMax - this.dataUtils.yMin
-    const xPos = this.opt.enabled ? this.opt.width - 1 : 0
-    const gridWidth = this.opt.enabled ? this.canvas.width - this.opt.width + 1 : this.canvas.width
+    const delta = this.dataUtils.yMax! - this.dataUtils.yMin!
+    const xPos = this.opt.enabled ? this.opt.width! - 1 : 0
+    const gridWidth = this.opt.enabled ? this.canvas.width - this.opt.width! + 1 : this.canvas.width
     const height = this.canvas.height
     const minTick = height / 30
     const scales = [100, 50, 25, 20, 10]
     if (this.opt.enabled) {
-      ctx.fillStyle = this.opt.textColor
-      ctx.fillRect(xPos, 0, this.opt.lineWidth, height + 1)
+      ctx.fillStyle = this.opt.textColor as string
+      ctx.fillRect(xPos, 0, this.opt.lineWidth!, height + 1)
     }
     if (delta == 0) {
       ctx.restore()
@@ -73,13 +73,19 @@ export default class YAxis {
         break
       }
     }
-    const start = this.dataUtils.yMin / Math.pow(10, pow)
-    const end = this.dataUtils.yMax / Math.pow(10, pow)
+    if (step == null) {
+      throw new Error('step should not be null')
+    }
+    const start = this.dataUtils.yMin! / Math.pow(10, pow)
+    const end = this.dataUtils.yMax! / Math.pow(10, pow)
     let y = start - (start % step)
     while (y < end) {
       const yPos = this.dataUtils.yPosFromValue(y * Math.pow(10, pow))
+      if (yPos == null) {
+        throw new Error('yPos should not be null')
+      }
       if (this.opt.gridEnabled) {
-        ctx.fillStyle = this.opt.gridColor
+        ctx.fillStyle = this.opt.gridColor as string
         if (y === 0) {
           ctx.fillRect(xPos, yPos - 1, gridWidth, 3)
         } else {
@@ -90,8 +96,8 @@ export default class YAxis {
         y += step
         continue
       }
-      ctx.fillStyle = this.opt.textColor
-      ctx.fillRect(xPos - this.opt.tickLength, yPos, this.opt.tickLength, this.opt.tickWidth)
+      ctx.fillStyle = this.opt.textColor as string
+      ctx.fillRect(xPos - this.opt.tickLength!, yPos, this.opt.tickLength!, this.opt.tickWidth!)
       const tickText = y === 0
         ? '0'
         : Math.abs(pow) > 3
@@ -99,7 +105,7 @@ export default class YAxis {
           : pow < 0
             ? `${y / Math.pow(10, -1 * pow)}`
             : `${y * Math.pow(10, pow)}`
-      ctx.fillText(tickText, xPos - this.opt.tickLength - TEXT_PADDING, yPos)
+      ctx.fillText(tickText, xPos - this.opt.tickLength! - TEXT_PADDING, yPos)
       y += step
     }
     ctx.restore()
@@ -107,19 +113,19 @@ export default class YAxis {
 
   drawCategories() {
     const ctx = this.ctx
-    const serieHeight = this.dataUtils.height / this.categories.length
+    const serieHeight = this.dataUtils.height / this.categories!.length
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     ctx.save()
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'right'
-    ctx.fillStyle = this.opt.textColor
+    ctx.fillStyle = this.opt.textColor as string
     ctx.font = `${this.opt.fontSize}px sans-serif`
     let yPos = 1 + serieHeight / 2
-    for (const name of this.categories) {
-      ctx.fillText(name, this.opt.width - this.opt.tickLength, yPos)
+    for (const name of this.categories!) {
+      ctx.fillText(name, this.opt.width! - this.opt.tickLength!, yPos)
       yPos += serieHeight
     }
-    ctx.fillRect(this.opt.width - 1, 0, this.opt.lineWidth, this.dataUtils.height + 1)
+    ctx.fillRect(this.opt.width! - 1, 0, this.opt.lineWidth!, this.dataUtils.height + 1)
     ctx.restore()
   }
 

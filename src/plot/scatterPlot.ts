@@ -1,4 +1,4 @@
-import { DataFromPos, ScatterOptions, TooltipHandlerResponse } from '../types'
+import type { DataFromPos, ScatterOptions, TooltipHandlerResponse } from '../types'
 import MasterInterface from '../masterInterface'
 import AbstractPlot from './abstractPlot.js'
 
@@ -22,28 +22,31 @@ export default class ScatterPlot extends AbstractPlot {
     ctx.lineWidth = 2
     const xPos = this.dataUtils.xPosFromValue(x) as number
     const data = this.dataFromXPos(xPos)
-    let xValue = null
+    let xValue = x
     const yValues = []
     for (const [i, s] of this.opt.entries()) {
       if (data[i] == null) {
         continue
       }
-      xValue = data[i].xDataValue
-      const point = s.data[data[i].index]
-      const value = data[i].yDataValue
+      xValue = data[i]!.xDataValue
+      const point = s.data[data[i]!.index!]
+      const value = data[i]!.yDataValue
+      if (value == null) {
+        continue
+      }
       const color = point.color != null ? point.color : s.color
       yValues.push({
         color: color,
         value,
         name: `${point.name} (${s.name})`,
-        textValue: s.tooltipFormatter != null ? s.tooltipFormatter(value) : `${value}`
+        textValue: s.tooltipFormatter != null && value != null ? s.tooltipFormatter(value) : `${value}`
       })
       ctx.fillStyle = color
       ctx.beginPath()
       if (s.shape === 'circle') {
-        this.drawCircle(ctx, data[i].xDataValuePos, data[i].yDataValuePos, true)
+        this.drawCircle(ctx, data[i]!.xDataValuePos, data[i]!.yDataValuePos, true)
       } else if (s.shape === 'diamond') {
-        this.drawDiamond(ctx, data[i].xDataValuePos, data[i].yDataValuePos, true)
+        this.drawDiamond(ctx, data[i]!.xDataValuePos, data[i]!.yDataValuePos, true)
       }
       ctx.fill()
       ctx.stroke()
@@ -71,7 +74,7 @@ export default class ScatterPlot extends AbstractPlot {
     for (const [i, serie] of this.opt.entries()) {
       const collection: { distance: number; point: {x: number; y: number; name: string; color?: string} }[] = []
       for (const point of serie.data) {
-        const x = this.dataUtils.xPosFromValue(point.x)
+        const x = this.dataUtils.xPosFromValue(point.x)!
         const distance = Math.abs(x - xPos)
         if (distance <= 10) {
           collection.push({ distance, point })
@@ -105,17 +108,17 @@ export default class ScatterPlot extends AbstractPlot {
         maxEnd = maxEnd == null ? point.x : Math.max(point.x, maxEnd)
       }
     }
-    const padding = (maxEnd - minStart) * 0.01
+    const padding = (maxEnd! - minStart!) * 0.01
     return [
-      xAxis.opt.min != null ? xAxis.opt.min : minStart - padding,
-      xAxis.opt.max != null ? xAxis.opt.max : maxEnd + padding
+      xAxis.opt.min != null ? xAxis.opt.min : minStart! - padding,
+      xAxis.opt.max != null ? xAxis.opt.max : maxEnd! + padding
     ] as [number, number]
   }
 
   getProcessingData() {
     const result = []
     for (const serie of this.opt) {
-      result.push(serie.data.filter(point => point.x >= this.dataUtils.start && point.x <= this.dataUtils.end).map(point => point.y))
+      result.push(serie.data.filter(point => point.x >= this.dataUtils.start! && point.x <= this.dataUtils.end!).map(point => point.y))
     }
     return result
   }
@@ -132,15 +135,15 @@ export default class ScatterPlot extends AbstractPlot {
       }
       const serie = this.opt[serieIndex]
       for (const point of serie.data) {
-        if (point.x < this.dataUtils.start || point.x > this.dataUtils.end) {
+        if (point.x < this.dataUtils.start! || point.x > this.dataUtils.end!) {
           continue
         }
         ctx.fillStyle = point.color != null ? point.color : serie.color
         ctx.beginPath()
         if (serie.shape === 'circle') { 
-          this.drawCircle(ctx, this.dataUtils.xPosFromValue(point.x), this.dataUtils.yPosFromValue(point.y), false)
+          this.drawCircle(ctx, this.dataUtils.xPosFromValue(point.x)!, this.dataUtils.yPosFromValue(point.y)!, false)
         } else if (serie.shape === 'diamond') {
-          this.drawDiamond(ctx, this.dataUtils.xPosFromValue(point.x), this.dataUtils.yPosFromValue(point.y), false)
+          this.drawDiamond(ctx, this.dataUtils.xPosFromValue(point.x)!, this.dataUtils.yPosFromValue(point.y)!, false)
         }
         ctx.fill()
         ctx.stroke()

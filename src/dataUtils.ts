@@ -1,5 +1,5 @@
+import type { DataUtilsComputedData, ColorScaleOptions } from './types'
 import MasterInterface from './masterInterface'
-import { DataUtilsComputedData, ColorScaleOptions } from './types'
 
 export default class DataUtils {
 
@@ -31,6 +31,11 @@ export default class DataUtils {
     this.yMax = null
     this.start = null
     this.end = null
+    this.computed = {
+      minValue: 0,
+      maxValue: 0,
+      series: []
+    }
   }
 
   /**
@@ -62,7 +67,7 @@ export default class DataUtils {
     if (this.start == null || this.end == null) {
       return null
     }
-    return this.start + (xPos / this.width) * (this.end - this.start)
+    return this.start! + (xPos / this.width) * (this.end! - this.start!)
   }
 
   /**
@@ -71,7 +76,7 @@ export default class DataUtils {
    * @returns the data value
    */
   yValueFromPos(yPos: number): number {
-    return this.yMax - (yPos / this.height) * (this.yMax - this.yMin)
+    return this.yMax! - (yPos / this.height) * (this.yMax! - this.yMin!)
   }
 
   /**
@@ -91,7 +96,7 @@ export default class DataUtils {
    * @param yValue - the data value
    * @returns the Y position coordinate
    */
-  yPosFromValue(yValue: number | null): null | number {
+  yPosFromValue(yValue: number | null): number | null {
     if (yValue == null || this.yMin == null || this.yMax == null) {
       return null
     }
@@ -155,11 +160,11 @@ export default class DataUtils {
         continue
       }
       const avgValue = valueSum / valueCount
-      this.computed.minValue = this.computed.minValue == null ? minValue : Math.min(this.computed.minValue, minValue)
-      this.computed.maxValue = this.computed.maxValue == null ? maxValue : Math.max(this.computed.maxValue, maxValue)
+      this.computed.minValue = this.computed.minValue == null ? minValue : Math.min(this.computed.minValue, minValue!)
+      this.computed.maxValue = this.computed.maxValue == null ? maxValue : Math.max(this.computed.maxValue, maxValue!)
       this.computed.series.push({
-        minValue: minValue,
-        maxValue: maxValue,
+        minValue: minValue!,
+        maxValue: maxValue!,
         avgValue,
         rmsValue: Math.sqrt((valueSqSum - 2 * avgValue * valueSum + valueCount * avgValue * avgValue) / valueCount)
       })
@@ -171,7 +176,7 @@ export default class DataUtils {
           const v = data[i]
           currentSum = v == null ? currentSum : currentSum + v
         }
-        this.computed.maxValue = Math.max(this.computed.maxValue, currentSum)
+        this.computed.maxValue = Math.max(this.computed.maxValue!, currentSum)
       }
     }
   }

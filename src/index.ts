@@ -1,5 +1,5 @@
+import type{ ColorScaleOptions, LichenOptions, VLine } from './types.js'
 import defaultOptions from './defaultOptions.js'
-import { ColorScaleOptions, LichenOptions, VLine } from './types.js'
 import DataUtils from './dataUtils.js'
 import EventUtils from './eventUtils.js'
 import XAxis from './xAxis.js'
@@ -33,13 +33,13 @@ function getID() {
 export default class Lichen {
 
   opt: LichenOptions
-  yAxis: YAxis
-  xAxis: XAxis
-  dataUtils: DataUtils
-  eventUtils: EventUtils
-  plot: LinePlot | Heatmap2dPlot | Heatmap3dPlot | StackedPlot | SequencePlot | ScatterPlot
-  legend: Legend
-  frontPanel: FrontPanel
+  // yAxis: YAxis
+  // xAxis: XAxis
+  // dataUtils: DataUtils
+  // eventUtils: EventUtils
+  // plot: LinePlot | Heatmap2dPlot | Heatmap3dPlot | StackedPlot | SequencePlot | ScatterPlot
+  // legend: Legend
+  // frontPanel: FrontPanel
   ready: boolean
   master: MasterInterface
   wrapper: HTMLElement | null
@@ -59,23 +59,26 @@ export default class Lichen {
     this.ready = false
     this.opt = this.mergeOptions(opt)
     this.init(container)
-    const resizeObserver = new ResizeObserver(() => this.handleResize())
-    resizeObserver.observe(container)
+    if (this.opt.autoResize) {
+      const resizeObserver = new ResizeObserver(() => this.handleResize())
+      resizeObserver.observe(container)
+    }
     this.debounceResize = null
-    this.opt.synced()[this.id] = this
+    this.opt.synced!()[this.id] = this
     if (drawOnCreation) {
       let waitAllReady = true
       while (waitAllReady) {
         waitAllReady = false
-        for (const chart of Object.values(this.opt.synced())) {
+        for (const chart of Object.values(this.opt.synced!())) {
           if (chart.ready === false) {
             waitAllReady = true
           }
         }
       }
-      const xRanges = Object.values(this.opt.synced()).map(chart => chart.master.getRegistered('PLOT').xRange())
-      this.dataUtils.start = Math.min.apply(null, xRanges.map(x => x[0]))
-      this.dataUtils.end = Math.max.apply(null, xRanges.map(x => x[1]))
+      const dataUtils = this.master.getRegistered('DATA_UTILS')
+      const xRanges = Object.values(this.opt.synced!()).map(chart => chart.master.getRegistered('PLOT').xRange())
+      dataUtils.start = Math.min.apply(null, xRanges.map(x => x[0]))
+      dataUtils.end = Math.max.apply(null, xRanges.map(x => x[1]))
       this.draw()
     }
   }
@@ -94,7 +97,7 @@ export default class Lichen {
    * @param src 
    * @param dest 
    */
-  deepCopy(src: any, dest={}) {
+  deepCopy(src: any, dest: Record<string, any>={}): any {
     if (src instanceof Function) {
       return src
     } else if (src instanceof Array) {
@@ -141,15 +144,15 @@ export default class Lichen {
     //   }
     // }
     if (result.synced == null) {
-      const instance = []
+      const instance: Lichen[] = []
       result.synced = () => instance
     }
     return result as LichenOptions
   }
 
   destroy() {
-    delete this.opt.synced()[this.id]
-    this.wrapper.remove()
+    delete this.opt.synced!()[this.id]
+    this.wrapper!.remove()
     const frontPanel = this.master.getRegistered('FRONT_PANEL')
     if (frontPanel.tooltipDiv != null) {
       frontPanel.tooltipDiv.remove()
@@ -178,31 +181,30 @@ export default class Lichen {
       container.appendChild(this.wrapper)
     }
     header.appendChild(title)
-    this.wrapper.appendChild(header)
-    this.wrapper.appendChild(canvasWrapperContainer)
-    this.wrapper.appendChild(legend)
+    this.wrapper!.appendChild(header)
+    this.wrapper!.appendChild(canvasWrapperContainer)
+    this.wrapper!.appendChild(legend)
     canvasWrapperContainer.appendChild(canvasWrapper)
-    let canvasWrapperContainerWidth = this.wrapper.getBoundingClientRect().width - 20
+    let canvasWrapperContainerWidth = this.opt.width != null ? this.opt.width : this.wrapper!.getBoundingClientRect().width - 20
     if (this.opt.header.position === 'left') {
-      canvasWrapperContainerWidth -= this.opt.header.width + 2 * PADDING
+      canvasWrapperContainerWidth -= this.opt.header.width! + 2 * PADDING
       Object.assign(header.style, { display: 'inline-block', width: `${this.opt.header.width}px`, verticalAlign: 'middle' })
     }
-    if (this.opt.legend.position === 'right') {
-      canvasWrapperContainerWidth -= this.opt.legend.width + 2 * PADDING
-      Object.assign(legend.style, { display: 'inline-block', width: `${this.opt.legend.width}px`, verticalAlign: 'top' })
+    if (this.opt.legend!.position! === 'right') {
+      canvasWrapperContainerWidth -= this.opt.legend!.width! + 2 * PADDING
+      Object.assign(legend.style, { display: 'inline-block', width: `${this.opt.legend!.width!}px`, verticalAlign: 'top' })
     }
     Object.assign(canvasWrapperContainer.style, { display: 'inline-block', width: `${canvasWrapperContainerWidth}px`, verticalAlign: 'middle' })
     const sizes = canvasWrapperContainer.getBoundingClientRect()
-    const plotWidth = this.opt.yAxis.enabled ? sizes.width - this.opt.yAxis.width : sizes.width
+    const plotWidth = this.opt.yAxis!.enabled ? sizes.width - this.opt.yAxis!.width! : sizes.width
     const PlotClass = PLOT_MAP[this.opt.type]
-    this.dataUtils = new DataUtils(this.master, plotWidth, PlotClass.getHeight(this.master))
-    this.yAxis = new YAxis(canvasWrapper, this.master)
-    this.xAxis = new XAxis(canvasWrapper, this.master)
-    canvasWrapper.style.height = `${this.xAxis.canvas.height}px`
-    this.plot = new PlotClass(canvasWrapper, this.master)
-    this.frontPanel = new FrontPanel(canvasWrapper, this.master)
-    this.legend = new Legend(legend, this.master)
-    this.legend.update()
+    new DataUtils(this.master, plotWidth, PlotClass.getHeight(this.master))
+    new YAxis(canvasWrapper, this.master)
+    const xAxis = new XAxis(canvasWrapper, this.master)
+    canvasWrapper.style.height = `${xAxis.canvas.height}px`
+    new PlotClass(canvasWrapper, this.master)
+    new FrontPanel(canvasWrapper, this.master)
+    new Legend(legend, this.master).update()
   }
 
   /**
@@ -211,56 +213,63 @@ export default class Lichen {
    */
   init(container: HTMLElement, reuseWrapper=false) {
     this.buildStructure(container, reuseWrapper)
-    this.eventUtils = new EventUtils(this.master, this.master.getRegistered('FRONT_PANEL').canvas)
+    new EventUtils(this.master, this.master.getRegistered('FRONT_PANEL').canvas)
     this.master
       .on('active', (value: boolean) => {
         if (value === false) {
-          for (const chart of Object.values(this.opt.synced())) {
-            chart.frontPanel.update(null)
+          for (const chart of Object.values(this.opt.synced!())) {
+            const chartFrontPanel = chart.master.getRegistered('FRONT_PANEL')
+            chartFrontPanel.update(null)
           }
         }
       })
       .on('move', (value: [number, number]) => {
-        if (this.opt.hooks.onCursorMove != null) {
-          this.opt.hooks.onCursorMove(value[0], value[1])
+        if (this.opt.hooks!.onCursorMove != null) {
+          this.opt.hooks!.onCursorMove(value[0], value[1])
         }
-        for (const chart of Object.values(this.opt.synced())) {
-          chart.frontPanel.update(value[0])
+        for (const chart of Object.values(this.opt.synced!())) {
+          const chartFrontPanel = chart.master.getRegistered('FRONT_PANEL')
+          chartFrontPanel.update(value[0])
         }
       })
       .on('selecting', (value: { x: [number | null, number | null], y: [number | null, number | null] }) => {
-        for (const chart of Object.values(this.opt.synced())) {
-          chart.frontPanel.update(null)
+        for (const chart of Object.values(this.opt.synced!())) {
+          const chartFrontPanel = chart.master.getRegistered('FRONT_PANEL')
+          chartFrontPanel.update(null)
           chart.setSelection(value.x, value.y)
         }
       })
       .on('vlineSelection', (value: VLine[]) => {
-        if (this.opt.hooks.onVlineSelection != null) {
-          this.opt.hooks.onVlineSelection(value)
+        if (this.opt.hooks!.onVlineSelection != null) {
+          this.opt.hooks!.onVlineSelection(value)
         }
       })
       .on('xRangeChange', (value: [number, number]) => {
-        const t1Diff = this.dataUtils.start - value[0]
-        const t2Diff = this.dataUtils.end - value[1]
-        for (const chart of Object.values(this.opt.synced())) {
-          chart.setXRange(chart.dataUtils.start - t1Diff, chart.dataUtils.end - t2Diff)
+        const dataUtils = this.master.getRegistered('DATA_UTILS')
+        const t1Diff = dataUtils.start! - value[0]
+        const t2Diff = dataUtils.end! - value[1]
+        for (const chart of Object.values(this.opt.synced!())) {
+          const chartDataUtils = chart.master.getRegistered('DATA_UTILS')
+          chart.setXRange(chartDataUtils.start! - t1Diff, chartDataUtils.end! - t2Diff)
           // chart.setXRange(value[0], value[1])
         }
       })
       .on('yRangeChange', (value: [number, number]) => {
-        const ratio = (value[1] - value[0]) / (this.dataUtils.yMax - this.dataUtils.yMin)
+        const dataUtils = this.master.getRegistered('DATA_UTILS')
+        const ratio = (value[1] - value[0]) / (dataUtils.yMax! - dataUtils.yMin!)
         const newMid = (value[0] + value[1]) / 2
-        const prevMid = (this.dataUtils.yMin + this.dataUtils.yMax) / 2
+        const prevMid = (dataUtils.yMin! + dataUtils.yMax!) / 2
         const deltaY = newMid - prevMid
-        for (const chart of Object.values(this.opt.synced())) {
-          const delta = chart.dataUtils.yMax - chart.dataUtils.yMin
-          const mid = deltaY + (chart.dataUtils.yMax + chart.dataUtils.yMin) / 2
+        for (const chart of Object.values(this.opt.synced!())) {
+          const chartDataUtils = chart.master.getRegistered('DATA_UTILS')
+          const delta = chartDataUtils.yMax! - chartDataUtils.yMin!
+          const mid = deltaY + (chartDataUtils.yMax! + chartDataUtils.yMin!) / 2
           const halfAmp = delta * ratio / 2
           chart.setYRange(mid - halfAmp, mid + halfAmp)
         }
       })
       .on('resetDisplay', () => {
-        for (const chart of Object.values(this.opt.synced())) {
+        for (const chart of Object.values(this.opt.synced!())) {
           chart.resetDisplay()
         }
       })
@@ -269,37 +278,39 @@ export default class Lichen {
         this.master.getRegistered('LEGEND').update()
       })
       .on('dblclick', (x: number) => {
-        if (this.opt.hooks.onDblClick != null) {
-          this.opt.hooks.onDblClick(x)
+        if (this.opt.hooks!.onDblClick != null) {
+          this.opt.hooks!.onDblClick(x)
         }
       })
       .on('active', (value: boolean) => {
-        if (value === true && this.opt.hooks.onActive != null) {
-          this.opt.hooks.onActive(this)
+        if (value === true && this.opt.hooks!.onActive != null) {
+          this.opt.hooks!.onActive(this)
         }
       })
       .on('click', () => {
-        if (this.opt.hooks.onClick != null) {
-          this.opt.hooks.onClick(this)
+        if (this.opt.hooks!.onClick != null) {
+          this.opt.hooks!.onClick(this)
         }
       })
     this.ready = true
   }
 
   rebuild() {
+    const dataUtils = this.master.getRegistered('DATA_UTILS')
+    this.master.getRegistered('FRONT_PANEL').tooltipDiv?.remove()
     this.master = new MasterInterface()
     this.master.register('CHART', this)
     const saveBounds = {
-      start: this.dataUtils.start,
-      end: this.dataUtils.end,
-      yMin: this.dataUtils.yMin,
-      yMax: this.dataUtils.yMax
+      start: dataUtils.start,
+      end: dataUtils.end,
+      yMin: dataUtils.yMin,
+      yMax: dataUtils.yMax
     }
-    const container = this.wrapper.parentElement
-    this.wrapper.innerHTML = ''
+    const container = this.wrapper!.parentElement as HTMLElement
+    this.wrapper!.innerHTML = ''
     this.init(container, true)
     this.setYRange(saveBounds.yMin, saveBounds.yMax, false)
-    this.setXRange(saveBounds.start, saveBounds.end)
+    this.setXRange(saveBounds.start!, saveBounds.end!)
     // this.draw()
   }
 
@@ -313,9 +324,9 @@ export default class Lichen {
   }
 
   resetDisplay() {
-    if (this.opt.hooks.beforeResetDisplay() === true) {
+    if (this.opt.hooks!.beforeResetDisplay!() === true) {
       const dataUtils = this.master.getRegistered('DATA_UTILS')
-      const xRanges = Object.values(this.opt.synced()).map(chart => chart.master.getRegistered('PLOT').xRange())
+      const xRanges = Object.values(this.opt.synced!()).map(chart => chart.master.getRegistered('PLOT').xRange())
       const xMin = Math.min.apply(null, xRanges.map(x => x[0]))
       const xMax = Math.max.apply(null, xRanges.map(x => x[1]))
       dataUtils.resetComputed()
@@ -330,7 +341,7 @@ export default class Lichen {
    * @param colorScale
    */
   setColorScale(colorScale: ColorScaleOptions) {
-    Object.assign(this.opt.colorScale, colorScale)
+    Object.assign(this.opt.colorScale!, colorScale)
     this.master.getRegistered('PLOT').update(true)
     this.master.getRegistered('LEGEND').update()
   }
@@ -343,9 +354,10 @@ export default class Lichen {
    */
   setXRange(x1: number, x2: number, draw = true) {
     this.master.getRegistered('FRONT_PANEL').update(null)
-    if (this.dataUtils.start != x1 || this.dataUtils.end != x2) {
-      this.dataUtils.start = x1
-      this.dataUtils.end = x2
+    const dataUtils = this.master.getRegistered('DATA_UTILS')
+    if (dataUtils.start != x1 || dataUtils.end != x2) {
+      dataUtils.start = x1
+      dataUtils.end = x2
       if (draw) {
         this.draw()
       }
@@ -359,8 +371,9 @@ export default class Lichen {
    * @param draw - call the {@link Lichen.draw} method if `true`
    */
   setYRange(y1: number | null, y2: number | null, draw = true) {
-    this.dataUtils.yMin = y1
-    this.dataUtils.yMax = y2
+    const dataUtils = this.master.getRegistered('DATA_UTILS')
+    dataUtils.yMin = y1
+    dataUtils.yMax = y2
     if (draw) {
       this.draw()
     }
@@ -389,16 +402,16 @@ export default class Lichen {
   draw() {
     const dataUtils = this.master.getRegistered('DATA_UTILS')
     dataUtils.processData()
-    if (dataUtils.yMin == null || dataUtils.yMax == null || this.opt.zoom.indexOf('y') < 0) {
+    if (dataUtils.yMin == null || dataUtils.yMax == null || (this.opt.zoom != null && this.opt.zoom.indexOf('y') < 0)) {
       const [yMin, yMax] = this.master.getRegistered('PLOT').yRange()
       let amplitude = yMax - yMin
       if (amplitude === 0) {
         amplitude = 0.1
       }
-      dataUtils.yMin = this.opt.yAxis.min != null ? this.opt.yAxis.min : yMin - 0.1 * amplitude
-      dataUtils.yMax = this.opt.yAxis.max != null ? this.opt.yAxis.max : yMax + 0.1 * amplitude
+      dataUtils.yMin = this.opt.yAxis!.min != null ? this.opt.yAxis!.min : yMin - 0.1 * amplitude
+      dataUtils.yMax = this.opt.yAxis!.max != null ? this.opt.yAxis!.max : yMax + 0.1 * amplitude
     }
-    if (this.opt.hooks.beforeUpdate(this) === true) {
+    if (this.opt.hooks!.beforeUpdate!(this) === true) {
       this.master.getRegistered('X_AXIS').update()
       this.master.getRegistered('Y_AXIS').update()
       this.master.getRegistered('PLOT').update()

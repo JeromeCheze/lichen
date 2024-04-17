@@ -1,4 +1,4 @@
-import { XAxisOptions } from './types'
+import { type XAxisOptions } from './types'
 import DataUtils from './dataUtils'
 import MasterInterface from './masterInterface';
 
@@ -23,7 +23,7 @@ export default class XAxis {
     this.canvas.width = this.dataUtils.width
     this.canvas.height = this.dataUtils.height
     if (this.opt.enabled) {
-      this.canvas.height += this.opt.tickLength + 2 * TEXT_PADDING + this.opt.fontSize
+      this.canvas.height += this.opt.tickLength! + 2 * TEXT_PADDING + this.opt.fontSize!
     }
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 0 })
     container.appendChild(this.canvas)
@@ -40,14 +40,14 @@ export default class XAxis {
     ctx.font = `${this.opt.fontSize}px sans-serif`
     ctx.textBaseline = 'top'
     ctx.textAlign = 'center'
-    const delta = this.dataUtils.end - this.dataUtils.start
+    const delta = this.dataUtils.end! - this.dataUtils.start!
     const yPos = this.dataUtils.height
     const width = this.canvas.width
     const minTick = width / 80
     const scales = [100, 50, 25, 20, 10]
     if (this.opt.enabled) {
-      ctx.fillStyle = this.opt.textColor
-      ctx.fillRect(0, yPos, width, this.opt.lineWidth)
+      ctx.fillStyle = this.opt.textColor as string
+      ctx.fillRect(0, yPos, width, this.opt.lineWidth!)
     }
     if (delta == 0) {
       ctx.restore()
@@ -72,21 +72,27 @@ export default class XAxis {
         break
       }
     }
-    const start = this.dataUtils.start / Math.pow(10, pow)
-    const end = this.dataUtils.end / Math.pow(10, pow)
+    if (step == null) {
+      throw new Error('step shoud not be null')
+    }
+    const start = this.dataUtils.start! / Math.pow(10, pow)
+    const end = this.dataUtils.end! / Math.pow(10, pow)
     let x = start - (start % step)
     while (x < end) {
       const xPos = this.dataUtils.xPosFromValue(x * Math.pow(10, pow))
+      if (xPos == null) {
+        throw new Error('xPos shoud not be null')
+      }
       if (this.opt.gridEnabled) {
-        ctx.fillStyle = this.opt.gridColor
+        ctx.fillStyle = this.opt.gridColor as string
         ctx.fillRect(xPos, 0, 1, yPos)
       }
       if (!this.opt.enabled) {
         x += step
         continue
       }
-      ctx.fillStyle = this.opt.textColor
-      ctx.fillRect(xPos, yPos, this.opt.tickWidth, this.opt.tickLength)
+      ctx.fillStyle = this.opt.textColor as string
+      ctx.fillRect(xPos, yPos, this.opt.tickWidth!, this.opt.tickLength!)
       const tickText = x === 0
         ? '0'
         : Math.abs(pow) > 3
@@ -94,7 +100,7 @@ export default class XAxis {
           : pow < 0
             ? `${x / Math.pow(10, -1 * pow)}`
             : `${x * Math.pow(10, pow)}`
-      ctx.fillText(tickText, xPos, yPos + this.opt.tickLength + TEXT_PADDING)
+      ctx.fillText(tickText, xPos, yPos + this.opt.tickLength! + TEXT_PADDING)
       x += step
     }
     ctx.restore()
@@ -118,22 +124,25 @@ export default class XAxis {
     let i = 0
     let a = scales[0]
     const d = new Date()
-    const tickInterval = 60 * (this.dataUtils.end - this.dataUtils.start) / width
+    const tickInterval = 60 * (this.dataUtils.end! - this.dataUtils.start!) / width
     while (tickInterval < scales[i]) {
       a = scales[i++]
     }
     ctx.textBaseline = 'top'
     ctx.textAlign = 'center'
     if (this.opt.enabled) {
-      ctx.fillStyle = this.opt.textColor
-      ctx.fillRect(0, yPos, width, this.opt.lineWidth)
+      ctx.fillStyle = this.opt.textColor as string
+      ctx.fillRect(0, yPos, width, this.opt.lineWidth!)
     }
-    let j = this.dataUtils.start - (this.dataUtils.start % a)
-    while (j < this.dataUtils.end) {
+    let j = this.dataUtils.start! - (this.dataUtils.start! % a)
+    while (j < this.dataUtils.end!) {
       d.setTime(j)
       const xPos = this.dataUtils.xPosFromValue(j)
+      if (xPos == null) {
+        throw new Error('xPos should not be null')
+      }
       if (this.opt.gridEnabled) {
-        ctx.fillStyle = this.opt.gridColor
+        ctx.fillStyle = this.opt.gridColor as string
         ctx.fillRect(xPos, 0, 1, yPos)
       }
       if (!this.opt.enabled) {
@@ -141,9 +150,9 @@ export default class XAxis {
         continue
       }
       if ((j % 86400e3) === 0) {
-        ctx.font = `bold ${this.opt.fontSize + 2}px sans-serif`
+        ctx.font = `bold ${this.opt.fontSize! + 2}px sans-serif`
       } else {
-        ctx.font = `${this.opt.fontSize}px sans-serif`
+        ctx.font = `${this.opt.fontSize!}px sans-serif`
       }
       const tickText = (
         (j % 86400e3) === 0
@@ -156,9 +165,9 @@ export default class XAxis {
                       ? d.toISOString().slice(11, 19)
                       : (j % 100) === 0 ? d.toISOString().slice(11, 21) : ''
       )
-      ctx.fillStyle = this.opt.textColor
-      ctx.fillRect(xPos, yPos, this.opt.tickWidth, this.opt.tickLength)
-      ctx.fillText(tickText, xPos, yPos + this.opt.tickLength + TEXT_PADDING)
+      ctx.fillStyle = this.opt.textColor as string
+      ctx.fillRect(xPos, yPos, this.opt.tickWidth!, this.opt.tickLength!)
+      ctx.fillText(tickText, xPos, yPos + this.opt.tickLength! + TEXT_PADDING)
       j += a
     }
     ctx.restore()

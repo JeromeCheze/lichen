@@ -1,4 +1,4 @@
-import { EvenUtilsEventHandlerMap } from './types'
+import type { EvenUtilsEventHandlerMap } from './types'
 import MasterInterface from './masterInterface'
 import DataUtils from './dataUtils'
 
@@ -89,12 +89,12 @@ export default class EventUtils {
         let y1 = null
         let y2 = null
         if (Math.abs(x - this.state.mouseDownPos[0]) > SELECT_THRESHOLD) {
-          x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])
-          x2 = this.dataUtils.xValueFromPos(x)
+          x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])!
+          x2 = this.dataUtils.xValueFromPos(x)!
         }
         if (Math.abs(y - this.state.mouseDownPos[1]) > SELECT_THRESHOLD) {
-          y1 = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1])
-          y2 = this.dataUtils.yValueFromPos(y)
+          y1 = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1])!
+          y2 = this.dataUtils.yValueFromPos(y)!
         }
         this.master.send('selecting', {
           x: x1 != null && x2 != null ? [Math.min(x1, x2), Math.max(x1, x2)] : [null, null],
@@ -105,19 +105,19 @@ export default class EventUtils {
         const deltaX = this.state.mouseDownPos[0] - x
         const deltaY = this.state.mouseDownPos[0] - y
         if (Math.abs(deltaX) > THRESHOLD) {
-          const valueDeltaX = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0]) - this.dataUtils.xValueFromPos(x)
+          const valueDeltaX = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])! - this.dataUtils.xValueFromPos(x)!
           this.state.mouseDownPos = [x, this.state.mouseDownPos[1]]
           this.master.send('xRangeChange', [
-            this.dataUtils.start + valueDeltaX,
-            this.dataUtils.end + valueDeltaX
+            this.dataUtils.start! + valueDeltaX,
+            this.dataUtils.end! + valueDeltaX
           ])
         }
         if (Math.abs(deltaY) > THRESHOLD) {
-          const valueDeltaY = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1]) - this.dataUtils.yValueFromPos(y)
+          const valueDeltaY = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1])! - this.dataUtils.yValueFromPos(y)!
           this.state.mouseDownPos = [this.state.mouseDownPos[0], y]
           this.master.send('yRangeChange', [
-            this.dataUtils.yMin + valueDeltaY,
-            this.dataUtils.yMax + valueDeltaY
+            this.dataUtils.yMin! + valueDeltaY,
+            this.dataUtils.yMax! + valueDeltaY
           ])
         }
       }
@@ -142,13 +142,13 @@ export default class EventUtils {
         let xRange: (number | null)[] = [null, null]
         let yRange: (number | null)[] = [null, null]
         if (Math.abs(x - this.state.mouseDownPos[0]) > SELECT_THRESHOLD) {
-          const x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])
-          const x2 = this.dataUtils.xValueFromPos(x)
+          const x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])!
+          const x2 = this.dataUtils.xValueFromPos(x)!
           xRange = [Math.min(x1, x2), Math.max(x1, x2)]
         }
         if (Math.abs(y - this.state.mouseDownPos[1]) > SELECT_THRESHOLD) {
-          const y1 = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1])
-          const y2 = this.dataUtils.yValueFromPos(y)
+          const y1 = this.dataUtils.yValueFromPos(this.state.mouseDownPos[1])!
+          const y2 = this.dataUtils.yValueFromPos(y)!
           yRange = [Math.min(y1, y2), Math.max(y1, y2)]
         }
         const chart = this.master.getRegistered('CHART')
@@ -163,7 +163,6 @@ export default class EventUtils {
           }
         }
       } else {
-        console.log('mouseUp')
         this.master.send('click', {
           xPos: x,
           yPos: y,
@@ -190,16 +189,16 @@ export default class EventUtils {
       e.preventDefault()
       const sign = Math.sign(e.deltaY)
       if (e.ctrlKey) {
-        const ratio = 0.1 * (this.dataUtils.yMax - this.dataUtils.yMin)
+        const ratio = 0.1 * (this.dataUtils.yMax! - this.dataUtils.yMin!)
         this.master.send('yRangeChange', [
-          this.dataUtils.yMin - sign * ratio,
-          this.dataUtils.yMax + sign * ratio
+          this.dataUtils.yMin! - sign * ratio,
+          this.dataUtils.yMax! + sign * ratio
         ])
       } else {
-        const ratio = 0.1 * (this.dataUtils.end - this.dataUtils.start)
+        const ratio = 0.1 * (this.dataUtils.end! - this.dataUtils.start!)
         this.master.send('xRangeChange', [
-          this.dataUtils.start - sign * ratio,
-          this.dataUtils.end + sign * ratio
+          this.dataUtils.start! - sign * ratio,
+          this.dataUtils.end! + sign * ratio
         ])
       }
     }
@@ -300,38 +299,38 @@ export default class EventUtils {
       } else if (Math.abs(panX) > 20) {
         this.state.touches = cur
         this.state.lastDistance = dist
-        const valueDeltaX = this.dataUtils.xValueFromPos(0) - this.dataUtils.xValueFromPos(panX)
+        const valueDeltaX = this.dataUtils.xValueFromPos(0)! - this.dataUtils.xValueFromPos(panX)!
         this.master.send('xRangeChange', [
-          this.dataUtils.start + valueDeltaX,
-          this.dataUtils.end + valueDeltaX
+          this.dataUtils.start! + valueDeltaX,
+          this.dataUtils.end! + valueDeltaX
         ])
       } else if (Math.abs(panY) > 20) {
         this.state.touches = cur
         this.state.lastDistance = dist
-        const valueDeltaY = this.dataUtils.yValueFromPos(0) - this.dataUtils.yValueFromPos(panY)
+        const valueDeltaY = this.dataUtils.yValueFromPos(0)! - this.dataUtils.yValueFromPos(panY)!
         this.master.send('yRangeChange', [
-          this.dataUtils.yMin - valueDeltaY,
-          this.dataUtils.yMax - valueDeltaY
+          this.dataUtils.yMin! - valueDeltaY,
+          this.dataUtils.yMax! - valueDeltaY
         ])
       }
     }
   }
 
   pinchX(level: number) {
-    const ratio = 0.1 * (this.dataUtils.end - this.dataUtils.start)
+    const ratio = 0.1 * (this.dataUtils.end! - this.dataUtils.start!)
     const sign = Math.sign(level)
     this.master.send('xRangeChange', [
-      this.dataUtils.start + sign * ratio,
-      this.dataUtils.end - sign * ratio
+      this.dataUtils.start! + sign * ratio,
+      this.dataUtils.end! - sign * ratio
     ])
   }
 
   pinchY(level: number) {
-    const ratio = 0.1 * (this.dataUtils.yMax - this.dataUtils.yMin)
+    const ratio = 0.1 * (this.dataUtils.yMax! - this.dataUtils.yMin!)
     const sign = Math.sign(level)
     this.master.send('yRangeChange', [
-      this.dataUtils.yMin + sign * ratio,
-      this.dataUtils.yMax - sign * ratio
+      this.dataUtils.yMin! + sign * ratio,
+      this.dataUtils.yMax! - sign * ratio
     ])
   }
 
@@ -348,38 +347,9 @@ export default class EventUtils {
   clearSelection() {
     if (window.getSelection) {
       const sel = window.getSelection()
-      sel.removeAllRanges()
+      if (sel != null) {
+        sel.removeAllRanges()
+      }
     }
   }
-
-  // active(callback) {
-  //   this.registered.active.push(callback)
-  //   return this
-  // }
-
-  // move(callback) {
-  //   this.registered.move.push(callback)
-  //   return this
-  // }
-
-  // xRangeChange(callback) {
-  //   this.registered.xRangeChange.push(callback)
-  //   return this
-  // }
-
-  // yRangeChange(callback) {
-  //   this.registered.yRangeChange.push(callback)
-  //   return this
-  // }
-
-  // selecting(callback) {
-  //   this.registered.selecting.push(callback)
-  //   return this
-  // }
-
-  // resetDisplay(callback) {
-  //   this.registered.resetDisplay.push(callback)
-  //   return this
-  // }
-
 }

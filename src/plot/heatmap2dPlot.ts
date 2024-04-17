@@ -1,4 +1,4 @@
-import { DataFromPos, Heatmap2dOptions, TooltipHandlerResponse } from '../types'
+import type { DataFromPos, Heatmap2dOptions, TooltipHandlerResponse } from '../types'
 import MasterInterface from '../masterInterface'
 import AbstractPlot from './abstractPlot.js'
 import DataUtils from '../dataUtils.js'
@@ -18,22 +18,25 @@ export default class Heatmap2dPlot extends AbstractPlot {
   }
 
   tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
-    const xPos = this.dataUtils.xPosFromValue(x)
+    const xPos = this.dataUtils.xPosFromValue(x)!
     const data = this.dataFromXPos(xPos)
-    let xValue = null
+    let xValue = x
     const yValues = []
     for (const [i, s] of this.opt.entries()) {
       if (data[i] == null) {
         continue
       }
-      xValue = data[i].xDataValue
-      const value = data[i].yDataValue
+      xValue = data[i]!.xDataValue
+      const value = data[i]!.yDataValue
+      if (value == null) {
+        continue
+      }
       yValues.push({
         // color: 'black',
-        color: DataUtils.getColor(value, this.colorScale),
+        color: DataUtils.getColor(value, this.colorScale) as string,
         value,
-        name: s.name,
-        textValue: s.tooltipFormatter != null ? s.tooltipFormatter(value) : `${value}`
+        name: s.name as string,
+        textValue: s.tooltipFormatter != null && value != null ? s.tooltipFormatter(value) : `${value}`
       })
     }
     return { xValue, yValues }
@@ -62,7 +65,7 @@ export default class Heatmap2dPlot extends AbstractPlot {
             index,
             xDataValue,
             xDataValuePos: this.dataUtils.xPosFromValue(xDataValue)!,
-            yDataValuePos: this.dataUtils.yPosFromValue(yDataValue),
+            yDataValuePos: this.dataUtils.yPosFromValue(yDataValue)!,
             yDataValue
           }
         }
@@ -88,8 +91,8 @@ export default class Heatmap2dPlot extends AbstractPlot {
 
   getXRangeIndex (serie: Heatmap2dOptions) {
     return [
-      Math.max(0, Math.floor((this.dataUtils.start - serie.start) / serie.step)),
-      Math.min(1 + Math.floor((this.dataUtils.end - serie.start) / serie.step), serie.data.length)
+      Math.max(0, Math.floor((this.dataUtils.start! - serie.start) / serie.step)),
+      Math.min(1 + Math.floor((this.dataUtils.end! - serie.start) / serie.step), serie.data.length)
     ]
   }
 
@@ -116,8 +119,8 @@ export default class Heatmap2dPlot extends AbstractPlot {
       const serie = this.opt[serieIndex]
       const [i1, i2] = this.getXRangeIndex(serie)
       let x0 = serie.start + serie.step * i1
-      let xPos = this.dataUtils.xPosFromValue(x0)
-      const xRatio = (this.dataUtils.end - this.dataUtils.start) / (serie.step * this.dataUtils.width)
+      let xPos = this.dataUtils.xPosFromValue(x0)!
+      const xRatio = (this.dataUtils.end! - this.dataUtils.start!) / (serie.step * this.dataUtils.width)
       let xStep = 1
       let indexStep = xRatio
       if (xRatio <= 1) {
@@ -125,7 +128,7 @@ export default class Heatmap2dPlot extends AbstractPlot {
         indexStep = 1
       }
       for (let i = i1; i < i2; i += indexStep) {
-        const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
+        const group = serie.data.slice(i, i + indexStep).filter(x => x != null) as number[]
         if (group.length > 0) {
           ctx.fillStyle = DataUtils.getColor(Math.max.apply(null, group), this.colorScale) as string
           ctx.fillRect(Math.floor(xPos), yPos + MARGIN, Math.floor(xStep) + 1, serieHeight - 2 * MARGIN)

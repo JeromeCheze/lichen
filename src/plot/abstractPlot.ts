@@ -1,6 +1,6 @@
 import DataUtils from "../dataUtils"
 import MasterInterface from "../masterInterface"
-import { ColorScaleOptions, DataFromPos, TooltipHandlerResponse } from "../types"
+import type { ColorScaleOptions, DataFromPos, TooltipHandlerResponse } from "../types"
 
 export default abstract class AbstractPlot {
 
@@ -34,7 +34,7 @@ export default abstract class AbstractPlot {
   }
 
   yRange(): [number, number] {
-    return [this.dataUtils.computed.minValue, this.dataUtils.computed.maxValue]
+    return [this.dataUtils.computed.minValue!, this.dataUtils.computed.maxValue!]
   }
 
   abstract tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse

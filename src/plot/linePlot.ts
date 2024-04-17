@@ -1,4 +1,4 @@
-import { DataFromPos, LineOptions, TooltipHandlerResponse } from '../types'
+import type { DataFromPos, LineOptions, TooltipHandlerResponse } from '../types'
 import MasterInterface from '../masterInterface'
 import AbstractPlot from './abstractPlot.js'
 import DataUtils from '../dataUtils.js'
@@ -21,26 +21,29 @@ export default class LinePlot extends AbstractPlot {
   tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
     ctx.save()
     ctx.fillStyle = 'white'
-    const xPos = this.dataUtils.xPosFromValue(x)
+    const xPos = this.dataUtils.xPosFromValue(x)!
     const data = this.dataFromXPos(xPos)
-    let xValue = null
+    let xValue = x
     const yValues = []
     for (const [i, s] of this.opt.entries()) {
       if (data[i] == null) {
         continue
       }
-      xValue = data[i].xDataValue
-      const value = data[i].yDataValue
+      xValue = data[i]!.xDataValue
+      const value = data[i]!.yDataValue
+      if (value == null) {
+        continue
+      }
       const color = s.color != null ? s.color : DataUtils.getColor(value, this.colorScale, true) as string
       yValues.push({
         color,
         value,
-        name: s.name,
-        textValue: s.tooltipFormatter != null ? s.tooltipFormatter(value) : `${value}`
+        name: s.name as string,
+        textValue: s.tooltipFormatter != null && value != null ? s.tooltipFormatter(value) : `${value}`
       })
       ctx.strokeStyle = color
       ctx.beginPath()
-      ctx.ellipse(data[i].xDataValuePos, data[i].yDataValuePos, 3, 3, 0, 0, 2 * Math.PI)
+      ctx.ellipse(data[i]!.xDataValuePos, data[i]!.yDataValuePos, 3, 3, 0, 0, 2 * Math.PI)
       ctx.fill()
       ctx.stroke()
     }
@@ -71,7 +74,7 @@ export default class LinePlot extends AbstractPlot {
             index,
             xDataValue,
             xDataValuePos: this.dataUtils.xPosFromValue(xDataValue)!,
-            yDataValuePos: this.dataUtils.yPosFromValue(yDataValue),
+            yDataValuePos: this.dataUtils.yPosFromValue(yDataValue)!,
             yDataValue
           }
         }
@@ -93,8 +96,8 @@ export default class LinePlot extends AbstractPlot {
 
   getXRangeIndex(serie: LineOptions) {
     return [
-      Math.max(0, Math.floor((this.dataUtils.start - serie.start) / serie.step)),
-      Math.min(1 + Math.floor((this.dataUtils.end - serie.start) / serie.step), serie.data.length)
+      Math.max(0, Math.floor((this.dataUtils.start! - serie.start) / serie.step)),
+      Math.min(1 + Math.floor((this.dataUtils.end! - serie.start) / serie.step), serie.data.length)
     ]
   }
 
@@ -114,8 +117,8 @@ export default class LinePlot extends AbstractPlot {
       const max = this.colorScale.max
       if (serie.area === true) {
         const fillGrad = ctx.createLinearGradient(
-          0, this.dataUtils.yPosFromValue(min),
-          0, this.dataUtils.yPosFromValue(max)
+          0, this.dataUtils.yPosFromValue(min)!,
+          0, this.dataUtils.yPosFromValue(max)!
         )
         for (const stop of this.colorScale.stops) {
           fillGrad.addColorStop(stop[0], this.dataUtils.toRGBA(stop[1], FILL_OPACITY))
@@ -123,8 +126,8 @@ export default class LinePlot extends AbstractPlot {
         ctx.fillStyle = fillGrad
       }
       const strokeGrad = ctx.createLinearGradient(
-        0, this.dataUtils.yPosFromValue(min),
-        0, this.dataUtils.yPosFromValue(max)
+        0, this.dataUtils.yPosFromValue(min)!,
+        0, this.dataUtils.yPosFromValue(max)!
       )
       for (const stop of this.colorScale.stops) {
         strokeGrad.addColorStop(stop[0], DataUtils.toRGB(stop[1]))
@@ -154,7 +157,10 @@ export default class LinePlot extends AbstractPlot {
       const [i1, i2] = this.getXRangeIndex(serie)
       let x0 = serie.start + serie.step * i1
       let xPos = this.dataUtils.xPosFromValue(x0)
-      const xRatio = (this.dataUtils.end - this.dataUtils.start) / (serie.step * this.dataUtils.width)
+      if (xPos == null) {
+        throw new Error('xPos should not be null')
+      }
+      const xRatio = (this.dataUtils.end! - this.dataUtils.start!) / (serie.step * this.dataUtils.width)
       let xStep = 1
       let indexStep = xRatio
       if (xRatio <= 1) {
@@ -170,22 +176,22 @@ export default class LinePlot extends AbstractPlot {
             let minValue: number | null = null
             let maxValue: number | null = null
             for (const v of group) {
-              minValue = minValue == null || v < minValue ? v : minValue
-              maxValue = maxValue == null || maxValue < v ? v : maxValue
+              minValue = minValue == null || v! < minValue ? v : minValue
+              maxValue = maxValue == null || maxValue < v! ? v : maxValue
             }
             if (prev == null) {
               ctx.beginPath()
-              ctx.moveTo(xPos, Math.min(this.dataUtils.yPosFromValue(0), this.canvas.height))
-              ctx.lineTo(xPos, this.dataUtils.yPosFromValue(minValue))
+              ctx.moveTo(xPos, Math.min(this.dataUtils.yPosFromValue(0)!, this.canvas.height))
+              ctx.lineTo(xPos, this.dataUtils.yPosFromValue(minValue)!)
             } else {
-              ctx.lineTo(xPos, this.dataUtils.yPosFromValue(minValue))
+              ctx.lineTo(xPos, this.dataUtils.yPosFromValue(minValue)!)
             }
             if (xStep === 1) {
-              ctx.lineTo(xPos, this.dataUtils.yPosFromValue(maxValue))
+              ctx.lineTo(xPos, this.dataUtils.yPosFromValue(maxValue)!)
             }
             prev = minValue
           } else {
-            ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0), this.canvas.height))
+            ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0)!, this.canvas.height))
             ctx.closePath()
             ctx.fill()
             prev = null
@@ -193,13 +199,16 @@ export default class LinePlot extends AbstractPlot {
           xPos += xStep
         }
         if (prev != null) {
-          ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0), this.canvas.height))
+          ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0)!, this.canvas.height))
           ctx.closePath()
           ctx.fill()
         }
       }
       ctx.beginPath()
       xPos = this.dataUtils.xPosFromValue(x0)
+      if (xPos == null) {
+        throw new Error('xPos should not be null')
+      }
       prev = null
       for (let i = i1; i <= i2; i += indexStep) {
         const group = serie.data.slice(i, i + indexStep).filter(x => x != null)
@@ -207,16 +216,16 @@ export default class LinePlot extends AbstractPlot {
           let minValue: number | null = null
           let maxValue: number | null = null
           for (const v of group) {
-            minValue = minValue == null || v < minValue ? v : minValue
-            maxValue = maxValue == null || maxValue < v ? v : maxValue
+            minValue = minValue == null || v! < minValue ? v : minValue
+            maxValue = maxValue == null || maxValue < v! ? v : maxValue
           }
           if (prev == null) {
-            ctx.moveTo(xPos, this.dataUtils.yPosFromValue(minValue))
+            ctx.moveTo(xPos, this.dataUtils.yPosFromValue(minValue)!)
           } else {
-            ctx.lineTo(xPos, this.dataUtils.yPosFromValue(minValue))
+            ctx.lineTo(xPos, this.dataUtils.yPosFromValue(minValue)!)
           }
           if (xStep === 1) {
-            ctx.lineTo(xPos, this.dataUtils.yPosFromValue(maxValue))
+            ctx.lineTo(xPos, this.dataUtils.yPosFromValue(maxValue)!)
           }
           prev = minValue
         } else {
