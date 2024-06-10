@@ -74,7 +74,7 @@ export default class FrontPanel {
   getDataTooltipContent(value: number) {
     const result: HTMLElement[] = []
     const content = this.master.getRegistered('PLOT').tooltipHandler(value, this.ctx) as TooltipHandlerResponse
-    if (content.xValue == null) {
+    if (content.xValue == null || content.yValues.length === 0) {
       return result
     }
     content.yValues.sort((a, b) => {
@@ -143,10 +143,10 @@ export default class FrontPanel {
     }
     this.tooltipDiv.innerHTML = ''
     if (this.state.cursorPos.pageX > (document.body.clientWidth / 2)) {
-      this.tooltipDiv.style.right = `${document.body.clientWidth - this.state.cursorPos.pageX + 50}px`
+      this.tooltipDiv.style.right = `${document.body.clientWidth - this.state.cursorPos.pageX + 20}px`
       this.tooltipDiv.style.left = 'auto'
     } else {
-      this.tooltipDiv.style.left = `${this.state.cursorPos.pageX + 40}px`
+      this.tooltipDiv.style.left = `${this.state.cursorPos.pageX + 20}px`
       this.tooltipDiv.style.right = 'auto'
     }
     for (const el of dataContent) {
@@ -158,6 +158,8 @@ export default class FrontPanel {
     Object.assign(this.tooltipDiv.style, {
       display: 'block',
       position: 'absolute',
+      borderRadius: '4px',
+      border: '1px solid #ccc',
       top: `${this.state.cursorPos.pageY + 20 - this.tooltipDiv.getBoundingClientRect().height / 2}px`,
       color: 'black'
     })

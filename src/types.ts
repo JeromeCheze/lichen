@@ -38,8 +38,8 @@ export type ColorScaleObject  = [
 
 export interface ColorScaleOptions {
   stops: ColorScaleObject
-  min: number
-  max: number
+  min: number | null
+  max: number | null
   logarithmic: boolean
 }
 
@@ -83,6 +83,7 @@ export interface ScatterOptions {
   name: string
   color: string
   shape: 'circle' | 'diamond'
+  enabled?: boolean
   data: {
     x: number
     y: number
@@ -98,6 +99,7 @@ export interface Heatmap2dOptions {
   start: number
   step: number
   data: (number | null)[]
+  aggregation: 'max' | 'min' | 'avg'
   tooltipFormatter?: (x: number) => string
 }
 

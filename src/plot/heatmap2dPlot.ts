@@ -4,6 +4,12 @@ import AbstractPlot from './abstractPlot.js'
 import DataUtils from '../dataUtils.js'
 
 const MARGIN = 1
+const AGGREGATION = {
+  'min': (group: number[]) => Math.min.apply(null, group),
+  'max': (group: number[]) => Math.max.apply(null, group),
+  'avg': (group: number[]) => group.reduce((a, b) => a + b) / group.length,
+  'amp': (group: number[]) => Math.max.apply(null, group) - Math.min.apply(null, group)
+}
 
 export default class Heatmap2dPlot extends AbstractPlot {
 
@@ -117,6 +123,7 @@ export default class Heatmap2dPlot extends AbstractPlot {
         continue
       }
       const serie = this.opt[serieIndex]
+      const agg = AGGREGATION[serie.aggregation]
       const [i1, i2] = this.getXRangeIndex(serie)
       let x0 = serie.start + serie.step * i1
       let xPos = this.dataUtils.xPosFromValue(x0)!
@@ -130,7 +137,7 @@ export default class Heatmap2dPlot extends AbstractPlot {
       for (let i = i1; i < i2; i += indexStep) {
         const group = serie.data.slice(i, i + indexStep).filter(x => x != null) as number[]
         if (group.length > 0) {
-          ctx.fillStyle = DataUtils.getColor(Math.max.apply(null, group), this.colorScale) as string
+          ctx.fillStyle = DataUtils.getColor(agg(group), this.colorScale, true, this.dataUtils) as string
           ctx.fillRect(Math.floor(xPos), yPos + MARGIN, Math.floor(xStep) + 1, serieHeight - 2 * MARGIN)
         }
         xPos += xStep

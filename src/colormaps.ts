@@ -1,3 +1,5 @@
+import type { ColorScaleObject } from "./types"
+
 export const PARULA = [
   [0.000, [53, 42, 135]],
   [0.125, [3, 99, 224]],
@@ -8,7 +10,7 @@ export const PARULA = [
   [0.750, [217, 186, 86]],
   [0.875, [252, 207, 47]],
   [1.000, [249, 251, 14]]
-]
+] as ColorScaleObject
 
 export const VIRIDIS = [
   [0, [68, 1, 84]],
@@ -20,7 +22,7 @@ export const VIRIDIS = [
   [0.75, [91, 200, 98]],
   [0.875, [170, 219, 50]],
   [1, [253, 231, 36]]
-]
+] as ColorScaleObject
 
 export const PLASMA = [
   [0, [12, 7, 134]],
@@ -32,7 +34,7 @@ export const PLASMA = [
   [0.75, [247, 147, 65]],
   [0.875, [253, 195, 40]],
   [1, [239, 248, 33]]
-]
+] as ColorScaleObject
 
 export const INFERNO = [
   [0, [0, 0, 3]],
@@ -44,7 +46,7 @@ export const INFERNO = [
   [0.75, [249, 140, 9]],
   [0.875, [248, 201, 49]],
   [1, [252, 254, 164]]
-]
+] as ColorScaleObject
 
 export const MAGMA = [
   [0, [0, 0, 3]],
@@ -56,7 +58,7 @@ export const MAGMA = [
   [0.75, [251, 134, 96]],
   [0.875, [254, 194, 134]],
   [1, [251, 252, 191]]
-]
+] as ColorScaleObject
 
 export const CIVIDIS = [
   [0, [0, 34, 77]],
@@ -68,4 +70,4 @@ export const CIVIDIS = [
   [0.75, [186, 172, 108]],
   [0.875, [220, 200, 88]],
   [1, [253, 231, 55]]
-]
+] as ColorScaleObject

@@ -188,7 +188,7 @@ export default class Lichen {
     let canvasWrapperContainerWidth = this.opt.width != null ? this.opt.width : this.wrapper!.getBoundingClientRect().width - 20
     if (this.opt.header.position === 'left') {
       canvasWrapperContainerWidth -= this.opt.header.width! + 2 * PADDING
-      Object.assign(header.style, { display: 'inline-block', width: `${this.opt.header.width}px`, verticalAlign: 'middle' })
+      Object.assign(header.style, { display: 'inline-block', width: `${this.opt.header.width}px`, verticalAlign: 'middle', padding: `0 ${PADDING}px` })
     }
     if (this.opt.legend!.position! === 'right') {
       canvasWrapperContainerWidth -= this.opt.legend!.width! + 2 * PADDING

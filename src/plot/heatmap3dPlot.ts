@@ -11,12 +11,20 @@ export default class Heatmap3dPlot extends AbstractPlot {
 
   constructor(container: HTMLElement, master: MasterInterface) {
     super(container, master)
-    const [yMin, yMax] = this.yRange()
-    this.dataUtils.yMin = yMin
-    this.dataUtils.yMax = yMax
     const yAxis = this.master.getRegistered('Y_AXIS')
-    yAxis.opt.min = yMin
-    yAxis.opt.max = yMax
+    const [yMin, yMax] = this.yRange()
+    if (yAxis.opt.min != null) {
+      this.dataUtils.yMin = yAxis.opt.min
+    } else {
+      this.dataUtils.yMin = yMin
+      yAxis.opt.min = yMin
+    }
+    if (yAxis.opt.max != null) {
+      this.dataUtils.yMax = yAxis.opt.max
+    } else {
+      this.dataUtils.yMax = yMax
+      yAxis.opt.max = yMax
+    }
     this.image = null
     this.imageWidth = null
     this.imageHeight = null
@@ -86,7 +94,7 @@ export default class Heatmap3dPlot extends AbstractPlot {
       const t1 = new Date().getTime()
       this.createImage()
       const t2 = new Date().getTime()
-      console.log(t2 - t1)
+      // console.log(t2 - t1)
     }
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)

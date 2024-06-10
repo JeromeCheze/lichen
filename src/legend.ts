@@ -93,7 +93,7 @@ export default class Legend {
     ctx.restore()
   }
 
-  drawLineLegend (items: LegendItem[]) {
+  drawLegend (items: LegendItem[]) {
     this.container.innerHTML = ''
     Object.assign(this.container.style, {
       textAlign: this.opt.position === 'bottom' ? 'center' : 'left',
@@ -138,10 +138,13 @@ export default class Legend {
     }
     if (this.type === 'line') {
       const series = this.series as LineOptions[]
-      this.drawLineLegend(series as LegendItem[])
+      this.drawLegend(series as LegendItem[])
     } else if (this.type === 'stacked') {
       const series = this.series as StackedOptions
-      this.drawLineLegend(series.data as LegendItem[])
+      this.drawLegend(series.data as LegendItem[])
+    } else if (this.type === 'scatter') {
+      const series = this.series as ScatterOptions[]
+      this.drawLegend(series as LegendItem[])
     } else if (this.type === 'heatmap3d') {
       this.drawHeatmap3dLegend()
     }

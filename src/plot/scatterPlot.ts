@@ -10,6 +10,9 @@ export default class ScatterPlot extends AbstractPlot {
 
   constructor(container: HTMLElement, master: MasterInterface) {
     super(container, master)
+    for (const serie of this.opt) {
+      serie.enabled = true
+    }
   }
 
   get opt(): ScatterOptions[] {
@@ -118,7 +121,11 @@ export default class ScatterPlot extends AbstractPlot {
   getProcessingData() {
     const result = []
     for (const serie of this.opt) {
-      result.push(serie.data.filter(point => point.x >= this.dataUtils.start! && point.x <= this.dataUtils.end!).map(point => point.y))
+      if (serie.enabled) {
+        result.push(serie.data.filter(point => point.x >= this.dataUtils.start! && point.x <= this.dataUtils.end!).map(point => point.y))
+      } else {
+        result.push([])
+      }
     }
     return result
   }

@@ -45,7 +45,7 @@ export default class YAxis {
     const gridWidth = this.opt.enabled ? this.canvas.width - this.opt.width! + 1 : this.canvas.width
     const height = this.canvas.height
     const minTick = height / 30
-    const scales = [100, 50, 25, 20, 10]
+    const scales = [100, 50, 25, 20, 10, 5, 2, 1]
     if (this.opt.enabled) {
       ctx.fillStyle = this.opt.textColor as string
       ctx.fillRect(xPos, 0, this.opt.lineWidth!, height + 1)
@@ -73,6 +73,7 @@ export default class YAxis {
         break
       }
     }
+    
     if (step == null) {
       throw new Error('step should not be null')
     }
