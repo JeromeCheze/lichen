@@ -36,13 +36,17 @@ export default class Legend {
   }
 
   drawHeatmap3dLegend () {
+    if (this.colorScale == null || this.colorScale.min == null || this.colorScale.max == null) {
+      return
+    }
     this.container.innerHTML = ''
     const canvas = document.createElement('canvas')
     this.container.appendChild(canvas)
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     ctx.save()
-    const min = this.colorScale!.logarithmic && this.colorScale!.min != 0 ? Math.log2(this.colorScale!.min) : this.colorScale!.min
-    const max = this.colorScale!.logarithmic && this.colorScale!.max != 0 ? Math.log2(this.colorScale!.max) : this.colorScale!.max
+
+    const min = this.colorScale.logarithmic && this.colorScale.min != 0 ? Math.log2(this.colorScale.min) : this.colorScale.min
+    const max = this.colorScale.logarithmic && this.colorScale.max != 0 ? Math.log2(this.colorScale.max) : this.colorScale.max
     if (this.opt.position === 'bottom') {
       Object.assign(this.container.style, { paddingTop: '10px' })
       Object.assign(canvas.style, { display: 'block', margin: 'auto' })

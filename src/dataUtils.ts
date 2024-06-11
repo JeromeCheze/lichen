@@ -202,6 +202,9 @@ export default class DataUtils {
     if (max == null && dataUtils != null) {
       max = dataUtils.computed.maxValue
     }
+    if (min == null || max == null) {
+      throw new Error(`Cound not determine color scale range [${min}, ${max}]`)
+    }
     if (colorScale.logarithmic) {
       if (value !== 0) {
         value = Math.log10(value)
