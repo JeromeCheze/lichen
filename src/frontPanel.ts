@@ -170,7 +170,14 @@ export default class FrontPanel {
     ctx.save()
     for (const vline of this.vLines) {
       if (vline.range) {
-        ctx.fillStyle = `rgba(${vline.color.slice(4, -1)}, 0.2)`
+        let c = ''
+        if (vline.color[0] === '#') {
+          ctx.fillStyle = `${vline.color}${(0.2 * 255).toString(16)}`
+        } else if (vline.color.indexOf('rgb(') === 0) {
+          ctx.fillStyle = `rgba(${vline.color.slice(4, -1)}, 0.2)`
+        } else {
+          ctx.fillStyle = vline.color
+        }
         const x0 = this.dataUtils.xPosFromValue(vline.x - vline.range[0])!
         const x1 = this.dataUtils.xPosFromValue(vline.x + vline.range[1])!
         ctx.fillRect(x0, 0, x1 - x0, this.canvas.height)
