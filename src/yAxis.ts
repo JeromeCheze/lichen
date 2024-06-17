@@ -36,6 +36,9 @@ export default class YAxis {
   drawAxis() {
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    if (this.dataUtils.yMin == null || this.dataUtils.yMax == null) {
+      return
+    }
     ctx.save()
     ctx.font = `${this.opt.fontSize}px sans-serif`
     ctx.textBaseline = 'middle'
@@ -80,7 +83,9 @@ export default class YAxis {
     const start = this.dataUtils.yMin! / Math.pow(10, pow)
     const end = this.dataUtils.yMax! / Math.pow(10, pow)
     let y = start - (start % step)
-    while (y < end) {
+    let nbLoop = 0
+    while (y < end && nbLoop < 50) {
+      nbLoop++
       const yPos = this.dataUtils.yPosFromValue(y * Math.pow(10, pow))
       if (yPos == null) {
         throw new Error('yPos should not be null')
