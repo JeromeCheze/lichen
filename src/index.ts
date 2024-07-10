@@ -40,11 +40,12 @@ export default class Lichen {
   // plot: LinePlot | Heatmap2dPlot | Heatmap3dPlot | StackedPlot | SequencePlot | ScatterPlot
   // legend: Legend
   // frontPanel: FrontPanel
+  id: number
   ready: boolean
   master: MasterInterface
   wrapper: HTMLElement | null
+  eventUtils: EventUtils | null
   debounceResize: number | null
-  id: number
   
   /**
    * @param container - The HTML element container
@@ -151,6 +152,9 @@ export default class Lichen {
   }
 
   destroy() {
+    if (this.eventUtils) {
+      this.eventUtils.destroy()
+    }
     delete this.opt.synced!()[this.id]
     this.wrapper!.remove()
     const frontPanel = this.master.getRegistered('FRONT_PANEL')
@@ -213,7 +217,7 @@ export default class Lichen {
    */
   init(container: HTMLElement, reuseWrapper=false) {
     this.buildStructure(container, reuseWrapper)
-    new EventUtils(this.master, this.master.getRegistered('FRONT_PANEL').canvas)
+    this.eventUtils = new EventUtils(this.master, this.master.getRegistered('FRONT_PANEL').canvas)
     this.master
       .on('active', (value: boolean) => {
         if (value === false) {

@@ -20,10 +20,11 @@ export default class EventUtils {
     this.element = element
     this.dataUtils = master.getRegistered('DATA_UTILS')
     this.handler = {
+      'mouseenter': { el: element, callback: (e: MouseEvent) => this.handleMouseEnter() },
       'mouseleave': { el: element, callback: (e: MouseEvent) => this.handleMouseLeave(e) },
-      'mousemove': { el: element, callback: (e: MouseEvent) => this.handleMouseMove(e) },
+      'mousemove': { el: document.body, callback: (e: MouseEvent) => this.handleMouseMove(e) },
       'mousedown': { el: element, callback: (e: MouseEvent) => this.handleMouseDown(e) },
-      'mouseup': { el: element, callback: (e: MouseEvent) => this.handleMouseUp(e) },
+      'mouseup': { el: document.body, callback: (e: MouseEvent) => this.handleMouseUp(e) },
       'dblclick': { el: element, callback: (e: MouseEvent) => this.handleDblClick(e) },
       'wheel': { el: element, callback: (e: WheelEvent) => this.handleWheel(e), passive: false },
       'touchstart': { el: element, callback: (e: TouchEvent) => this.handleTouchStart(e) },
@@ -60,27 +61,36 @@ export default class EventUtils {
     }
   }
 
+  destroy() {
+    for (const [eventName, o] of Object.entries(this.handler)) {
+      o.el.removeEventListener(eventName, o.callback)
+    }
+  }
+
   getRelativePosition(e: MouseEvent | Touch) {
     const bcr = this.element.getBoundingClientRect()
     return [e.clientX - bcr.x, e.clientY - bcr.y]
   }
 
+  handleMouseEnter() {
+    this.state.active = true
+    this.master.send('active', true)
+  }
+
   handleMouseLeave(e?: MouseEvent) {
-    if (e != null) {
-      this.handleMouseUp(e)
+    if (this.state.mouseDownPos == null) {
+      if (e != null) {
+        this.handleMouseUp(e)
+      }
+      this.state.active = false
+      this.state.shiftKey = false
+      this.state.ctrlKey = false
+      this.state.cursorPos = null
+      this.master.send('active', false)
     }
-    this.state.active = false
-    this.state.shiftKey = false
-    this.state.ctrlKey = false
-    this.state.cursorPos = null
-    this.master.send('active', false)
   }
 
   handleMouseMove(e: MouseEvent) {
-    if (this.state.active === false) {
-      this.state.active = true
-      this.master.send('active', true)
-    }
     const [x, y] = this.getRelativePosition(e)
     if (this.state.mouseDownPos != null) {
       if (this.state.shiftKey) {
@@ -122,12 +132,14 @@ export default class EventUtils {
         }
       }
     } else {
-      this.state.cursorPos = e
-      this.master.send('cursor', e)
-      this.master.send('move', [
-        this.dataUtils.xValueFromPos(x),
-        this.dataUtils.yValueFromPos(y)
-      ])
+      if (this.state.active) {
+        this.state.cursorPos = e
+        this.master.send('cursor', e)
+        this.master.send('move', [
+          this.dataUtils.xValueFromPos(x),
+          this.dataUtils.yValueFromPos(y)
+        ])
+      }
     }
   }
 
