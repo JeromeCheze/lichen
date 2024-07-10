@@ -55,6 +55,7 @@ export default class Lichen {
   constructor(container: HTMLElement, opt: LichenOptions, drawOnCreation: boolean = true) {
     this.id = getID()
     this.wrapper = null
+    this.eventUtils = null
     this.master = new MasterInterface()
     this.master.register('CHART', this)
     this.ready = false
