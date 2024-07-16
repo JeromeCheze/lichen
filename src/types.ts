@@ -149,6 +149,7 @@ export interface VLine {
   arrow?: 'top' | 'bottom'
   data?: any
   tooltip?: string
+  width?: number
 }
 
 export interface EventChannelSubscription {

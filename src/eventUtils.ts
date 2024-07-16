@@ -199,7 +199,8 @@ export default class EventUtils {
   handleWheel(e: WheelEvent) {
     if (e.shiftKey) {
       e.preventDefault()
-      const sign = Math.sign(e.deltaY)
+      const delta = Math.abs(e.deltaY) > 1 ? e.deltaY : Math.abs(e.deltaX) > 1 ? e.deltaX : 0
+      const sign = Math.sign(delta)
       if (e.ctrlKey) {
         const ratio = 0.1 * (this.dataUtils.yMax! - this.dataUtils.yMin!)
         this.master.send('yRangeChange', [

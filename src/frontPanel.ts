@@ -184,7 +184,10 @@ export default class FrontPanel {
       }
       ctx.fillStyle = vline.color
       const xPos = Math.floor(this.dataUtils.xPosFromValue(vline.x)!)
-      ctx.fillRect(xPos - 0.5, 0, 1, this.canvas.height)
+      const width = vline.width == null ? 1 : vline.width
+      if (width > 0) {
+        ctx.fillRect(xPos - (width / 2), 0, width, this.canvas.height)
+      }
       if (vline.arrow != null) {
         ctx.beginPath()
         if (vline.arrow === 'top') { 
