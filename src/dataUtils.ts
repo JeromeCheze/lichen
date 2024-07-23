@@ -181,6 +181,10 @@ export default class DataUtils {
     }
   }
 
+  static correctFloat(v: number) {
+    return parseFloat(v.toPrecision(14))
+  }
+
   static getRatio(v: number, min: number, max: number) {
     return (v - min) / (max - min)
   }

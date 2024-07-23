@@ -1,6 +1,6 @@
-import DataUtils from './dataUtils'
 import MasterInterface from './masterInterface';
 import { type YAxisOptions } from './types'
+import DataUtils from './dataUtils'
 
 const TEXT_PADDING = 4
 
@@ -33,6 +33,76 @@ export default class YAxis {
     return this.master.getRegistered('CHART').opt.yAxis
   }
 
+  drawTickPositions(tickPos: number[]) {
+    const ctx = this.ctx
+    const gridWidth = this.opt.enabled ? this.canvas.width - this.opt.width! + 1 : this.canvas.width
+    const xPos = this.opt.enabled ? this.opt.width! - 1 : 0
+    for (const pos of tickPos) {
+      const yPos = this.dataUtils.yPosFromValue(pos)
+      if (this.opt.gridEnabled) {
+        ctx.fillStyle = this.opt.gridColor as string
+        if (pos === 0) {
+          ctx.fillRect(xPos, yPos - 1, gridWidth, 3)
+        } else {
+          ctx.fillRect(xPos, yPos, gridWidth, 1)
+        }
+      }
+      if (!this.opt.enabled) {
+        continue
+      }
+      ctx.fillStyle = this.opt.textColor as string
+      ctx.fillRect(xPos - this.opt.tickLength!, yPos, this.opt.tickLength!, this.opt.tickWidth!)
+      const tickText = Math.abs(pos) > 1e3 ? pos.toExponential() : `${pos}`
+      ctx.fillText(tickText, xPos - this.opt.tickLength! - TEXT_PADDING, yPos)
+    }
+  }
+
+  getLinearTickPositions(min:number, max: number, tickInterval: number) {
+    const magnitude = Math.pow(10, Math.floor(Math.log10(tickInterval)))
+    const multiples = [1, 2, 5, 10]
+    let interval = 0
+    for (const mult of multiples) {
+      interval = mult
+      if (mult * magnitude >= tickInterval) {
+        break
+      }
+    }
+    interval = interval * magnitude
+    const roundedMin = DataUtils.correctFloat(Math.floor(min / interval) * interval)
+    const roundedMax = DataUtils.correctFloat(Math.ceil(max / interval) * interval)
+    let pos = roundedMin
+    const tickPos: number[] = []
+    while(pos <= roundedMax) {
+      const lastPos = pos
+      tickPos.push(pos)
+      pos = DataUtils.correctFloat(pos + interval)
+      if (pos === lastPos) {
+        break
+      }
+    }
+    return tickPos
+  }
+
+  getLogTickPositions(min: number, max:number, tickInterval: number) {
+    if (tickInterval >= 0.5) {
+      return this.getLinearTickPositions(min, max, Math.round(tickInterval))
+    }
+    const tickPos: number[] = []
+    const roundedMin = Math.floor(min)
+    const intermediate = tickInterval > 0.3
+      ? [1, 2, 4]
+      : tickInterval > 0.15
+        ? [1, 2, 4, 6, 8]
+        : [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    for (let i = roundedMin; i < max + 1; i++) {
+      for (const mult of intermediate) {
+        const pos = Math.pow(10, i) * mult
+        tickPos.push(pos)
+      }
+    }
+    return tickPos
+  }
+
   drawAxis() {
     const ctx = this.ctx
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -43,77 +113,26 @@ export default class YAxis {
     ctx.font = `${this.opt.fontSize}px sans-serif`
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'right'
-    const delta = this.dataUtils.yMax! - this.dataUtils.yMin!
+    let min = this.dataUtils.yMin!
+    let max = this.dataUtils.yMax!
+    if (this.opt.logarithmic) {
+      min = DataUtils.correctFloat(Math.log10(min))
+      max = DataUtils.correctFloat(Math.log10(max))
+    }
+    const range = max - min
     const xPos = this.opt.enabled ? this.opt.width! - 1 : 0
-    const gridWidth = this.opt.enabled ? this.canvas.width - this.opt.width! + 1 : this.canvas.width
-    const height = this.canvas.height
-    const minTick = height / 30
-    const scales = [100, 50, 25, 20, 10, 5, 2, 1]
+    const axisLength = this.canvas.height
     if (this.opt.enabled) {
       ctx.fillStyle = this.opt.textColor as string
-      ctx.fillRect(xPos, 0, this.opt.lineWidth!, height + 1)
+      ctx.fillRect(xPos, 0, this.opt.lineWidth!, axisLength + 1)
     }
-    if (delta == 0) {
-      ctx.restore()
-      return
-    }
-    let pow = 0
-    if (delta > scales[0]) {
-      while (delta > scales[0] * Math.pow(10, pow)) {
-        pow++
-      }
-    }
-    if (delta < scales[0]) {
-      while (delta < scales[0] * Math.pow(10, pow)) {
-        pow--
-      }
-    }
-    scales.reverse()
-    let step = null
-    for (let s of scales) {
-      step = s
-      if (delta / (s * Math.pow(10, pow)) < minTick) {
-        break
-      }
-    }
-    
-    if (step == null) {
-      throw new Error('step should not be null')
-    }
-    const start = this.dataUtils.yMin! / Math.pow(10, pow)
-    const end = this.dataUtils.yMax! / Math.pow(10, pow)
-    let y = start - (start % step)
-    let nbLoop = 0
-    while (y < end && nbLoop < 50) {
-      nbLoop++
-      const yPos = this.dataUtils.yPosFromValue(y * Math.pow(10, pow))
-      if (yPos == null) {
-        throw new Error('yPos should not be null')
-      }
-      if (this.opt.gridEnabled) {
-        ctx.fillStyle = this.opt.gridColor as string
-        if (y === 0) {
-          ctx.fillRect(xPos, yPos - 1, gridWidth, 3)
-        } else {
-          ctx.fillRect(xPos, yPos, gridWidth, 1)
-        }
-      }
-      if (!this.opt.enabled) {
-        y += step
-        continue
-      }
-      ctx.fillStyle = this.opt.textColor as string
-      ctx.fillRect(xPos - this.opt.tickLength!, yPos, this.opt.tickLength!, this.opt.tickWidth!)
-      const tickText = y === 0
-        ? '0'
-        : Math.abs(pow) > 3
-          ? `${y}e${pow}`
-          : pow < 0
-            ? `${y / Math.pow(10, -1 * pow)}`
-            : `${y * Math.pow(10, pow)}`
-      ctx.fillText(tickText, xPos - this.opt.tickLength! - TEXT_PADDING, yPos)
-      y += step
-    }
+    const tickAmount = axisLength / 30
+    const tickInterval = range === 0 ? 1 : range / tickAmount
+    const getTickPositions = this.opt.logarithmic
+      ? this.getLogTickPositions
+      : this.getLinearTickPositions
+    const tickPos = getTickPositions.call(this, min, max, tickInterval)
+    this.drawTickPositions(tickPos)
     ctx.restore()
   }
 

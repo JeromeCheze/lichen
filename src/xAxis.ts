@@ -1,6 +1,6 @@
+import MasterInterface from './masterInterface';
 import { type XAxisOptions } from './types'
 import DataUtils from './dataUtils'
-import MasterInterface from './masterInterface';
 
 const TEXT_PADDING = 4
 
@@ -33,86 +33,34 @@ export default class XAxis {
     return this.master.getRegistered('CHART').opt.xAxis
   }
 
-  drawLinearAxis() {
-    const ctx = this.ctx
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    ctx.save()
-    ctx.font = `${this.opt.fontSize}px sans-serif`
-    ctx.textBaseline = 'top'
-    ctx.textAlign = 'center'
-    const delta = this.dataUtils.end! - this.dataUtils.start!
-    const yPos = this.dataUtils.height
-    const width = this.canvas.width
-    const minTick = width / 80
-    const scales = [100, 50, 25, 20, 10]
-    if (this.opt.enabled) {
-      ctx.fillStyle = this.opt.textColor as string
-      ctx.fillRect(0, yPos, width, this.opt.lineWidth!)
-    }
-    if (delta == 0) {
-      ctx.restore()
-      return
-    }
-    let pow = 0
-    if (delta > scales[0]) {
-      while (delta > scales[0] * Math.pow(10, pow)) {
-        pow++
-      }
-    }
-    if (delta < scales[0]) {
-      while (delta < scales[0] * Math.pow(10, pow)) {
-        pow--
-      }
-    }
-    scales.reverse()
-    let step = null
-    for (let s of scales) {
-      step = s
-      if (delta / (s * Math.pow(10, pow)) < minTick) {
+  getLinearTickPositions(min:number, max: number, tickInterval: number) {
+    const magnitude = Math.pow(10, Math.floor(Math.log10(tickInterval)))
+    const multiples = [1, 2, 5, 10]
+    let interval = 0
+    for (const mult of multiples) {
+      interval = mult
+      if (mult * magnitude >= tickInterval) {
         break
       }
     }
-    if (step == null) {
-      throw new Error('step shoud not be null')
+    interval = interval * magnitude
+    const roundedMin = DataUtils.correctFloat(Math.floor(min / interval) * interval)
+    const roundedMax = DataUtils.correctFloat(Math.ceil(max / interval) * interval)
+    let pos = roundedMin
+    const tickPos: number[] = []
+    while(pos <= roundedMax) {
+      const lastPos = pos
+      tickPos.push(pos)
+      pos = DataUtils.correctFloat(pos + interval)
+      if (pos === lastPos) {
+        break
+      }
     }
-    const start = this.dataUtils.start! / Math.pow(10, pow)
-    const end = this.dataUtils.end! / Math.pow(10, pow)
-    let x = start - (start % step)
-    while (x < end) {
-      const xPos = this.dataUtils.xPosFromValue(x * Math.pow(10, pow))
-      if (xPos == null) {
-        throw new Error('xPos shoud not be null')
-      }
-      if (this.opt.gridEnabled) {
-        ctx.fillStyle = this.opt.gridColor as string
-        ctx.fillRect(xPos, 0, 1, yPos)
-      }
-      if (!this.opt.enabled) {
-        x += step
-        continue
-      }
-      ctx.fillStyle = this.opt.textColor as string
-      ctx.fillRect(xPos, yPos, this.opt.tickWidth!, this.opt.tickLength!)
-      const tickText = x === 0
-        ? '0'
-        : Math.abs(pow) > 3
-          ? `${x}e${pow}`
-          : pow < 0
-            ? `${x / Math.pow(10, -1 * pow)}`
-            : `${x * Math.pow(10, pow)}`
-      ctx.fillText(tickText, xPos, yPos + this.opt.tickLength! + TEXT_PADDING)
-      x += step
-    }
-    ctx.restore()
+    return tickPos
   }
 
-  drawDatetimeAxis() {
-    const ctx = this.ctx
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    ctx.save()
-    const width = this.canvas.width
-    const yPos = this.dataUtils.height
-    const scales = [
+  getDatetimeTickPositions(min: number, max: number, tickInterval: number) {
+    const multiples = [
       31536000e3, 15768000e3, // >/= 6 months
       4838400e3, 2419200e3, 604800e3, // >/= 7days
       172800e3, 86400e3, // >/= 1 day
@@ -121,64 +69,95 @@ export default class XAxis {
       30e3, 10e3, 5e3, 2e3, 1e3, // >/= 1 seconde
       500, 200, 100 // < 1 seconde
     ]
-    let i = 0
-    let a = scales[0]
-    const d = new Date()
-    const tickInterval = 60 * (this.dataUtils.end! - this.dataUtils.start!) / width
-    while (tickInterval < scales[i]) {
-      a = scales[i++]
-    }
-    ctx.textBaseline = 'top'
-    ctx.textAlign = 'center'
-    if (this.opt.enabled) {
-      ctx.fillStyle = this.opt.textColor as string
-      ctx.fillRect(0, yPos, width, this.opt.lineWidth!)
-    }
-    let j = this.dataUtils.start! - (this.dataUtils.start! % a)
-    while (j < this.dataUtils.end!) {
-      d.setTime(j)
-      const xPos = this.dataUtils.xPosFromValue(j)
-      if (xPos == null) {
-        throw new Error('xPos should not be null')
+    let interval = multiples[0]
+    for (const mult of multiples) {
+      if (tickInterval > mult) {
+        break
       }
+      interval = mult
+    }
+    const roundedMin = DataUtils.correctFloat(Math.floor(min / interval) * interval)
+    const roundedMax = DataUtils.correctFloat(Math.ceil(max / interval) * interval)
+    let pos = roundedMin
+    const tickPos: number[] = []
+    while(pos <= roundedMax) {
+      const lastPos = pos
+      tickPos.push(pos)
+      pos += interval
+      if (pos === lastPos) {
+        break
+      }
+    }
+    return tickPos
+  }
+
+  formatLinearTick(v: number) {
+    return Math.abs(v) > 1e3 ? v.toExponential() : `${v}`
+  }
+
+  formatDatetimeTick(v: number) {
+    const d = new Date(v)
+    return (v % 86400e3) === 0
+      ? d.getDate() + '/' + (d.getMonth() + 1)
+      : (v % 3600e3) === 0
+        ? d.getUTCHours() + 'h'
+        : (v % 600e3) === 0
+          ? d.toISOString().slice(11, 16)
+          : (v % 1e3) === 0
+            ? d.toISOString().slice(11, 19)
+            : (v % 100) === 0 ? d.toISOString().slice(11, 21) : ''
+  }
+
+  drawTickPositions(tickPos: number[]) {
+    const ctx = this.ctx
+    const yPos = this.dataUtils.height
+    for (const pos of tickPos) {
+      const xPos = this.dataUtils.xPosFromValue(pos)
       if (this.opt.gridEnabled) {
         ctx.fillStyle = this.opt.gridColor as string
-        ctx.fillRect(xPos, 0, 1, yPos)
+        ctx.fillRect(xPos, yPos, 1, yPos)
       }
       if (!this.opt.enabled) {
-        j += a
         continue
       }
-      if ((j % 86400e3) === 0) {
-        ctx.font = `bold ${this.opt.fontSize! + 2}px sans-serif`
-      } else {
-        ctx.font = `${this.opt.fontSize!}px sans-serif`
-      }
-      const tickText = (
-        (j % 86400e3) === 0
-          ? d.getDate() + '/' + (d.getMonth() + 1)
-          : (j % 3600e3) === 0
-              ? d.getUTCHours() + 'h'
-              : (j % 600e3) === 0
-                  ? d.toISOString().slice(11, 16)
-                  : (j % 1e3) === 0
-                      ? d.toISOString().slice(11, 19)
-                      : (j % 100) === 0 ? d.toISOString().slice(11, 21) : ''
-      )
+      const tickText = this.opt.datetime ? this.formatDatetimeTick(pos) : this.formatLinearTick(pos)
       ctx.fillStyle = this.opt.textColor as string
       ctx.fillRect(xPos, yPos, this.opt.tickWidth!, this.opt.tickLength!)
       ctx.fillText(tickText, xPos, yPos + this.opt.tickLength! + TEXT_PADDING)
-      j += a
     }
+  }
+
+  drawAxis() {
+    const ctx = this.ctx
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    if (this.dataUtils.yMin == null || this.dataUtils.yMax == null) {
+      return
+    }
+    ctx.save()
+    ctx.font = `${this.opt.fontSize}px sans-serif`
+    ctx.textBaseline = 'top'
+    ctx.textAlign = 'center'
+    const min = this.dataUtils.start!
+    const max = this.dataUtils.end!
+    const range = max - min
+    const yPos = this.dataUtils.height
+    const axisLength = this.canvas.width
+    if (this.opt.enabled) {
+      ctx.fillStyle = this.opt.textColor as string
+      ctx.fillRect(0, yPos, axisLength, this.opt.lineWidth!)
+    }
+    const tickAmount = axisLength / 80
+    const tickInterval = range === 0 ? 1 : range / tickAmount
+    const getTickPositions = this.opt.datetime
+      ? this.getDatetimeTickPositions
+      : this.getLinearTickPositions
+    const tickPos = getTickPositions.call(this, min, max, tickInterval)
+    this.drawTickPositions(tickPos)
     ctx.restore()
   }
 
   update() {
-    if (this.opt.datetime) {
-      this.drawDatetimeAxis()
-    } else {
-      this.drawLinearAxis()
-    }
+    this.drawAxis()
   }
 }
 
