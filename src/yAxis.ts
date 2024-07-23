@@ -38,7 +38,7 @@ export default class YAxis {
     const gridWidth = this.opt.enabled ? this.canvas.width - this.opt.width! + 1 : this.canvas.width
     const xPos = this.opt.enabled ? this.opt.width! - 1 : 0
     for (const pos of tickPos) {
-      const yPos = this.dataUtils.yPosFromValue(pos)
+      const yPos = this.dataUtils.yPosFromValue(pos) as number
       if (this.opt.gridEnabled) {
         ctx.fillStyle = this.opt.gridColor as string
         if (pos === 0) {

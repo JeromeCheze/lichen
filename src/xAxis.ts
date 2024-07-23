@@ -112,7 +112,7 @@ export default class XAxis {
     const ctx = this.ctx
     const yPos = this.dataUtils.height
     for (const pos of tickPos) {
-      const xPos = this.dataUtils.xPosFromValue(pos)
+      const xPos = this.dataUtils.xPosFromValue(pos) as number
       if (this.opt.gridEnabled) {
         ctx.fillStyle = this.opt.gridColor as string
         ctx.fillRect(xPos, yPos, 1, yPos)
