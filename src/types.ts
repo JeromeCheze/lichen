@@ -168,7 +168,7 @@ export interface TooltipHandlerResponse {
 
 export interface HooksOptions {
   beforeSelection?: (x: [number | null, number | null], y: [number | null, number | null]) => boolean
-  beforeUpdate?: (chart: Lichen) => boolean
+  beforeDraw?: (chart: Lichen) => boolean
   beforeResetDisplay?: () => boolean
   onVlineSelection?: (vlines: VLine[]) => void
   onCursorMove?: (x: number, y: number) => void

@@ -54,7 +54,7 @@ export default {
     text: ''
   },
   hooks: {
-    beforeUpdate: (chart: Lichen) => true,
+    beforeDraw: (chart: Lichen) => true,
     beforeSelection: (x: number, y: number) => true,
     beforeResetDisplay: () => true
   },

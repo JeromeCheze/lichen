@@ -279,7 +279,7 @@ export default class Lichen {
         }
       })
       .on('redraw', () => {
-        this.draw()
+        this.update()
         this.master.getRegistered('LEGEND').update()
       })
       .on('dblclick', (x: number) => {
@@ -316,7 +316,7 @@ export default class Lichen {
     this.init(container, true)
     this.setYRange(saveBounds.yMin, saveBounds.yMax, false)
     this.setXRange(saveBounds.start!, saveBounds.end!)
-    // this.draw()
+    // this.update()
   }
 
   handleResize() {
@@ -337,7 +337,7 @@ export default class Lichen {
       dataUtils.resetComputed()
       dataUtils.setXRange(xMin, xMax)
       dataUtils.setYRange(null, null)
-      this.draw()
+      this.update()
     }
   }
 
@@ -363,9 +363,7 @@ export default class Lichen {
     if (dataUtils.start != x1 || dataUtils.end != x2) {
       dataUtils.start = x1
       dataUtils.end = x2
-      if (draw) {
-        this.draw()
-      }
+      this.update(draw)
     }
   }
 
@@ -379,9 +377,7 @@ export default class Lichen {
     const dataUtils = this.master.getRegistered('DATA_UTILS')
     dataUtils.yMin = y1
     dataUtils.yMax = y2
-    if (draw) {
-      this.draw()
-    }
+    this.update(draw)
   }
 
   /**
@@ -405,6 +401,15 @@ export default class Lichen {
    * The main draw method of Lichen
    */
   draw() {
+    if (this.opt.hooks!.beforeDraw!(this) === true) {
+      this.master.getRegistered('X_AXIS').update()
+      this.master.getRegistered('Y_AXIS').update()
+      this.master.getRegistered('PLOT').update()
+      this.master.getRegistered('FRONT_PANEL').update(null)
+    }
+  }
+
+  update(draw = true) {
     const dataUtils = this.master.getRegistered('DATA_UTILS')
     dataUtils.processData()
     if (dataUtils.yMin == null || dataUtils.yMax == null || (this.opt.zoom != null && this.opt.zoom.indexOf('y') < 0)) {
@@ -416,11 +421,8 @@ export default class Lichen {
       dataUtils.yMin = this.opt.yAxis!.min != null ? this.opt.yAxis!.min : yMin - 0.1 * amplitude
       dataUtils.yMax = this.opt.yAxis!.max != null ? this.opt.yAxis!.max : yMax + 0.1 * amplitude
     }
-    if (this.opt.hooks!.beforeUpdate!(this) === true) {
-      this.master.getRegistered('X_AXIS').update()
-      this.master.getRegistered('Y_AXIS').update()
-      this.master.getRegistered('PLOT').update()
-      this.master.getRegistered('FRONT_PANEL').update(null)
+    if (draw) {
+      this.draw()
     }
   }
 }
