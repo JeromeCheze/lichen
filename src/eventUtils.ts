@@ -208,10 +208,13 @@ export default class EventUtils {
           this.dataUtils.yMax! + sign * ratio
         ])
       } else {
-        const ratio = 0.1 * (this.dataUtils.end! - this.dataUtils.start!)
+        const [x, y] = this.getRelativePosition(e)
+        const xRef = this.dataUtils.xValueFromPos(x) as number
+        const ratio = 0.2 * (this.dataUtils.end! - this.dataUtils.start!)
+        const amount = DataUtils.getRatio(xRef, this.dataUtils.start!, this.dataUtils.end!)
         this.master.send('xRangeChange', [
-          this.dataUtils.start! - sign * ratio,
-          this.dataUtils.end! + sign * ratio
+          this.dataUtils.start! - sign * ratio * amount,
+          this.dataUtils.end! + sign * ratio *  (1 - amount)
         ])
       }
     }
