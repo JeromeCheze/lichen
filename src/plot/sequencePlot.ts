@@ -61,6 +61,10 @@ export default class SequencePlot extends AbstractPlot {
     return [this.opt.start, this.opt.start + this.opt.data.length * this.opt.step] as [number, number]
   }
 
+  step() {
+    return this.opt.step
+  }
+
   getXRangeIndex() {
     return [
       Math.max(0, Math.floor((this.dataUtils.start! - this.opt.start) / this.opt.step)),

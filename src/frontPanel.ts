@@ -1,4 +1,4 @@
-import type { ColorScaleOptions, CrosshairOptions, Heatmap2dOptions, LineOptions, SequenceOptions, VLine, TooltipHandlerResponse } from "./types"
+import type { ColorScaleOptions, CrosshairOptions, VLine, TooltipHandlerResponse } from "./types"
 import MasterInterface from "./masterInterface"
 import DataUtils from "./dataUtils"
 
@@ -18,7 +18,6 @@ export default class FrontPanel {
   ) {
     master.register('FRONT_PANEL', this)
     this.master = master
-    const mapOpt = master.getRegistered('CHART').opt
     this.selected = []
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D

@@ -13,7 +13,7 @@ const AGGREGATION = {
 
 export default class Heatmap2dPlot extends AbstractPlot {
 
-  constructor (container: HTMLElement, master: MasterInterface) {
+  constructor(container: HTMLElement, master: MasterInterface) {
     super(container, master)
     this.master.getRegistered('Y_AXIS').categories = this.opt.map(x => x.name)
     this.master.getRegistered('CHART').opt.zoom = 'x'
@@ -84,7 +84,7 @@ export default class Heatmap2dPlot extends AbstractPlot {
     return master.getRegistered('CHART').opt.serieHeight * master.getRegistered('CHART').opt.series.length
   }
 
-  xRange () {
+  xRange() {
     let minStart: number | null = null
     let maxEnd: number | null = null
     for (const serie of this.opt) {
@@ -95,14 +95,18 @@ export default class Heatmap2dPlot extends AbstractPlot {
     return [minStart, maxEnd] as [number, number]
   }
 
-  getXRangeIndex (serie: Heatmap2dOptions) {
+  step() {
+    return Math.max(...this.opt.map(x => x.step))
+  }
+
+  getXRangeIndex(serie: Heatmap2dOptions) {
     return [
       Math.max(0, Math.floor((this.dataUtils.start! - serie.start) / serie.step)),
       Math.min(1 + Math.floor((this.dataUtils.end! - serie.start) / serie.step), serie.data.length)
     ]
   }
 
-  getProcessingData () {
+  getProcessingData() {
     const result = []
     for (const serie of this.opt) { 
       const [i1, i2] = this.getXRangeIndex(serie)
@@ -111,7 +115,7 @@ export default class Heatmap2dPlot extends AbstractPlot {
     return result
   }
 
-  update () {
+  update() {
     const ctx = this.ctx
     const serieHeight = this.canvas.height / this.opt.length
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)

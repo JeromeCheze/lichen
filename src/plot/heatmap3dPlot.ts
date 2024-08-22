@@ -46,6 +46,10 @@ export default class Heatmap3dPlot extends AbstractPlot {
     return [this.opt.start, this.opt.start + this.opt.data.length * this.opt.step] as [number, number]
   }
 
+  step() {
+    return this.opt.step
+  }
+
   yRange(): [number, number] {
     return [this.opt.yMin, this.opt.yMax]
   }

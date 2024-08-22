@@ -27,10 +27,10 @@ export default class EventUtils {
       'mouseup': { el: document.body, callback: (e: MouseEvent) => this.handleMouseUp(e) },
       'dblclick': { el: element, callback: (e: MouseEvent) => this.handleDblClick(e) },
       'wheel': { el: element, callback: (e: WheelEvent) => this.handleWheel(e), passive: false },
-      'touchstart': { el: element, callback: (e: TouchEvent) => this.handleTouchStart(e) },
+      'touchstart': { el: element, callback: (e: TouchEvent) => this.handleTouchStart(e), passive: false },
       'touchend': { el: element, callback: (e: TouchEvent) => this.handleTouchEnd(e) },
       'touchcancel': { el: element, callback: (e: TouchEvent) => this.handleTouchEnd(e) },
-      'touchmove': { el: element, callback: (e: TouchEvent) => this.handleTouchMove(e) },
+      'touchmove': { el: element, callback: (e: TouchEvent) => this.handleTouchMove(e), passive: false },
       'keydown': { el: document.body, callback: (e: KeyboardEvent) => this.handleKeyDown(e) },
       'keyup': { el: document.body, callback: (e: KeyboardEvent) => this.handleKeyUp(e) }
     }

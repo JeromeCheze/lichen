@@ -358,6 +358,9 @@ export default class Lichen {
    * @param draw - call the {@link Lichen.draw} method if `true`
    */
   setXRange(x1: number, x2: number, draw = true) {
+    if ((x2 - x1) < this.master.getRegistered('PLOT').step()) {
+      return
+    }
     this.master.getRegistered('FRONT_PANEL').update(null)
     const dataUtils = this.master.getRegistered('DATA_UTILS')
     if (dataUtils.start != x1 || dataUtils.end != x2) {

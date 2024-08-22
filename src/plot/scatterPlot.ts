@@ -12,6 +12,11 @@ export default class ScatterPlot extends AbstractPlot {
     super(container, master)
     for (const serie of this.opt) {
       serie.enabled = true
+      serie.data.sort((a, b) => {
+        const aa = a.x
+        const bb = b.x
+        return aa < bb ? -1 : aa > bb ? 1 : 0
+      })
     }
   }
 
@@ -116,6 +121,21 @@ export default class ScatterPlot extends AbstractPlot {
       xAxis.opt.min != null ? xAxis.opt.min : minStart! - padding,
       xAxis.opt.max != null ? xAxis.opt.max : maxEnd! + padding
     ] as [number, number]
+  }
+
+  step() {
+    let step: number | null = null
+    for (const serie of this.opt) {
+      let prev: number | null = null
+      for (const point of serie.data) {
+        if (prev != null) {
+          const delta = point.x - prev
+          step = step == null ? delta : Math.max(step, point.x - prev)
+        }
+        prev = point.x
+      }
+    }
+    return step == null ? 1e3 : step
   }
 
   getProcessingData() {

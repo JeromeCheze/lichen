@@ -91,6 +91,10 @@ export default class StackedPlot extends AbstractPlot {
     return [this.opt.start, this.opt.start + this.opt.data[0].data.length * this.opt.step] as [number, number]
   }
 
+  step() {
+    return this.opt.step
+  }
+
   getXRangeIndex() {
     return [
       Math.max(0, Math.floor((this.dataUtils.start! - this.opt.start!) / this.opt.step)),

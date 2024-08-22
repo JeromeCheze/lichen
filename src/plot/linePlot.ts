@@ -94,6 +94,10 @@ export default class LinePlot extends AbstractPlot {
     return [minStart, maxEnd] as [number, number]
   }
 
+  step() {
+    return Math.max(...this.opt.map(x => x.step))
+  }
+
   getXRangeIndex(serie: LineOptions) {
     return [
       Math.max(0, Math.floor((this.dataUtils.start! - serie.start) / serie.step)),

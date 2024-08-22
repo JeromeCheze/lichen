@@ -43,6 +43,8 @@ export default abstract class AbstractPlot {
   
   abstract xRange(): [number, number]
 
+  abstract step(): number
+
   abstract getProcessingData(): (number | null)[][]
 
   abstract update(forceRedraw: boolean): void
