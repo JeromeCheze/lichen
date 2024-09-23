@@ -111,14 +111,19 @@ export default class ScatterPlot extends AbstractPlot {
     let max: number | null = null
     for (const serie of this.opt) {
       for (const value of serie.data) {
-        if (min == null && max == null) {
+        if (min == null) {
           min = value.y
+        } else if (max == null) {
           max = value.y
         } else {
           min = Math.min(min, value.y)
           max = Math.max(max, value.y)
         }
       }
+    }
+    if (min == null || max == null) {
+      min = -0.1
+      max = 0.1
     }
     return [min, max]
   }
