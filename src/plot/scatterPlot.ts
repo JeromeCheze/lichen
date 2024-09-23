@@ -106,6 +106,23 @@ export default class ScatterPlot extends AbstractPlot {
     return result
   }
 
+  yRange(): [number, number] {
+    let min: number | null = null
+    let max: number | null = null
+    for (const serie of this.opt) {
+      for (const value of serie.data) {
+        if (min == null && max == null) {
+          min = value.y
+          max = value.y
+        } else {
+          min = Math.min(min, value.y)
+          max = Math.max(max, value.y)
+        }
+      }
+    }
+    return [min, max]
+  }
+
   xRange() {
     const xAxis = this.master.getRegistered('X_AXIS')
     let minStart: number | null = null
