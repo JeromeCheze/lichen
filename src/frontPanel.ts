@@ -126,6 +126,9 @@ export default class FrontPanel {
         if (Math.abs(vlinePos - xPos) < 5) {
           const el = document.createElement('div')
           el.innerHTML = vline.tooltip
+          if (result.length > 0) {
+            result.push(document.createElement('hr'))
+          }
           result.push(el)
         }
       }
