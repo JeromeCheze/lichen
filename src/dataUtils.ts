@@ -145,16 +145,28 @@ export default class DataUtils {
       let valueSum = 0
       let valueSqSum = 0
       let valueCount = 0
+      let values = []
       for (const v of data) {
         if (v == null) { 
           continue
         }
+        values.push(v)
         minValue = minValue == null ? v : Math.min(minValue, v)
         maxValue = maxValue == null ? v : Math.max(maxValue, v)
         valueSum += v
         valueSqSum += v * v
         valueCount++
       }
+      let quarterLeftAvg = 0
+      let quarterLeftAvgCount = 0
+      for (const v of values) {
+        quarterLeftAvg += v
+        quarterLeftAvgCount++
+        if (quarterLeftAvgCount > values.length / 4) {
+          break
+        }
+      }
+      // values = values.sort()
       if (valueCount === 0) {
         this.computed.series.push(null)
         continue
@@ -166,6 +178,8 @@ export default class DataUtils {
         minValue: minValue!,
         maxValue: maxValue!,
         avgValue,
+        quarterLeftAvg: quarterLeftAvg / quarterLeftAvgCount,
+        // median: values[Math.floor(values.length / 2)],
         rmsValue: Math.sqrt((valueSqSum - 2 * avgValue * valueSum + valueCount * avgValue * avgValue) / valueCount)
       })
     }

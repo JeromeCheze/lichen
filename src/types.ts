@@ -216,6 +216,8 @@ export interface DataUtilsComputedSerieData {
   maxValue: number
   avgValue: number
   rmsValue: number
+  // median: number
+  quarterLeftAvg: number
 }
 
 export interface DataUtilsComputedData {
