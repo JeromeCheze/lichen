@@ -46,7 +46,7 @@ export default class Lichen {
   wrapper: HTMLElement | null
   eventUtils: EventUtils | null
   debounceResize: number | null
-  
+  resizeHandler: () => void
   /**
    * @param container - The HTML element container
    * @param opt - Charts options object
@@ -61,10 +61,6 @@ export default class Lichen {
     this.ready = false
     this.opt = this.mergeOptions(opt)
     this.init(container)
-    if (this.opt.autoResize) {
-      const resizeObserver = new ResizeObserver(() => this.handleResize())
-      resizeObserver.observe(container)
-    }
     this.debounceResize = null
     this.opt.synced!()[this.id] = this
     if (drawOnCreation) {
@@ -81,7 +77,11 @@ export default class Lichen {
       const xRanges = Object.values(this.opt.synced!()).map(chart => chart.master.getRegistered('PLOT').xRange())
       dataUtils.start = Math.min.apply(null, xRanges.map(x => x[0]))
       dataUtils.end = Math.max.apply(null, xRanges.map(x => x[1]))
-      this.draw()
+      this.update()
+    }
+    this.resizeHandler = () => this.handleResize()
+    if (this.opt.autoResize) {
+      window.addEventListener('resize', this.resizeHandler)
     }
   }
 
@@ -156,12 +156,16 @@ export default class Lichen {
     if (this.eventUtils) {
       this.eventUtils.destroy()
     }
+    if (this.opt.autoResize) {
+      window.removeEventListener('resize', this.handleResize)
+    }
     delete this.opt.synced!()[this.id]
     this.wrapper!.remove()
     const frontPanel = this.master.getRegistered('FRONT_PANEL')
     if (frontPanel.tooltipDiv != null) {
       frontPanel.tooltipDiv.remove()
     }
+    this.master.clear()
   }
 
   /**
@@ -301,22 +305,30 @@ export default class Lichen {
   }
 
   rebuild() {
-    const dataUtils = this.master.getRegistered('DATA_UTILS')
-    this.master.getRegistered('FRONT_PANEL').tooltipDiv?.remove()
-    this.master = new MasterInterface()
-    this.master.register('CHART', this)
-    const saveBounds = {
-      start: dataUtils.start,
-      end: dataUtils.end,
-      yMin: dataUtils.yMin,
-      yMax: dataUtils.yMax
+    if (!this.ready) {
+      return
     }
-    const container = this.wrapper!.parentElement as HTMLElement
-    this.wrapper!.innerHTML = ''
-    this.init(container, true)
-    this.setYRange(saveBounds.yMin, saveBounds.yMax, false)
-    this.setXRange(saveBounds.start!, saveBounds.end!)
-    // this.update()
+    try {
+      this.ready = false
+      const dataUtils = this.master.getRegistered('DATA_UTILS')
+      this.master.getRegistered('FRONT_PANEL').tooltipDiv?.remove()
+      this.master = new MasterInterface()
+      this.master.register('CHART', this)
+      const saveBounds = {
+        start: dataUtils.start,
+        end: dataUtils.end,
+        yMin: dataUtils.yMin,
+        yMax: dataUtils.yMax
+      }
+      this.wrapper!.innerHTML = ''
+      const container = this.wrapper!.parentElement as HTMLElement
+      this.init(container, true)
+      this.setYRange(saveBounds.yMin, saveBounds.yMax, false)
+      this.setXRange(saveBounds.start!, saveBounds.end!)
+      // this.update()
+    } catch (error) {
+      console.warn(`Cannot rebuild chart #${this.id}: ${error}`)
+    }
   }
 
   handleResize() {
@@ -325,7 +337,7 @@ export default class Lichen {
     }
     this.debounceResize = window.setTimeout(() => {
       this.rebuild()
-    }, 300)
+    }, 500)
   }
 
   resetDisplay() {
