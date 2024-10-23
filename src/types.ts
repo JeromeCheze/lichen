@@ -79,19 +79,21 @@ export interface StackedOptions {
   data: StackedDataOptions[]
 }
 
+export interface ScatterPoint {
+  x: number
+  y: number
+  name: string
+  color?: string
+  extra?: any
+}
+
 export interface ScatterOptions {
   name: string
   color: string
   shape: 'circle' | 'diamond'
   enabled?: boolean
-  data: {
-    x: number
-    y: number
-    name: string
-    color?: string
-    extra?: any
-  }[]
-  tooltipFormatter?: (x: number) => string
+  data: ScatterPoint[]
+  tooltipFormatter?: (x: ScatterPoint) => string
 }
 
 export interface Heatmap2dOptions {

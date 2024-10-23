@@ -1,4 +1,4 @@
-import type { DataFromPos, ScatterOptions, TooltipHandlerResponse } from '../types'
+import type { DataFromPos, ScatterOptions, ScatterPoint, TooltipHandlerResponse } from '../types'
 import MasterInterface from '../masterInterface'
 import AbstractPlot from './abstractPlot.js'
 
@@ -47,7 +47,7 @@ export default class ScatterPlot extends AbstractPlot {
         color: color,
         value,
         name: `${point.name} (${s.name})`,
-        textValue: s.tooltipFormatter != null && value != null ? s.tooltipFormatter(value) : `${value}`
+        textValue: s.tooltipFormatter != null && value != null ? s.tooltipFormatter(point) : `${value}`
       })
       ctx.fillStyle = color
       ctx.beginPath()
@@ -80,7 +80,7 @@ export default class ScatterPlot extends AbstractPlot {
   dataFromXPos(xPos: number): (DataFromPos | null)[] {
     const result: (DataFromPos | null)[] = Array.from({ length: this.opt.length }, () => null)
     for (const [i, serie] of this.opt.entries()) {
-      const collection: { distance: number; point: {x: number; y: number; name: string; color?: string} }[] = []
+      const collection: { distance: number; point: ScatterPoint }[] = []
       for (const point of serie.data) {
         const x = this.dataUtils.xPosFromValue(point.x)!
         const distance = Math.abs(x - xPos)
