@@ -22,7 +22,7 @@
 
 #### Defined in
 
-types.ts:75
+types.ts:77
 
 ___
 
@@ -32,7 +32,7 @@ ___
 
 #### Defined in
 
-types.ts:77
+types.ts:79
 
 ___
 
@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-types.ts:76
+types.ts:78
 
 ___
 
@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-types.ts:73
+types.ts:75
 
 ___
 
@@ -62,4 +62,4 @@ ___
 
 #### Defined in
 
-types.ts:74
+types.ts:76

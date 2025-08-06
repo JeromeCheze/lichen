@@ -16,28 +16,28 @@
 
 ### enabled
 
-• **enabled**: `boolean`
+• `Optional` **enabled**: `boolean`
 
 #### Defined in
 
-types.ts:131
+types.ts:139
 
 ___
 
 ### sticky
 
-• **sticky**: `boolean`
+• `Optional` **sticky**: `boolean`
 
 #### Defined in
 
-types.ts:132
+types.ts:140
 
 ___
 
 ### text
 
-• **text**: `string`
+• `Optional` **text**: `string`
 
 #### Defined in
 
-types.ts:133
+types.ts:141

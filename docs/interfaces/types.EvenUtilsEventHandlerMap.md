@@ -6,4 +6,4 @@
 
 ## Indexable
 
-▪ [eventName: `string`]: { `callback`: (`e`: `any`) => `void` ; `el`: `HTMLElement`  }
+▪ [eventName: `string`]: { `callback`: (`e`: `any`) => `void` ; `el`: `HTMLElement` ; `passive?`: `boolean`  }

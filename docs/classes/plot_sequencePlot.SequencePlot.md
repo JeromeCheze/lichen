@@ -22,6 +22,10 @@
 - [ctx](plot_sequencePlot.SequencePlot.md#ctx)
 - [dataUtils](plot_sequencePlot.SequencePlot.md#datautils)
 - [master](plot_sequencePlot.SequencePlot.md#master)
+
+### Accessors
+
+- [colorScale](plot_sequencePlot.SequencePlot.md#colorscale)
 - [opt](plot_sequencePlot.SequencePlot.md#opt)
 
 ### Methods
@@ -30,6 +34,7 @@
 - [getProcessingData](plot_sequencePlot.SequencePlot.md#getprocessingdata)
 - [getXRangeIndex](plot_sequencePlot.SequencePlot.md#getxrangeindex)
 - [isDataStacked](plot_sequencePlot.SequencePlot.md#isdatastacked)
+- [step](plot_sequencePlot.SequencePlot.md#step)
 - [tooltipHandler](plot_sequencePlot.SequencePlot.md#tooltiphandler)
 - [update](plot_sequencePlot.SequencePlot.md#update)
 - [xRange](plot_sequencePlot.SequencePlot.md#xrange)
@@ -55,7 +60,7 @@
 
 #### Defined in
 
-plot/sequencePlot.ts:11
+plot/sequencePlot.ts:9
 
 ## Properties
 
@@ -113,15 +118,37 @@ ___
 
 plot/abstractPlot.ts:10
 
+## Accessors
+
+### colorScale
+
+• `get` **colorScale**(): [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Returns
+
+[`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Inherited from
+
+AbstractPlot.colorScale
+
+#### Defined in
+
+plot/abstractPlot.ts:24
+
 ___
 
 ### opt
 
-• **opt**: [`SequenceOptions`](../interfaces/types.SequenceOptions.md)
+• `get` **opt**(): [`SequenceOptions`](../interfaces/types.SequenceOptions.md)
+
+#### Returns
+
+[`SequenceOptions`](../interfaces/types.SequenceOptions.md)
 
 #### Defined in
 
-plot/sequencePlot.ts:9
+plot/sequencePlot.ts:15
 
 ## Methods
 
@@ -145,7 +172,7 @@ plot/sequencePlot.ts:9
 
 #### Defined in
 
-plot/sequencePlot.ts:35
+plot/sequencePlot.ts:36
 
 ___
 
@@ -163,7 +190,7 @@ ___
 
 #### Defined in
 
-plot/sequencePlot.ts:70
+plot/sequencePlot.ts:75
 
 ___
 
@@ -177,7 +204,7 @@ ___
 
 #### Defined in
 
-plot/sequencePlot.ts:63
+plot/sequencePlot.ts:68
 
 ___
 
@@ -195,7 +222,25 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:28
+plot/abstractPlot.ts:32
+
+___
+
+### step
+
+▸ **step**(): `number`
+
+#### Returns
+
+`number`
+
+#### Overrides
+
+[AbstractPlot](plot_abstractPlot.AbstractPlot.md).[step](plot_abstractPlot.AbstractPlot.md#step)
+
+#### Defined in
+
+plot/sequencePlot.ts:64
 
 ___
 
@@ -220,7 +265,7 @@ ___
 
 #### Defined in
 
-plot/sequencePlot.ts:18
+plot/sequencePlot.ts:19
 
 ___
 
@@ -238,7 +283,7 @@ ___
 
 #### Defined in
 
-plot/sequencePlot.ts:74
+plot/sequencePlot.ts:79
 
 ___
 
@@ -256,7 +301,7 @@ ___
 
 #### Defined in
 
-plot/sequencePlot.ts:59
+plot/sequencePlot.ts:60
 
 ___
 
@@ -274,7 +319,7 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:32
+plot/abstractPlot.ts:36
 
 ___
 
@@ -298,4 +343,4 @@ ___
 
 #### Defined in
 
-plot/sequencePlot.ts:55
+plot/sequencePlot.ts:56

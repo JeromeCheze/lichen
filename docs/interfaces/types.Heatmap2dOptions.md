@@ -8,6 +8,7 @@
 
 ### Properties
 
+- [aggregation](types.Heatmap2dOptions.md#aggregation)
 - [data](types.Heatmap2dOptions.md#data)
 - [name](types.Heatmap2dOptions.md#name)
 - [start](types.Heatmap2dOptions.md#start)
@@ -16,13 +17,23 @@
 
 ## Properties
 
+### aggregation
+
+• **aggregation**: ``"max"`` \| ``"min"`` \| ``"avg"``
+
+#### Defined in
+
+types.ts:104
+
+___
+
 ### data
 
 • **data**: `number`[]
 
 #### Defined in
 
-types.ts:97
+types.ts:103
 
 ___
 
@@ -32,7 +43,7 @@ ___
 
 #### Defined in
 
-types.ts:94
+types.ts:100
 
 ___
 
@@ -42,7 +53,7 @@ ___
 
 #### Defined in
 
-types.ts:95
+types.ts:101
 
 ___
 
@@ -52,7 +63,7 @@ ___
 
 #### Defined in
 
-types.ts:96
+types.ts:102
 
 ___
 
@@ -76,4 +87,4 @@ ___
 
 #### Defined in
 
-types.ts:98
+types.ts:105

@@ -23,7 +23,7 @@
 
 #### Defined in
 
-types.ts:59
+types.ts:61
 
 ___
 
@@ -33,7 +33,7 @@ ___
 
 #### Defined in
 
-types.ts:61
+types.ts:63
 
 ___
 
@@ -43,7 +43,7 @@ ___
 
 #### Defined in
 
-types.ts:57
+types.ts:59
 
 ___
 
@@ -53,7 +53,7 @@ ___
 
 #### Defined in
 
-types.ts:58
+types.ts:60
 
 ___
 
@@ -77,7 +77,7 @@ ___
 
 #### Defined in
 
-types.ts:62
+types.ts:64
 
 ___
 
@@ -87,4 +87,4 @@ ___
 
 #### Defined in
 
-types.ts:60
+types.ts:62

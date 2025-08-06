@@ -9,6 +9,7 @@
 ### Properties
 
 - [data](types.Heatmap3dOptions.md#data)
+- [smoothing](types.Heatmap3dOptions.md#smoothing)
 - [start](types.Heatmap3dOptions.md#start)
 - [step](types.Heatmap3dOptions.md#step)
 - [yMax](types.Heatmap3dOptions.md#ymax)
@@ -24,7 +25,17 @@
 
 #### Defined in
 
-types.ts:104
+types.ts:111
+
+___
+
+### smoothing
+
+• `Optional` **smoothing**: `boolean`
+
+#### Defined in
+
+types.ts:116
 
 ___
 
@@ -34,7 +45,7 @@ ___
 
 #### Defined in
 
-types.ts:102
+types.ts:109
 
 ___
 
@@ -44,7 +55,7 @@ ___
 
 #### Defined in
 
-types.ts:103
+types.ts:110
 
 ___
 
@@ -54,7 +65,7 @@ ___
 
 #### Defined in
 
-types.ts:106
+types.ts:113
 
 ___
 
@@ -64,7 +75,7 @@ ___
 
 #### Defined in
 
-types.ts:105
+types.ts:112
 
 ___
 
@@ -74,7 +85,7 @@ ___
 
 #### Defined in
 
-types.ts:108
+types.ts:115
 
 ___
 
@@ -84,4 +95,4 @@ ___
 
 #### Defined in
 
-types.ts:107
+types.ts:114

@@ -19,13 +19,16 @@
 ### Properties
 
 - [canvas](plot_heatmap3dPlot.Heatmap3dPlot.md#canvas)
-- [colorScale](plot_heatmap3dPlot.Heatmap3dPlot.md#colorscale)
 - [ctx](plot_heatmap3dPlot.Heatmap3dPlot.md#ctx)
 - [dataUtils](plot_heatmap3dPlot.Heatmap3dPlot.md#datautils)
 - [image](plot_heatmap3dPlot.Heatmap3dPlot.md#image)
 - [imageHeight](plot_heatmap3dPlot.Heatmap3dPlot.md#imageheight)
 - [imageWidth](plot_heatmap3dPlot.Heatmap3dPlot.md#imagewidth)
 - [master](plot_heatmap3dPlot.Heatmap3dPlot.md#master)
+
+### Accessors
+
+- [colorScale](plot_heatmap3dPlot.Heatmap3dPlot.md#colorscale)
 - [opt](plot_heatmap3dPlot.Heatmap3dPlot.md#opt)
 
 ### Methods
@@ -34,6 +37,7 @@
 - [dataFromXPos](plot_heatmap3dPlot.Heatmap3dPlot.md#datafromxpos)
 - [getProcessingData](plot_heatmap3dPlot.Heatmap3dPlot.md#getprocessingdata)
 - [isDataStacked](plot_heatmap3dPlot.Heatmap3dPlot.md#isdatastacked)
+- [step](plot_heatmap3dPlot.Heatmap3dPlot.md#step)
 - [tooltipHandler](plot_heatmap3dPlot.Heatmap3dPlot.md#tooltiphandler)
 - [update](plot_heatmap3dPlot.Heatmap3dPlot.md#update)
 - [xRange](plot_heatmap3dPlot.Heatmap3dPlot.md#xrange)
@@ -59,7 +63,7 @@
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:13
+plot/heatmap3dPlot.ts:12
 
 ## Properties
 
@@ -74,16 +78,6 @@ plot/heatmap3dPlot.ts:13
 #### Defined in
 
 plot/abstractPlot.ts:7
-
-___
-
-### colorScale
-
-• **colorScale**: [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
-
-#### Defined in
-
-plot/heatmap3dPlot.ts:8
 
 ___
 
@@ -121,7 +115,7 @@ ___
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:9
+plot/heatmap3dPlot.ts:8
 
 ___
 
@@ -131,7 +125,7 @@ ___
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:11
+plot/heatmap3dPlot.ts:10
 
 ___
 
@@ -141,7 +135,7 @@ ___
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:10
+plot/heatmap3dPlot.ts:9
 
 ___
 
@@ -157,15 +151,37 @@ ___
 
 plot/abstractPlot.ts:10
 
+## Accessors
+
+### colorScale
+
+• `get` **colorScale**(): [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Returns
+
+[`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Inherited from
+
+AbstractPlot.colorScale
+
+#### Defined in
+
+plot/abstractPlot.ts:24
+
 ___
 
 ### opt
 
-• **opt**: [`Heatmap3dOptions`](../interfaces/types.Heatmap3dOptions.md)
+• `get` **opt**(): [`Heatmap3dOptions`](../interfaces/types.Heatmap3dOptions.md)
+
+#### Returns
+
+[`Heatmap3dOptions`](../interfaces/types.Heatmap3dOptions.md)
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:7
+plot/heatmap3dPlot.ts:33
 
 ## Methods
 
@@ -179,7 +195,7 @@ plot/heatmap3dPlot.ts:7
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:45
+plot/heatmap3dPlot.ts:61
 
 ___
 
@@ -203,7 +219,7 @@ ___
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:29
+plot/heatmap3dPlot.ts:41
 
 ___
 
@@ -221,7 +237,7 @@ ___
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:41
+plot/heatmap3dPlot.ts:57
 
 ___
 
@@ -239,7 +255,25 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:28
+plot/abstractPlot.ts:32
+
+___
+
+### step
+
+▸ **step**(): `number`
+
+#### Returns
+
+`number`
+
+#### Overrides
+
+[AbstractPlot](plot_abstractPlot.AbstractPlot.md).[step](plot_abstractPlot.AbstractPlot.md#step)
+
+#### Defined in
+
+plot/heatmap3dPlot.ts:49
 
 ___
 
@@ -264,7 +298,7 @@ ___
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:25
+plot/heatmap3dPlot.ts:37
 
 ___
 
@@ -288,7 +322,7 @@ ___
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:77
+plot/heatmap3dPlot.ts:93
 
 ___
 
@@ -306,7 +340,7 @@ ___
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:33
+plot/heatmap3dPlot.ts:45
 
 ___
 
@@ -324,7 +358,7 @@ ___
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:37
+plot/heatmap3dPlot.ts:53
 
 ___
 
@@ -348,4 +382,4 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:24
+plot/abstractPlot.ts:28

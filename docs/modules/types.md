@@ -18,11 +18,13 @@
 - [HeaderOptions](../interfaces/types.HeaderOptions.md)
 - [Heatmap2dOptions](../interfaces/types.Heatmap2dOptions.md)
 - [Heatmap3dOptions](../interfaces/types.Heatmap3dOptions.md)
+- [HooksOptions](../interfaces/types.HooksOptions.md)
 - [LegendItem](../interfaces/types.LegendItem.md)
 - [LegendOptions](../interfaces/types.LegendOptions.md)
 - [LichenOptions](../interfaces/types.LichenOptions.md)
 - [LineOptions](../interfaces/types.LineOptions.md)
 - [ScatterOptions](../interfaces/types.ScatterOptions.md)
+- [ScatterPoint](../interfaces/types.ScatterPoint.md)
 - [SequenceOptions](../interfaces/types.SequenceOptions.md)
 - [StackedDataOptions](../interfaces/types.StackedDataOptions.md)
 - [StackedOptions](../interfaces/types.StackedOptions.md)
@@ -43,4 +45,4 @@
 
 #### Defined in
 
-types.ts:31
+types.ts:33

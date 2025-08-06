@@ -22,6 +22,10 @@
 - [ctx](plot_scatterPlot.ScatterPlot.md#ctx)
 - [dataUtils](plot_scatterPlot.ScatterPlot.md#datautils)
 - [master](plot_scatterPlot.ScatterPlot.md#master)
+
+### Accessors
+
+- [colorScale](plot_scatterPlot.ScatterPlot.md#colorscale)
 - [opt](plot_scatterPlot.ScatterPlot.md#opt)
 
 ### Methods
@@ -31,6 +35,7 @@
 - [drawDiamond](plot_scatterPlot.ScatterPlot.md#drawdiamond)
 - [getProcessingData](plot_scatterPlot.ScatterPlot.md#getprocessingdata)
 - [isDataStacked](plot_scatterPlot.ScatterPlot.md#isdatastacked)
+- [step](plot_scatterPlot.ScatterPlot.md#step)
 - [tooltipHandler](plot_scatterPlot.ScatterPlot.md#tooltiphandler)
 - [update](plot_scatterPlot.ScatterPlot.md#update)
 - [xRange](plot_scatterPlot.ScatterPlot.md#xrange)
@@ -56,7 +61,7 @@
 
 #### Defined in
 
-plot/scatterPlot.ts:13
+plot/scatterPlot.ts:11
 
 ## Properties
 
@@ -114,15 +119,37 @@ ___
 
 plot/abstractPlot.ts:10
 
+## Accessors
+
+### colorScale
+
+• `get` **colorScale**(): [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Returns
+
+[`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Inherited from
+
+AbstractPlot.colorScale
+
+#### Defined in
+
+plot/abstractPlot.ts:24
+
 ___
 
 ### opt
 
-• **opt**: [`ScatterOptions`](../interfaces/types.ScatterOptions.md)[]
+• `get` **opt**(): [`ScatterOptions`](../interfaces/types.ScatterOptions.md)[]
+
+#### Returns
+
+[`ScatterOptions`](../interfaces/types.ScatterOptions.md)[]
 
 #### Defined in
 
-plot/scatterPlot.ts:11
+plot/scatterPlot.ts:23
 
 ## Methods
 
@@ -146,7 +173,7 @@ plot/scatterPlot.ts:11
 
 #### Defined in
 
-plot/scatterPlot.ts:68
+plot/scatterPlot.ts:80
 
 ___
 
@@ -169,7 +196,7 @@ ___
 
 #### Defined in
 
-plot/scatterPlot.ts:54
+plot/scatterPlot.ts:66
 
 ___
 
@@ -192,7 +219,7 @@ ___
 
 #### Defined in
 
-plot/scatterPlot.ts:59
+plot/scatterPlot.ts:71
 
 ___
 
@@ -210,7 +237,7 @@ ___
 
 #### Defined in
 
-plot/scatterPlot.ts:110
+plot/scatterPlot.ts:163
 
 ___
 
@@ -228,7 +255,25 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:28
+plot/abstractPlot.ts:32
+
+___
+
+### step
+
+▸ **step**(): `number`
+
+#### Returns
+
+`number`
+
+#### Overrides
+
+[AbstractPlot](plot_abstractPlot.AbstractPlot.md).[step](plot_abstractPlot.AbstractPlot.md#step)
+
+#### Defined in
+
+plot/scatterPlot.ts:148
 
 ___
 
@@ -253,7 +298,7 @@ ___
 
 #### Defined in
 
-plot/scatterPlot.ts:18
+plot/scatterPlot.ts:27
 
 ___
 
@@ -271,7 +316,7 @@ ___
 
 #### Defined in
 
-plot/scatterPlot.ts:118
+plot/scatterPlot.ts:175
 
 ___
 
@@ -289,7 +334,7 @@ ___
 
 #### Defined in
 
-plot/scatterPlot.ts:97
+plot/scatterPlot.ts:131
 
 ___
 
@@ -301,13 +346,13 @@ ___
 
 [`number`, `number`]
 
-#### Inherited from
+#### Overrides
 
 [AbstractPlot](plot_abstractPlot.AbstractPlot.md).[yRange](plot_abstractPlot.AbstractPlot.md#yrange)
 
 #### Defined in
 
-plot/abstractPlot.ts:32
+plot/scatterPlot.ts:109
 
 ___
 
@@ -331,4 +376,4 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:24
+plot/abstractPlot.ts:28

@@ -16,22 +16,21 @@
 - [element](eventUtils.EventUtils.md#element)
 - [handler](eventUtils.EventUtils.md#handler)
 - [master](eventUtils.EventUtils.md#master)
-- [registered](eventUtils.EventUtils.md#registered)
 - [state](eventUtils.EventUtils.md#state)
 
 ### Methods
 
-- [active](eventUtils.EventUtils.md#active)
 - [clearSelection](eventUtils.EventUtils.md#clearselection)
+- [destroy](eventUtils.EventUtils.md#destroy)
 - [getAngle](eventUtils.EventUtils.md#getangle)
 - [getDistance](eventUtils.EventUtils.md#getdistance)
 - [getPanning](eventUtils.EventUtils.md#getpanning)
 - [getRelativePosition](eventUtils.EventUtils.md#getrelativeposition)
-- [handleClick](eventUtils.EventUtils.md#handleclick)
 - [handleDblClick](eventUtils.EventUtils.md#handledblclick)
 - [handleKeyDown](eventUtils.EventUtils.md#handlekeydown)
 - [handleKeyUp](eventUtils.EventUtils.md#handlekeyup)
 - [handleMouseDown](eventUtils.EventUtils.md#handlemousedown)
+- [handleMouseEnter](eventUtils.EventUtils.md#handlemouseenter)
 - [handleMouseLeave](eventUtils.EventUtils.md#handlemouseleave)
 - [handleMouseMove](eventUtils.EventUtils.md#handlemousemove)
 - [handleMouseUp](eventUtils.EventUtils.md#handlemouseup)
@@ -39,13 +38,8 @@
 - [handleTouchMove](eventUtils.EventUtils.md#handletouchmove)
 - [handleTouchStart](eventUtils.EventUtils.md#handletouchstart)
 - [handleWheel](eventUtils.EventUtils.md#handlewheel)
-- [move](eventUtils.EventUtils.md#move)
 - [pinchX](eventUtils.EventUtils.md#pinchx)
 - [pinchY](eventUtils.EventUtils.md#pinchy)
-- [resetDisplay](eventUtils.EventUtils.md#resetdisplay)
-- [selecting](eventUtils.EventUtils.md#selecting)
-- [xRangeChange](eventUtils.EventUtils.md#xrangechange)
-- [yRangeChange](eventUtils.EventUtils.md#yrangechange)
 
 ## Constructors
 
@@ -106,16 +100,6 @@ eventUtils.ts:15
 
 ___
 
-### registered
-
-• **registered**: `Record`<`string`, (`e`: `any`) => `void`[]\>
-
-#### Defined in
-
-eventUtils.ts:13
-
-___
-
 ### state
 
 • **state**: `Record`<`string`, `any`\>
@@ -125,26 +109,6 @@ ___
 eventUtils.ts:14
 
 ## Methods
-
-### active
-
-▸ **active**(`callback`): [`EventUtils`](eventUtils.EventUtils.md)
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `callback` | `any` |
-
-#### Returns
-
-[`EventUtils`](eventUtils.EventUtils.md)
-
-#### Defined in
-
-eventUtils.ts:340
-
-___
 
 ### clearSelection
 
@@ -156,7 +120,21 @@ ___
 
 #### Defined in
 
-eventUtils.ts:333
+eventUtils.ts:363
+
+___
+
+### destroy
+
+▸ **destroy**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+eventUtils.ts:64
 
 ___
 
@@ -179,7 +157,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:189
+eventUtils.ts:223
 
 ___
 
@@ -202,7 +180,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:203
+eventUtils.ts:237
 
 ___
 
@@ -229,7 +207,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:207
+eventUtils.ts:241
 
 ___
 
@@ -249,27 +227,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:60
-
-___
-
-### handleClick
-
-▸ **handleClick**(`e`): `void`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `e` | `MouseEvent` |
-
-#### Returns
-
-`void`
-
-#### Defined in
-
-eventUtils.ts:65
+eventUtils.ts:70
 
 ___
 
@@ -289,7 +247,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:161
+eventUtils.ts:189
 
 ___
 
@@ -309,7 +267,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:319
+eventUtils.ts:353
 
 ___
 
@@ -329,7 +287,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:326
+eventUtils.ts:358
 
 ___
 
@@ -349,7 +307,21 @@ ___
 
 #### Defined in
 
-eventUtils.ts:140
+eventUtils.ts:146
+
+___
+
+### handleMouseEnter
+
+▸ **handleMouseEnter**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+eventUtils.ts:75
 
 ___
 
@@ -369,7 +341,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:75
+eventUtils.ts:80
 
 ___
 
@@ -389,7 +361,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:86
+eventUtils.ts:93
 
 ___
 
@@ -409,7 +381,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:144
+eventUtils.ts:150
 
 ___
 
@@ -429,7 +401,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:242
+eventUtils.ts:276
 
 ___
 
@@ -449,7 +421,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:248
+eventUtils.ts:282
 
 ___
 
@@ -469,7 +441,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:218
+eventUtils.ts:252
 
 ___
 
@@ -489,27 +461,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:168
-
-___
-
-### move
-
-▸ **move**(`callback`): [`EventUtils`](eventUtils.EventUtils.md)
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `callback` | `any` |
-
-#### Returns
-
-[`EventUtils`](eventUtils.EventUtils.md)
-
-#### Defined in
-
-eventUtils.ts:345
+eventUtils.ts:199
 
 ___
 
@@ -529,7 +481,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:301
+eventUtils.ts:335
 
 ___
 
@@ -549,84 +501,4 @@ ___
 
 #### Defined in
 
-eventUtils.ts:310
-
-___
-
-### resetDisplay
-
-▸ **resetDisplay**(`callback`): [`EventUtils`](eventUtils.EventUtils.md)
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `callback` | `any` |
-
-#### Returns
-
-[`EventUtils`](eventUtils.EventUtils.md)
-
-#### Defined in
-
-eventUtils.ts:365
-
-___
-
-### selecting
-
-▸ **selecting**(`callback`): [`EventUtils`](eventUtils.EventUtils.md)
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `callback` | `any` |
-
-#### Returns
-
-[`EventUtils`](eventUtils.EventUtils.md)
-
-#### Defined in
-
-eventUtils.ts:360
-
-___
-
-### xRangeChange
-
-▸ **xRangeChange**(`callback`): [`EventUtils`](eventUtils.EventUtils.md)
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `callback` | `any` |
-
-#### Returns
-
-[`EventUtils`](eventUtils.EventUtils.md)
-
-#### Defined in
-
-eventUtils.ts:350
-
-___
-
-### yRangeChange
-
-▸ **yRangeChange**(`callback`): [`EventUtils`](eventUtils.EventUtils.md)
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `callback` | `any` |
-
-#### Returns
-
-[`EventUtils`](eventUtils.EventUtils.md)
-
-#### Defined in
-
-eventUtils.ts:355
+eventUtils.ts:344

@@ -26,7 +26,7 @@
 
 #### Defined in
 
-types.ts:50
+types.ts:52
 
 ___
 
@@ -36,7 +36,7 @@ ___
 
 #### Defined in
 
-types.ts:49
+types.ts:51
 
 ___
 
@@ -46,7 +46,7 @@ ___
 
 #### Defined in
 
-types.ts:48
+types.ts:50
 
 ___
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-types.ts:52
+types.ts:54
 
 ___
 
@@ -66,17 +66,17 @@ ___
 
 #### Defined in
 
-types.ts:51
+types.ts:53
 
 ___
 
 ### name
 
-• **name**: `string`
+• `Optional` **name**: `string`
 
 #### Defined in
 
-types.ts:45
+types.ts:47
 
 ___
 
@@ -86,7 +86,7 @@ ___
 
 #### Defined in
 
-types.ts:46
+types.ts:48
 
 ___
 
@@ -96,7 +96,7 @@ ___
 
 #### Defined in
 
-types.ts:47
+types.ts:49
 
 ___
 
@@ -120,4 +120,4 @@ ___
 
 #### Defined in
 
-types.ts:53
+types.ts:55

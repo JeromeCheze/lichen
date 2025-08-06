@@ -10,10 +10,13 @@
 
 - [arrow](types.VLine.md#arrow)
 - [color](types.VLine.md#color)
+- [data](types.VLine.md#data)
 - [position](types.VLine.md#position)
 - [range](types.VLine.md#range)
 - [selectable](types.VLine.md#selectable)
 - [text](types.VLine.md#text)
+- [tooltip](types.VLine.md#tooltip)
+- [width](types.VLine.md#width)
 - [x](types.VLine.md#x)
 
 ## Properties
@@ -24,7 +27,7 @@
 
 #### Defined in
 
-types.ts:143
+types.ts:151
 
 ___
 
@@ -34,17 +37,27 @@ ___
 
 #### Defined in
 
-types.ts:138
+types.ts:146
+
+___
+
+### data
+
+• `Optional` **data**: `any`
+
+#### Defined in
+
+types.ts:152
 
 ___
 
 ### position
 
-• **position**: ``"top"`` \| ``"bottom"``
+• `Optional` **position**: ``"top"`` \| ``"bottom"``
 
 #### Defined in
 
-types.ts:140
+types.ts:148
 
 ___
 
@@ -54,7 +67,7 @@ ___
 
 #### Defined in
 
-types.ts:141
+types.ts:149
 
 ___
 
@@ -64,17 +77,37 @@ ___
 
 #### Defined in
 
-types.ts:142
+types.ts:150
 
 ___
 
 ### text
 
-• **text**: `string`
+• `Optional` **text**: `string`
 
 #### Defined in
 
-types.ts:139
+types.ts:147
+
+___
+
+### tooltip
+
+• `Optional` **tooltip**: `string`
+
+#### Defined in
+
+types.ts:153
+
+___
+
+### width
+
+• `Optional` **width**: `number`
+
+#### Defined in
+
+types.ts:154
 
 ___
 
@@ -84,4 +117,4 @@ ___
 
 #### Defined in
 
-types.ts:137
+types.ts:145
