@@ -17,6 +17,7 @@
 
 ### Methods
 
+- [clear](masterInterface.MasterInterface.md#clear)
 - [getRegistered](masterInterface.MasterInterface.md#getregistered)
 - [on](masterInterface.MasterInterface.md#on)
 - [register](masterInterface.MasterInterface.md#register)
@@ -54,6 +55,20 @@ masterInterface.ts:5
 
 ## Methods
 
+### clear
+
+▸ **clear**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+masterInterface.ts:13
+
+___
+
 ### getRegistered
 
 ▸ **getRegistered**(`name`): `any`
@@ -70,7 +85,7 @@ masterInterface.ts:5
 
 #### Defined in
 
-masterInterface.ts:37
+masterInterface.ts:42
 
 ___
 
@@ -91,7 +106,7 @@ ___
 
 #### Defined in
 
-masterInterface.ts:13
+masterInterface.ts:18
 
 ___
 
@@ -112,7 +127,7 @@ ___
 
 #### Defined in
 
-masterInterface.ts:29
+masterInterface.ts:34
 
 ___
 
@@ -124,7 +139,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `name` | `any` |
+| `name` | `string` |
 | `data` | `any` |
 
 #### Returns
@@ -133,4 +148,4 @@ ___
 
 #### Defined in
 
-masterInterface.ts:21
+masterInterface.ts:26

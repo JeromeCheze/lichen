@@ -17,12 +17,18 @@
 - [ctx](yAxis.YAxis.md#ctx)
 - [dataUtils](yAxis.YAxis.md#datautils)
 - [master](yAxis.YAxis.md#master)
+
+### Accessors
+
 - [opt](yAxis.YAxis.md#opt)
 
 ### Methods
 
+- [drawAxis](yAxis.YAxis.md#drawaxis)
 - [drawCategories](yAxis.YAxis.md#drawcategories)
-- [drawLinearAxis](yAxis.YAxis.md#drawlinearaxis)
+- [drawTickPositions](yAxis.YAxis.md#drawtickpositions)
+- [getLinearTickPositions](yAxis.YAxis.md#getlineartickpositions)
+- [getLogTickPositions](yAxis.YAxis.md#getlogtickpositions)
 - [update](yAxis.YAxis.md#update)
 
 ## Constructors
@@ -40,7 +46,7 @@
 
 #### Defined in
 
-yAxis.ts:16
+yAxis.ts:15
 
 ## Properties
 
@@ -60,7 +66,7 @@ ___
 
 #### Defined in
 
-yAxis.ts:13
+yAxis.ts:12
 
 ___
 
@@ -80,7 +86,7 @@ ___
 
 #### Defined in
 
-yAxis.ts:12
+yAxis.ts:11
 
 ___
 
@@ -90,19 +96,37 @@ ___
 
 #### Defined in
 
-yAxis.ts:14
+yAxis.ts:13
 
-___
+## Accessors
 
 ### opt
 
-• **opt**: [`YAxisOptions`](../interfaces/types.YAxisOptions.md)
+• `get` **opt**(): [`YAxisOptions`](../interfaces/types.YAxisOptions.md)
+
+#### Returns
+
+[`YAxisOptions`](../interfaces/types.YAxisOptions.md)
 
 #### Defined in
 
-yAxis.ts:11
+yAxis.ts:32
 
 ## Methods
+
+### drawAxis
+
+▸ **drawAxis**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+yAxis.ts:106
+
+___
 
 ### drawCategories
 
@@ -114,13 +138,19 @@ yAxis.ts:11
 
 #### Defined in
 
-yAxis.ts:177
+yAxis.ts:139
 
 ___
 
-### drawLinearAxis
+### drawTickPositions
 
-▸ **drawLinearAxis**(): `void`
+▸ **drawTickPositions**(`tickPos`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `tickPos` | `number`[] |
 
 #### Returns
 
@@ -128,7 +158,51 @@ ___
 
 #### Defined in
 
-yAxis.ts:109
+yAxis.ts:36
+
+___
+
+### getLinearTickPositions
+
+▸ **getLinearTickPositions**(`min`, `max`, `tickInterval`): `number`[]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `min` | `number` |
+| `max` | `number` |
+| `tickInterval` | `number` |
+
+#### Returns
+
+`number`[]
+
+#### Defined in
+
+yAxis.ts:60
+
+___
+
+### getLogTickPositions
+
+▸ **getLogTickPositions**(`min`, `max`, `tickInterval`): `number`[]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `min` | `number` |
+| `max` | `number` |
+| `tickInterval` | `number` |
+
+#### Returns
+
+`number`[]
+
+#### Defined in
+
+yAxis.ts:86
 
 ___
 
@@ -142,4 +216,4 @@ ___
 
 #### Defined in
 
-yAxis.ts:195
+yAxis.ts:157

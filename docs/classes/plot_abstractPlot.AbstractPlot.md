@@ -33,11 +33,16 @@
 - [dataUtils](plot_abstractPlot.AbstractPlot.md#datautils)
 - [master](plot_abstractPlot.AbstractPlot.md#master)
 
+### Accessors
+
+- [colorScale](plot_abstractPlot.AbstractPlot.md#colorscale)
+
 ### Methods
 
 - [dataFromXPos](plot_abstractPlot.AbstractPlot.md#datafromxpos)
 - [getProcessingData](plot_abstractPlot.AbstractPlot.md#getprocessingdata)
 - [isDataStacked](plot_abstractPlot.AbstractPlot.md#isdatastacked)
+- [step](plot_abstractPlot.AbstractPlot.md#step)
 - [tooltipHandler](plot_abstractPlot.AbstractPlot.md#tooltiphandler)
 - [update](plot_abstractPlot.AbstractPlot.md#update)
 - [xRange](plot_abstractPlot.AbstractPlot.md#xrange)
@@ -101,6 +106,20 @@ ___
 
 plot/abstractPlot.ts:10
 
+## Accessors
+
+### colorScale
+
+• `get` **colorScale**(): [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Returns
+
+[`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Defined in
+
+plot/abstractPlot.ts:24
+
 ## Methods
 
 ### dataFromXPos
@@ -119,7 +138,7 @@ plot/abstractPlot.ts:10
 
 #### Defined in
 
-plot/abstractPlot.ts:38
+plot/abstractPlot.ts:42
 
 ___
 
@@ -133,7 +152,7 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:42
+plot/abstractPlot.ts:48
 
 ___
 
@@ -147,7 +166,21 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:28
+plot/abstractPlot.ts:32
+
+___
+
+### step
+
+▸ `Abstract` **step**(): `number`
+
+#### Returns
+
+`number`
+
+#### Defined in
+
+plot/abstractPlot.ts:46
 
 ___
 
@@ -168,7 +201,7 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:36
+plot/abstractPlot.ts:40
 
 ___
 
@@ -188,7 +221,7 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:44
+plot/abstractPlot.ts:50
 
 ___
 
@@ -202,7 +235,7 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:40
+plot/abstractPlot.ts:44
 
 ___
 
@@ -216,7 +249,7 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:32
+plot/abstractPlot.ts:36
 
 ___
 
@@ -236,4 +269,4 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:24
+plot/abstractPlot.ts:28

@@ -17,58 +17,58 @@
 
 ### CIVIDIS
 
-• `Const` **CIVIDIS**: (`number` \| `number`[])[][]
+• `Const` **CIVIDIS**: [`ColorScaleObject`](types.md#colorscaleobject)
 
 #### Defined in
 
-colormaps.ts:61
+colormaps.ts:63
 
 ___
 
 ### INFERNO
 
-• `Const` **INFERNO**: (`number` \| `number`[])[][]
+• `Const` **INFERNO**: [`ColorScaleObject`](types.md#colorscaleobject)
 
 #### Defined in
 
-colormaps.ts:37
+colormaps.ts:39
 
 ___
 
 ### MAGMA
 
-• `Const` **MAGMA**: (`number` \| `number`[])[][]
+• `Const` **MAGMA**: [`ColorScaleObject`](types.md#colorscaleobject)
 
 #### Defined in
 
-colormaps.ts:49
+colormaps.ts:51
 
 ___
 
 ### PARULA
 
-• `Const` **PARULA**: (`number` \| `number`[])[][]
+• `Const` **PARULA**: [`ColorScaleObject`](types.md#colorscaleobject)
 
 #### Defined in
 
-colormaps.ts:1
+colormaps.ts:3
 
 ___
 
 ### PLASMA
 
-• `Const` **PLASMA**: (`number` \| `number`[])[][]
+• `Const` **PLASMA**: [`ColorScaleObject`](types.md#colorscaleobject)
 
 #### Defined in
 
-colormaps.ts:25
+colormaps.ts:27
 
 ___
 
 ### VIRIDIS
 
-• `Const` **VIRIDIS**: (`number` \| `number`[])[][]
+• `Const` **VIRIDIS**: [`ColorScaleObject`](types.md#colorscaleobject)
 
 #### Defined in
 
-colormaps.ts:13
+colormaps.ts:15

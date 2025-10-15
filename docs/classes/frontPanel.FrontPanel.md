@@ -13,15 +13,18 @@
 ### Properties
 
 - [canvas](frontPanel.FrontPanel.md#canvas)
-- [colorScale](frontPanel.FrontPanel.md#colorscale)
-- [crosshair](frontPanel.FrontPanel.md#crosshair)
 - [ctx](frontPanel.FrontPanel.md#ctx)
 - [dataUtils](frontPanel.FrontPanel.md#datautils)
 - [master](frontPanel.FrontPanel.md#master)
 - [selected](frontPanel.FrontPanel.md#selected)
 - [state](frontPanel.FrontPanel.md#state)
-- [tooltip](frontPanel.FrontPanel.md#tooltip)
 - [tooltipDiv](frontPanel.FrontPanel.md#tooltipdiv)
+
+### Accessors
+
+- [colorScale](frontPanel.FrontPanel.md#colorscale)
+- [crosshair](frontPanel.FrontPanel.md#crosshair)
+- [tooltip](frontPanel.FrontPanel.md#tooltip)
 - [vLines](frontPanel.FrontPanel.md#vlines)
 
 ### Methods
@@ -29,6 +32,9 @@
 - [drawCrosshair](frontPanel.FrontPanel.md#drawcrosshair)
 - [drawTooltip](frontPanel.FrontPanel.md#drawtooltip)
 - [drawVLines](frontPanel.FrontPanel.md#drawvlines)
+- [getDataTooltipContent](frontPanel.FrontPanel.md#getdatatooltipcontent)
+- [getVLineTooltipContent](frontPanel.FrontPanel.md#getvlinetooltipcontent)
+- [handleActive](frontPanel.FrontPanel.md#handleactive)
 - [handleClick](frontPanel.FrontPanel.md#handleclick)
 - [selection](frontPanel.FrontPanel.md#selection)
 - [update](frontPanel.FrontPanel.md#update)
@@ -48,7 +54,7 @@
 
 #### Defined in
 
-frontPanel.ts:19
+frontPanel.ts:15
 
 ## Properties
 
@@ -59,26 +65,6 @@ frontPanel.ts:19
 #### Defined in
 
 frontPanel.ts:7
-
-___
-
-### colorScale
-
-• **colorScale**: [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
-
-#### Defined in
-
-frontPanel.ts:11
-
-___
-
-### crosshair
-
-• **crosshair**: [`CrosshairOptions`](../interfaces/types.CrosshairOptions.md)
-
-#### Defined in
-
-frontPanel.ts:13
 
 ___
 
@@ -118,7 +104,7 @@ ___
 
 #### Defined in
 
-frontPanel.ts:15
+frontPanel.ts:11
 
 ___
 
@@ -128,17 +114,7 @@ ___
 
 #### Defined in
 
-frontPanel.ts:17
-
-___
-
-### tooltip
-
-• **tooltip**: `boolean`
-
-#### Defined in
-
-frontPanel.ts:12
+frontPanel.ts:13
 
 ___
 
@@ -148,17 +124,63 @@ ___
 
 #### Defined in
 
-frontPanel.ts:16
+frontPanel.ts:12
+
+## Accessors
+
+### colorScale
+
+• `get` **colorScale**(): [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Returns
+
+[`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Defined in
+
+frontPanel.ts:62
+
+___
+
+### crosshair
+
+• `get` **crosshair**(): [`CrosshairOptions`](../interfaces/types.CrosshairOptions.md)
+
+#### Returns
+
+[`CrosshairOptions`](../interfaces/types.CrosshairOptions.md)
+
+#### Defined in
+
+frontPanel.ts:58
+
+___
+
+### tooltip
+
+• `get` **tooltip**(): `boolean`
+
+#### Returns
+
+`boolean`
+
+#### Defined in
+
+frontPanel.ts:50
 
 ___
 
 ### vLines
 
-• **vLines**: [`VLine`](../interfaces/types.VLine.md)[]
+• `get` **vLines**(): [`VLine`](../interfaces/types.VLine.md)[]
+
+#### Returns
+
+[`VLine`](../interfaces/types.VLine.md)[]
 
 #### Defined in
 
-frontPanel.ts:14
+frontPanel.ts:54
 
 ## Methods
 
@@ -178,7 +200,7 @@ frontPanel.ts:14
 
 #### Defined in
 
-frontPanel.ts:172
+frontPanel.ts:236
 
 ___
 
@@ -198,7 +220,7 @@ ___
 
 #### Defined in
 
-frontPanel.ts:61
+frontPanel.ts:139
 
 ___
 
@@ -212,7 +234,67 @@ ___
 
 #### Defined in
 
-frontPanel.ts:119
+frontPanel.ts:170
+
+___
+
+### getDataTooltipContent
+
+▸ **getDataTooltipContent**(`value`): `HTMLElement`[]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `value` | `number` |
+
+#### Returns
+
+`HTMLElement`[]
+
+#### Defined in
+
+frontPanel.ts:73
+
+___
+
+### getVLineTooltipContent
+
+▸ **getVLineTooltipContent**(`value`): `HTMLElement`[]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `value` | `number` |
+
+#### Returns
+
+`HTMLElement`[]
+
+#### Defined in
+
+frontPanel.ts:120
+
+___
+
+### handleActive
+
+▸ **handleActive**(`value`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `value` | `boolean` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+frontPanel.ts:66
 
 ___
 
@@ -236,7 +318,7 @@ ___
 
 #### Defined in
 
-frontPanel.ts:161
+frontPanel.ts:224
 
 ___
 
@@ -257,7 +339,7 @@ ___
 
 #### Defined in
 
-frontPanel.ts:195
+frontPanel.ts:262
 
 ___
 
@@ -277,4 +359,4 @@ ___
 
 #### Defined in
 
-frontPanel.ts:216
+frontPanel.ts:299

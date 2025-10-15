@@ -12,10 +12,13 @@
 
 ### Properties
 
-- [colorScale](legend.Legend.md#colorscale)
 - [container](legend.Legend.md#container)
-- [height](legend.Legend.md#height)
 - [master](legend.Legend.md#master)
+
+### Accessors
+
+- [colorScale](legend.Legend.md#colorscale)
+- [height](legend.Legend.md#height)
 - [opt](legend.Legend.md#opt)
 - [series](legend.Legend.md#series)
 - [type](legend.Legend.md#type)
@@ -23,7 +26,7 @@
 ### Methods
 
 - [drawHeatmap3dLegend](legend.Legend.md#drawheatmap3dlegend)
-- [drawLineLegend](legend.Legend.md#drawlinelegend)
+- [drawLegend](legend.Legend.md#drawlegend)
 - [update](legend.Legend.md#update)
 
 ## Constructors
@@ -41,19 +44,9 @@
 
 #### Defined in
 
-legend.ts:14
+legend.ts:9
 
 ## Properties
-
-### colorScale
-
-• **colorScale**: [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
-
-#### Defined in
-
-legend.ts:10
-
-___
 
 ### container
 
@@ -65,16 +58,6 @@ legend.ts:7
 
 ___
 
-### height
-
-• **height**: `number`
-
-#### Defined in
-
-legend.ts:11
-
-___
-
 ### master
 
 • **master**: [`MasterInterface`](masterInterface.MasterInterface.md)
@@ -83,35 +66,75 @@ ___
 
 legend.ts:6
 
+## Accessors
+
+### colorScale
+
+• `get` **colorScale**(): [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Returns
+
+[`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Defined in
+
+legend.ts:26
+
+___
+
+### height
+
+• `get` **height**(): `number`
+
+#### Returns
+
+`number`
+
+#### Defined in
+
+legend.ts:34
+
 ___
 
 ### opt
 
-• **opt**: [`LegendOptions`](../interfaces/types.LegendOptions.md)
+• `get` **opt**(): [`LegendOptions`](../interfaces/types.LegendOptions.md)
+
+#### Returns
+
+[`LegendOptions`](../interfaces/types.LegendOptions.md)
 
 #### Defined in
 
-legend.ts:8
+legend.ts:18
 
 ___
 
 ### series
 
-• **series**: [`LineOptions`](../interfaces/types.LineOptions.md)[] \| [`Heatmap2dOptions`](../interfaces/types.Heatmap2dOptions.md)[] \| [`Heatmap3dOptions`](../interfaces/types.Heatmap3dOptions.md) \| [`StackedOptions`](../interfaces/types.StackedOptions.md) \| [`SequenceOptions`](../interfaces/types.SequenceOptions.md) \| [`ScatterOptions`](../interfaces/types.ScatterOptions.md)[]
+• `get` **series**(): [`LineOptions`](../interfaces/types.LineOptions.md)[] \| [`Heatmap2dOptions`](../interfaces/types.Heatmap2dOptions.md)[] \| [`Heatmap3dOptions`](../interfaces/types.Heatmap3dOptions.md) \| [`StackedOptions`](../interfaces/types.StackedOptions.md) \| [`SequenceOptions`](../interfaces/types.SequenceOptions.md) \| [`ScatterOptions`](../interfaces/types.ScatterOptions.md)[]
+
+#### Returns
+
+[`LineOptions`](../interfaces/types.LineOptions.md)[] \| [`Heatmap2dOptions`](../interfaces/types.Heatmap2dOptions.md)[] \| [`Heatmap3dOptions`](../interfaces/types.Heatmap3dOptions.md) \| [`StackedOptions`](../interfaces/types.StackedOptions.md) \| [`SequenceOptions`](../interfaces/types.SequenceOptions.md) \| [`ScatterOptions`](../interfaces/types.ScatterOptions.md)[]
 
 #### Defined in
 
-legend.ts:12
+legend.ts:30
 
 ___
 
 ### type
 
-• **type**: ``"line"`` \| ``"sequence"`` \| ``"heatmap2d"`` \| ``"heatmap3d"`` \| ``"stacked"`` \| ``"scatter"``
+• `get` **type**(): ``"line"`` \| ``"sequence"`` \| ``"heatmap2d"`` \| ``"heatmap3d"`` \| ``"stacked"`` \| ``"scatter"``
+
+#### Returns
+
+``"line"`` \| ``"sequence"`` \| ``"heatmap2d"`` \| ``"heatmap3d"`` \| ``"stacked"`` \| ``"scatter"``
 
 #### Defined in
 
-legend.ts:9
+legend.ts:22
 
 ## Methods
 
@@ -125,13 +148,13 @@ legend.ts:9
 
 #### Defined in
 
-legend.ts:29
+legend.ts:38
 
 ___
 
-### drawLineLegend
+### drawLegend
 
-▸ **drawLineLegend**(`items`): `void`
+▸ **drawLegend**(`items`): `void`
 
 #### Parameters
 
@@ -145,7 +168,7 @@ ___
 
 #### Defined in
 
-legend.ts:87
+legend.ts:100
 
 ___
 
@@ -159,4 +182,4 @@ ___
 
 #### Defined in
 
-legend.ts:126
+legend.ts:139

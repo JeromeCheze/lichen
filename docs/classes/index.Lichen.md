@@ -12,27 +12,31 @@
 
 ### Properties
 
-- [dataUtils](index.Lichen.md#datautils)
+- [debounceResize](index.Lichen.md#debounceresize)
 - [eventUtils](index.Lichen.md#eventutils)
-- [frontPanel](index.Lichen.md#frontpanel)
-- [legend](index.Lichen.md#legend)
+- [id](index.Lichen.md#id)
 - [master](index.Lichen.md#master)
 - [opt](index.Lichen.md#opt)
-- [plot](index.Lichen.md#plot)
 - [ready](index.Lichen.md#ready)
-- [xAxis](index.Lichen.md#xaxis)
-- [yAxis](index.Lichen.md#yaxis)
+- [resizeHandler](index.Lichen.md#resizehandler)
+- [wrapper](index.Lichen.md#wrapper)
 
 ### Methods
 
 - [buildStructure](index.Lichen.md#buildstructure)
+- [deepCopy](index.Lichen.md#deepcopy)
+- [destroy](index.Lichen.md#destroy)
 - [draw](index.Lichen.md#draw)
+- [handleResize](index.Lichen.md#handleresize)
 - [init](index.Lichen.md#init)
 - [mergeOptions](index.Lichen.md#mergeoptions)
+- [rebuild](index.Lichen.md#rebuild)
+- [resetDisplay](index.Lichen.md#resetdisplay)
 - [setColorScale](index.Lichen.md#setcolorscale)
 - [setSelection](index.Lichen.md#setselection)
 - [setXRange](index.Lichen.md#setxrange)
 - [setYRange](index.Lichen.md#setyrange)
+- [update](index.Lichen.md#update)
 - [getColorScale](index.Lichen.md#getcolorscale)
 
 ## Constructors
@@ -51,17 +55,17 @@
 
 #### Defined in
 
-index.ts:47
+index.ts:55
 
 ## Properties
 
-### dataUtils
+### debounceResize
 
-• **dataUtils**: [`DataUtils`](dataUtils.DataUtils.md)
+• **debounceResize**: `number`
 
 #### Defined in
 
-index.ts:34
+index.ts:48
 
 ___
 
@@ -71,27 +75,17 @@ ___
 
 #### Defined in
 
-index.ts:35
+index.ts:47
 
 ___
 
-### frontPanel
+### id
 
-• **frontPanel**: [`FrontPanel`](frontPanel.FrontPanel.md)
-
-#### Defined in
-
-index.ts:38
-
-___
-
-### legend
-
-• **legend**: [`Legend`](legend.Legend.md)
+• **id**: `number`
 
 #### Defined in
 
-index.ts:37
+index.ts:43
 
 ___
 
@@ -101,7 +95,7 @@ ___
 
 #### Defined in
 
-index.ts:40
+index.ts:45
 
 ___
 
@@ -111,17 +105,7 @@ ___
 
 #### Defined in
 
-index.ts:31
-
-___
-
-### plot
-
-• **plot**: [`LinePlot`](plot_linePlot.LinePlot.md) \| [`Heatmap2dPlot`](plot_heatmap2dPlot.Heatmap2dPlot.md) \| [`Heatmap3dPlot`](plot_heatmap3dPlot.Heatmap3dPlot.md) \| [`StackedPlot`](plot_stackedPlot.StackedPlot.md) \| [`SequencePlot`](plot_sequencePlot.SequencePlot.md) \| [`ScatterPlot`](plot_scatterPlot.ScatterPlot.md)
-
-#### Defined in
-
-index.ts:36
+index.ts:35
 
 ___
 
@@ -131,41 +115,50 @@ ___
 
 #### Defined in
 
-index.ts:39
+index.ts:44
 
 ___
 
-### xAxis
+### resizeHandler
 
-• **xAxis**: [`XAxis`](xAxis.XAxis.md)
+• **resizeHandler**: () => `void`
+
+#### Type declaration
+
+▸ (): `void`
+
+##### Returns
+
+`void`
 
 #### Defined in
 
-index.ts:33
+index.ts:49
 
 ___
 
-### yAxis
+### wrapper
 
-• **yAxis**: [`YAxis`](yAxis.YAxis.md)
+• **wrapper**: `HTMLElement`
 
 #### Defined in
 
-index.ts:32
+index.ts:46
 
 ## Methods
 
 ### buildStructure
 
-▸ **buildStructure**(`container`): `void`
+▸ **buildStructure**(`container`, `reuseWrapper?`): `void`
 
 Create all the structure and instantiate all charts components
 
 #### Parameters
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `container` | `HTMLElement` | The HTML element container |
+| Name | Type | Default value | Description |
+| :------ | :------ | :------ | :------ |
+| `container` | `HTMLElement` | `undefined` | The HTML element container |
+| `reuseWrapper` | `boolean` | `false` | - |
 
 #### Returns
 
@@ -173,7 +166,42 @@ Create all the structure and instantiate all charts components
 
 #### Defined in
 
-index.ts:112
+index.ts:175
+
+___
+
+### deepCopy
+
+▸ **deepCopy**(`src`, `dest?`): `any`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `src` | `any` |
+| `dest` | `Record`<`string`, `any`\> |
+
+#### Returns
+
+`any`
+
+#### Defined in
+
+index.ts:102
+
+___
+
+### destroy
+
+▸ **destroy**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+index.ts:155
 
 ___
 
@@ -189,21 +217,13 @@ The main draw method of Lichen
 
 #### Defined in
 
-index.ts:269
+index.ts:418
 
 ___
 
-### init
+### handleResize
 
-▸ **init**(`container`): `void`
-
-Initialize the chart construction
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `container` | `HTMLElement` | The HTML element container |
+▸ **handleResize**(): `void`
 
 #### Returns
 
@@ -211,7 +231,30 @@ Initialize the chart construction
 
 #### Defined in
 
-index.ts:159
+index.ts:334
+
+___
+
+### init
+
+▸ **init**(`container`, `reuseWrapper?`): `void`
+
+Initialize the chart construction
+
+#### Parameters
+
+| Name | Type | Default value | Description |
+| :------ | :------ | :------ | :------ |
+| `container` | `HTMLElement` | `undefined` | The HTML element container |
+| `reuseWrapper` | `boolean` | `false` | - |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+index.ts:223
 
 ___
 
@@ -235,7 +278,35 @@ The Lichen options merged
 
 #### Defined in
 
-index.ts:85
+index.ts:131
+
+___
+
+### rebuild
+
+▸ **rebuild**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+index.ts:307
+
+___
+
+### resetDisplay
+
+▸ **resetDisplay**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+index.ts:343
 
 ___
 
@@ -257,7 +328,7 @@ Set the given color scale object to use and updates the plot and the legend
 
 #### Defined in
 
-index.ts:214
+index.ts:360
 
 ___
 
@@ -280,7 +351,7 @@ Set the selection to draw on front panel
 
 #### Defined in
 
-index.ts:254
+index.ts:403
 
 ___
 
@@ -304,7 +375,7 @@ Set the X range for next draw
 
 #### Defined in
 
-index.ts:226
+index.ts:372
 
 ___
 
@@ -328,13 +399,33 @@ Set the X range for next draw
 
 #### Defined in
 
-index.ts:241
+index.ts:391
+
+___
+
+### update
+
+▸ **update**(`draw?`): `void`
+
+#### Parameters
+
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `draw` | `boolean` | `true` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+index.ts:427
 
 ___
 
 ### getColorScale
 
-▸ `Static` **getColorScale**(`name`): (`number` \| `number`[])[][]
+▸ `Static` **getColorScale**(`name`): [`ColorScaleObject`](../modules/types.md#colorscaleobject)
 
 Give the requested colorscale object
 
@@ -346,10 +437,10 @@ Give the requested colorscale object
 
 #### Returns
 
-(`number` \| `number`[])[][]
+[`ColorScaleObject`](../modules/types.md#colorscaleobject)
 
 the requested colorscale object
 
 #### Defined in
 
-index.ts:76
+index.ts:93

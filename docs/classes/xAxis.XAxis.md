@@ -16,12 +16,19 @@
 - [ctx](xAxis.XAxis.md#ctx)
 - [dataUtils](xAxis.XAxis.md#datautils)
 - [master](xAxis.XAxis.md#master)
+
+### Accessors
+
 - [opt](xAxis.XAxis.md#opt)
 
 ### Methods
 
-- [drawDatetimeAxis](xAxis.XAxis.md#drawdatetimeaxis)
-- [drawLinearAxis](xAxis.XAxis.md#drawlinearaxis)
+- [drawAxis](xAxis.XAxis.md#drawaxis)
+- [drawTickPositions](xAxis.XAxis.md#drawtickpositions)
+- [formatDatetimeTick](xAxis.XAxis.md#formatdatetimetick)
+- [formatLinearTick](xAxis.XAxis.md#formatlineartick)
+- [getDatetimeTickPositions](xAxis.XAxis.md#getdatetimetickpositions)
+- [getLinearTickPositions](xAxis.XAxis.md#getlineartickpositions)
 - [update](xAxis.XAxis.md#update)
 
 ## Constructors
@@ -39,7 +46,7 @@
 
 #### Defined in
 
-xAxis.ts:15
+xAxis.ts:14
 
 ## Properties
 
@@ -49,7 +56,7 @@ xAxis.ts:15
 
 #### Defined in
 
-xAxis.ts:10
+xAxis.ts:9
 
 ___
 
@@ -59,7 +66,7 @@ ___
 
 #### Defined in
 
-xAxis.ts:11
+xAxis.ts:10
 
 ___
 
@@ -69,7 +76,7 @@ ___
 
 #### Defined in
 
-xAxis.ts:12
+xAxis.ts:11
 
 ___
 
@@ -79,23 +86,27 @@ ___
 
 #### Defined in
 
-xAxis.ts:13
+xAxis.ts:12
 
-___
+## Accessors
 
 ### opt
 
-• **opt**: [`XAxisOptions`](../interfaces/types.XAxisOptions.md)
+• `get` **opt**(): [`XAxisOptions`](../interfaces/types.XAxisOptions.md)
+
+#### Returns
+
+[`XAxisOptions`](../interfaces/types.XAxisOptions.md)
 
 #### Defined in
 
-xAxis.ts:9
+xAxis.ts:32
 
 ## Methods
 
-### drawDatetimeAxis
+### drawAxis
 
-▸ **drawDatetimeAxis**(): `void`
+▸ **drawAxis**(): `void`
 
 #### Returns
 
@@ -103,13 +114,19 @@ xAxis.ts:9
 
 #### Defined in
 
-xAxis.ts:101
+xAxis.ts:130
 
 ___
 
-### drawLinearAxis
+### drawTickPositions
 
-▸ **drawLinearAxis**(): `void`
+▸ **drawTickPositions**(`tickPos`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `tickPos` | `number`[] |
 
 #### Returns
 
@@ -117,7 +134,91 @@ ___
 
 #### Defined in
 
-xAxis.ts:34
+xAxis.ts:111
+
+___
+
+### formatDatetimeTick
+
+▸ **formatDatetimeTick**(`v`): `string`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `v` | `number` |
+
+#### Returns
+
+`string`
+
+#### Defined in
+
+xAxis.ts:98
+
+___
+
+### formatLinearTick
+
+▸ **formatLinearTick**(`v`): `string`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `v` | `number` |
+
+#### Returns
+
+`string`
+
+#### Defined in
+
+xAxis.ts:94
+
+___
+
+### getDatetimeTickPositions
+
+▸ **getDatetimeTickPositions**(`min`, `max`, `tickInterval`): `number`[]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `min` | `number` |
+| `max` | `number` |
+| `tickInterval` | `number` |
+
+#### Returns
+
+`number`[]
+
+#### Defined in
+
+xAxis.ts:62
+
+___
+
+### getLinearTickPositions
+
+▸ **getLinearTickPositions**(`min`, `max`, `tickInterval`): `number`[]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `min` | `number` |
+| `max` | `number` |
+| `tickInterval` | `number` |
+
+#### Returns
+
+`number`[]
+
+#### Defined in
+
+xAxis.ts:36
 
 ___
 
@@ -131,4 +232,4 @@ ___
 
 #### Defined in
 
-xAxis.ts:165
+xAxis.ts:159

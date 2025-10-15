@@ -19,10 +19,13 @@
 ### Properties
 
 - [canvas](plot_linePlot.LinePlot.md#canvas)
-- [colorScale](plot_linePlot.LinePlot.md#colorscale)
 - [ctx](plot_linePlot.LinePlot.md#ctx)
 - [dataUtils](plot_linePlot.LinePlot.md#datautils)
 - [master](plot_linePlot.LinePlot.md#master)
+
+### Accessors
+
+- [colorScale](plot_linePlot.LinePlot.md#colorscale)
 - [opt](plot_linePlot.LinePlot.md#opt)
 
 ### Methods
@@ -32,6 +35,7 @@
 - [getXRangeIndex](plot_linePlot.LinePlot.md#getxrangeindex)
 - [isDataStacked](plot_linePlot.LinePlot.md#isdatastacked)
 - [setSerieColor](plot_linePlot.LinePlot.md#setseriecolor)
+- [step](plot_linePlot.LinePlot.md#step)
 - [tooltipHandler](plot_linePlot.LinePlot.md#tooltiphandler)
 - [update](plot_linePlot.LinePlot.md#update)
 - [xRange](plot_linePlot.LinePlot.md#xrange)
@@ -57,7 +61,7 @@
 
 #### Defined in
 
-plot/linePlot.ts:12
+plot/linePlot.ts:10
 
 ## Properties
 
@@ -72,16 +76,6 @@ plot/linePlot.ts:12
 #### Defined in
 
 plot/abstractPlot.ts:7
-
-___
-
-### colorScale
-
-• **colorScale**: [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
-
-#### Defined in
-
-plot/linePlot.ts:10
 
 ___
 
@@ -125,15 +119,37 @@ ___
 
 plot/abstractPlot.ts:10
 
+## Accessors
+
+### colorScale
+
+• `get` **colorScale**(): [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Returns
+
+[`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Inherited from
+
+AbstractPlot.colorScale
+
+#### Defined in
+
+plot/abstractPlot.ts:24
+
 ___
 
 ### opt
 
-• **opt**: [`LineOptions`](../interfaces/types.LineOptions.md)[]
+• `get` **opt**(): [`LineOptions`](../interfaces/types.LineOptions.md)[]
+
+#### Returns
+
+[`LineOptions`](../interfaces/types.LineOptions.md)[]
 
 #### Defined in
 
-plot/linePlot.ts:9
+plot/linePlot.ts:17
 
 ## Methods
 
@@ -157,7 +173,7 @@ plot/linePlot.ts:9
 
 #### Defined in
 
-plot/linePlot.ts:51
+plot/linePlot.ts:54
 
 ___
 
@@ -175,7 +191,7 @@ ___
 
 #### Defined in
 
-plot/linePlot.ts:101
+plot/linePlot.ts:108
 
 ___
 
@@ -195,7 +211,7 @@ ___
 
 #### Defined in
 
-plot/linePlot.ts:94
+plot/linePlot.ts:101
 
 ___
 
@@ -213,7 +229,7 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:28
+plot/abstractPlot.ts:32
 
 ___
 
@@ -233,7 +249,25 @@ ___
 
 #### Defined in
 
-plot/linePlot.ts:110
+plot/linePlot.ts:117
+
+___
+
+### step
+
+▸ **step**(): `number`
+
+#### Returns
+
+`number`
+
+#### Overrides
+
+[AbstractPlot](plot_abstractPlot.AbstractPlot.md).[step](plot_abstractPlot.AbstractPlot.md#step)
+
+#### Defined in
+
+plot/linePlot.ts:97
 
 ___
 
@@ -276,7 +310,7 @@ ___
 
 #### Defined in
 
-plot/linePlot.ts:143
+plot/linePlot.ts:150
 
 ___
 
@@ -294,7 +328,7 @@ ___
 
 #### Defined in
 
-plot/linePlot.ts:83
+plot/linePlot.ts:86
 
 ___
 
@@ -312,7 +346,7 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:32
+plot/abstractPlot.ts:36
 
 ___
 
@@ -336,4 +370,4 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:24
+plot/abstractPlot.ts:28

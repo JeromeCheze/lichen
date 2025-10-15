@@ -11,6 +11,7 @@
 - [avgValue](types.DataUtilsComputedSerieData.md#avgvalue)
 - [maxValue](types.DataUtilsComputedSerieData.md#maxvalue)
 - [minValue](types.DataUtilsComputedSerieData.md#minvalue)
+- [quarterLeftAvg](types.DataUtilsComputedSerieData.md#quarterleftavg)
 - [rmsValue](types.DataUtilsComputedSerieData.md#rmsvalue)
 
 ## Properties
@@ -21,7 +22,7 @@
 
 #### Defined in
 
-types.ts:194
+types.ts:219
 
 ___
 
@@ -31,7 +32,7 @@ ___
 
 #### Defined in
 
-types.ts:193
+types.ts:218
 
 ___
 
@@ -41,7 +42,17 @@ ___
 
 #### Defined in
 
-types.ts:192
+types.ts:217
+
+___
+
+### quarterLeftAvg
+
+• **quarterLeftAvg**: `number`
+
+#### Defined in
+
+types.ts:222
 
 ___
 
@@ -51,4 +62,4 @@ ___
 
 #### Defined in
 
-types.ts:195
+types.ts:220

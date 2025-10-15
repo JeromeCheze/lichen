@@ -16,28 +16,27 @@
 - [end](dataUtils.DataUtils.md#end)
 - [height](dataUtils.DataUtils.md#height)
 - [master](dataUtils.DataUtils.md#master)
-- [opt](dataUtils.DataUtils.md#opt)
 - [start](dataUtils.DataUtils.md#start)
-- [type](dataUtils.DataUtils.md#type)
 - [width](dataUtils.DataUtils.md#width)
 - [yMax](dataUtils.DataUtils.md#ymax)
 - [yMin](dataUtils.DataUtils.md#ymin)
 
 ### Methods
 
-- [getColor](dataUtils.DataUtils.md#getcolor)
-- [getRatio](dataUtils.DataUtils.md#getratio)
 - [processData](dataUtils.DataUtils.md#processdata)
 - [resetComputed](dataUtils.DataUtils.md#resetcomputed)
 - [setXRange](dataUtils.DataUtils.md#setxrange)
 - [setYRange](dataUtils.DataUtils.md#setyrange)
-- [toRGB](dataUtils.DataUtils.md#torgb)
 - [toRGBA](dataUtils.DataUtils.md#torgba)
 - [toScientificNotation](dataUtils.DataUtils.md#toscientificnotation)
 - [xPosFromValue](dataUtils.DataUtils.md#xposfromvalue)
 - [xValueFromPos](dataUtils.DataUtils.md#xvaluefrompos)
 - [yPosFromValue](dataUtils.DataUtils.md#yposfromvalue)
 - [yValueFromPos](dataUtils.DataUtils.md#yvaluefrompos)
+- [correctFloat](dataUtils.DataUtils.md#correctfloat)
+- [getColor](dataUtils.DataUtils.md#getcolor)
+- [getRatio](dataUtils.DataUtils.md#getratio)
+- [toRGB](dataUtils.DataUtils.md#torgb)
 
 ## Constructors
 
@@ -55,7 +54,7 @@
 
 #### Defined in
 
-dataUtils.ts:23
+dataUtils.ts:21
 
 ## Properties
 
@@ -65,7 +64,7 @@ dataUtils.ts:23
 
 #### Defined in
 
-dataUtils.ts:10
+dataUtils.ts:8
 
 ___
 
@@ -75,7 +74,7 @@ ___
 
 #### Defined in
 
-dataUtils.ts:14
+dataUtils.ts:12
 
 ___
 
@@ -85,7 +84,7 @@ ___
 
 #### Defined in
 
-dataUtils.ts:9
+dataUtils.ts:7
 
 ___
 
@@ -95,17 +94,7 @@ ___
 
 #### Defined in
 
-dataUtils.ts:15
-
-___
-
-### opt
-
-• **opt**: [`LineOptions`](../interfaces/types.LineOptions.md)[] \| [`Heatmap2dOptions`](../interfaces/types.Heatmap2dOptions.md)[] \| [`Heatmap3dOptions`](../interfaces/types.Heatmap3dOptions.md) \| [`StackedOptions`](../interfaces/types.StackedOptions.md) \| [`SequenceOptions`](../interfaces/types.SequenceOptions.md) \| [`ScatterOptions`](../interfaces/types.ScatterOptions.md)[]
-
-#### Defined in
-
-dataUtils.ts:7
+dataUtils.ts:13
 
 ___
 
@@ -115,17 +104,7 @@ ___
 
 #### Defined in
 
-dataUtils.ts:13
-
-___
-
-### type
-
-• **type**: ``"line"`` \| ``"sequence"`` \| ``"heatmap2d"`` \| ``"heatmap3d"`` \| ``"stacked"`` \| ``"scatter"``
-
-#### Defined in
-
-dataUtils.ts:6
+dataUtils.ts:11
 
 ___
 
@@ -135,7 +114,7 @@ ___
 
 #### Defined in
 
-dataUtils.ts:8
+dataUtils.ts:6
 
 ___
 
@@ -145,7 +124,7 @@ ___
 
 #### Defined in
 
-dataUtils.ts:12
+dataUtils.ts:10
 
 ___
 
@@ -155,53 +134,9 @@ ___
 
 #### Defined in
 
-dataUtils.ts:11
+dataUtils.ts:9
 
 ## Methods
-
-### getColor
-
-▸ **getColor**(`value`, `colorScale`, `text?`): `string` \| `any`[]
-
-#### Parameters
-
-| Name | Type | Default value |
-| :------ | :------ | :------ |
-| `value` | `number` | `undefined` |
-| `colorScale` | [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md) | `undefined` |
-| `text` | `boolean` | `true` |
-
-#### Returns
-
-`string` \| `any`[]
-
-#### Defined in
-
-dataUtils.ts:192
-
-___
-
-### getRatio
-
-▸ **getRatio**(`v`, `min`, `max`): `number`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `v` | `number` |
-| `min` | `number` |
-| `max` | `number` |
-
-#### Returns
-
-`number`
-
-#### Defined in
-
-dataUtils.ts:180
-
-___
 
 ### processData
 
@@ -213,7 +148,7 @@ ___
 
 #### Defined in
 
-dataUtils.ts:135
+dataUtils.ts:139
 
 ___
 
@@ -227,7 +162,7 @@ ___
 
 #### Defined in
 
-dataUtils.ts:127
+dataUtils.ts:131
 
 ___
 
@@ -250,7 +185,7 @@ Set X range to use for data processing
 
 #### Defined in
 
-dataUtils.ts:45
+dataUtils.ts:46
 
 ___
 
@@ -273,27 +208,7 @@ Set the Y range to use for data processing
 
 #### Defined in
 
-dataUtils.ts:55
-
-___
-
-### toRGB
-
-▸ **toRGB**(`c`): `string`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `c` | [`number`, `number`, `number`] |
-
-#### Returns
-
-`string`
-
-#### Defined in
-
-dataUtils.ts:184
+dataUtils.ts:56
 
 ___
 
@@ -314,7 +229,7 @@ ___
 
 #### Defined in
 
-dataUtils.ts:188
+dataUtils.ts:210
 
 ___
 
@@ -335,7 +250,7 @@ ___
 
 #### Defined in
 
-dataUtils.ts:105
+dataUtils.ts:109
 
 ___
 
@@ -359,7 +274,7 @@ the X position coordinate
 
 #### Defined in
 
-dataUtils.ts:86
+dataUtils.ts:87
 
 ___
 
@@ -383,7 +298,7 @@ the data value
 
 #### Defined in
 
-dataUtils.ts:65
+dataUtils.ts:66
 
 ___
 
@@ -407,7 +322,7 @@ the Y position coordinate
 
 #### Defined in
 
-dataUtils.ts:98
+dataUtils.ts:99
 
 ___
 
@@ -431,4 +346,89 @@ the data value
 
 #### Defined in
 
-dataUtils.ts:77
+dataUtils.ts:78
+
+___
+
+### correctFloat
+
+▸ `Static` **correctFloat**(`v`): `number`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `v` | `number` |
+
+#### Returns
+
+`number`
+
+#### Defined in
+
+dataUtils.ts:198
+
+___
+
+### getColor
+
+▸ `Static` **getColor**(`value`, `colorScale`, `text?`, `dataUtils?`): `string` \| `any`[]
+
+#### Parameters
+
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `value` | `number` | `undefined` |
+| `colorScale` | [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md) | `undefined` |
+| `text` | `boolean` | `true` |
+| `dataUtils?` | [`DataUtils`](dataUtils.DataUtils.md) | `undefined` |
+
+#### Returns
+
+`string` \| `any`[]
+
+#### Defined in
+
+dataUtils.ts:214
+
+___
+
+### getRatio
+
+▸ `Static` **getRatio**(`v`, `min`, `max`): `number`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `v` | `number` |
+| `min` | `number` |
+| `max` | `number` |
+
+#### Returns
+
+`number`
+
+#### Defined in
+
+dataUtils.ts:202
+
+___
+
+### toRGB
+
+▸ `Static` **toRGB**(`c`): `string`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `c` | [`number`, `number`, `number`] |
+
+#### Returns
+
+`string`
+
+#### Defined in
+
+dataUtils.ts:206

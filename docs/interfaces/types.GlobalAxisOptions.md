@@ -21,6 +21,8 @@
 - [gridColor](types.GlobalAxisOptions.md#gridcolor)
 - [gridEnabled](types.GlobalAxisOptions.md#gridenabled)
 - [lineWidth](types.GlobalAxisOptions.md#linewidth)
+- [max](types.GlobalAxisOptions.md#max)
+- [min](types.GlobalAxisOptions.md#min)
 - [textColor](types.GlobalAxisOptions.md#textcolor)
 - [tickLength](types.GlobalAxisOptions.md#ticklength)
 - [tickWidth](types.GlobalAxisOptions.md#tickwidth)
@@ -30,7 +32,7 @@
 
 ### enabled
 
-• **enabled**: `boolean`
+• `Optional` **enabled**: `boolean`
 
 #### Defined in
 
@@ -40,7 +42,7 @@ ___
 
 ### fontSize
 
-• **fontSize**: `number`
+• `Optional` **fontSize**: `number`
 
 #### Defined in
 
@@ -50,7 +52,7 @@ ___
 
 ### gridColor
 
-• **gridColor**: `string`
+• `Optional` **gridColor**: `string`
 
 #### Defined in
 
@@ -60,7 +62,7 @@ ___
 
 ### gridEnabled
 
-• **gridEnabled**: `boolean`
+• `Optional` **gridEnabled**: `boolean`
 
 #### Defined in
 
@@ -70,7 +72,7 @@ ___
 
 ### lineWidth
 
-• **lineWidth**: `number`
+• `Optional` **lineWidth**: `number`
 
 #### Defined in
 
@@ -78,9 +80,29 @@ types.ts:13
 
 ___
 
+### max
+
+• `Optional` **max**: `number`
+
+#### Defined in
+
+types.ts:19
+
+___
+
+### min
+
+• `Optional` **min**: `number`
+
+#### Defined in
+
+types.ts:18
+
+___
+
 ### textColor
 
-• **textColor**: `string`
+• `Optional` **textColor**: `string`
 
 #### Defined in
 
@@ -90,7 +112,7 @@ ___
 
 ### tickLength
 
-• **tickLength**: `number`
+• `Optional` **tickLength**: `number`
 
 #### Defined in
 
@@ -100,7 +122,7 @@ ___
 
 ### tickWidth
 
-• **tickWidth**: `number`
+• `Optional` **tickWidth**: `number`
 
 #### Defined in
 

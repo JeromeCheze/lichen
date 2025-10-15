@@ -21,7 +21,7 @@
 
 #### Defined in
 
-types.ts:67
+types.ts:69
 
 ___
 
@@ -31,7 +31,7 @@ ___
 
 #### Defined in
 
-types.ts:69
+types.ts:71
 
 ___
 
@@ -41,7 +41,7 @@ ___
 
 #### Defined in
 
-types.ts:68
+types.ts:70
 
 ___
 
@@ -51,4 +51,4 @@ ___
 
 #### Defined in
 
-types.ts:66
+types.ts:68

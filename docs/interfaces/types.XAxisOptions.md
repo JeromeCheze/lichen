@@ -20,26 +20,29 @@
 - [gridColor](types.XAxisOptions.md#gridcolor)
 - [gridEnabled](types.XAxisOptions.md#gridenabled)
 - [lineWidth](types.XAxisOptions.md#linewidth)
+- [max](types.XAxisOptions.md#max)
+- [min](types.XAxisOptions.md#min)
 - [textColor](types.XAxisOptions.md#textcolor)
 - [tickLength](types.XAxisOptions.md#ticklength)
 - [tickWidth](types.XAxisOptions.md#tickwidth)
 - [title](types.XAxisOptions.md#title)
+- [tooltipFormatter](types.XAxisOptions.md#tooltipformatter)
 
 ## Properties
 
 ### datetime
 
-• **datetime**: `boolean`
+• `Optional` **datetime**: `boolean`
 
 #### Defined in
 
-types.ts:21
+types.ts:24
 
 ___
 
 ### enabled
 
-• **enabled**: `boolean`
+• `Optional` **enabled**: `boolean`
 
 #### Inherited from
 
@@ -53,7 +56,7 @@ ___
 
 ### fontSize
 
-• **fontSize**: `number`
+• `Optional` **fontSize**: `number`
 
 #### Inherited from
 
@@ -67,7 +70,7 @@ ___
 
 ### gridColor
 
-• **gridColor**: `string`
+• `Optional` **gridColor**: `string`
 
 #### Inherited from
 
@@ -81,7 +84,7 @@ ___
 
 ### gridEnabled
 
-• **gridEnabled**: `boolean`
+• `Optional` **gridEnabled**: `boolean`
 
 #### Inherited from
 
@@ -95,7 +98,7 @@ ___
 
 ### lineWidth
 
-• **lineWidth**: `number`
+• `Optional` **lineWidth**: `number`
 
 #### Inherited from
 
@@ -107,9 +110,37 @@ types.ts:13
 
 ___
 
+### max
+
+• `Optional` **max**: `number`
+
+#### Inherited from
+
+[GlobalAxisOptions](types.GlobalAxisOptions.md).[max](types.GlobalAxisOptions.md#max)
+
+#### Defined in
+
+types.ts:19
+
+___
+
+### min
+
+• `Optional` **min**: `number`
+
+#### Inherited from
+
+[GlobalAxisOptions](types.GlobalAxisOptions.md).[min](types.GlobalAxisOptions.md#min)
+
+#### Defined in
+
+types.ts:18
+
+___
+
 ### textColor
 
-• **textColor**: `string`
+• `Optional` **textColor**: `string`
 
 #### Inherited from
 
@@ -123,7 +154,7 @@ ___
 
 ### tickLength
 
-• **tickLength**: `number`
+• `Optional` **tickLength**: `number`
 
 #### Inherited from
 
@@ -137,7 +168,7 @@ ___
 
 ### tickWidth
 
-• **tickWidth**: `number`
+• `Optional` **tickWidth**: `number`
 
 #### Inherited from
 
@@ -160,3 +191,27 @@ ___
 #### Defined in
 
 types.ts:17
+
+___
+
+### tooltipFormatter
+
+• `Optional` **tooltipFormatter**: (`x`: `number`) => `string`
+
+#### Type declaration
+
+▸ (`x`): `string`
+
+##### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `x` | `number` |
+
+##### Returns
+
+`string`
+
+#### Defined in
+
+types.ts:23

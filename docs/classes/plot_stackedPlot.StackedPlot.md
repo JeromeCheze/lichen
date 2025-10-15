@@ -19,10 +19,13 @@
 ### Properties
 
 - [canvas](plot_stackedPlot.StackedPlot.md#canvas)
-- [colorScale](plot_stackedPlot.StackedPlot.md#colorscale)
 - [ctx](plot_stackedPlot.StackedPlot.md#ctx)
 - [dataUtils](plot_stackedPlot.StackedPlot.md#datautils)
 - [master](plot_stackedPlot.StackedPlot.md#master)
+
+### Accessors
+
+- [colorScale](plot_stackedPlot.StackedPlot.md#colorscale)
 - [opt](plot_stackedPlot.StackedPlot.md#opt)
 
 ### Methods
@@ -32,6 +35,7 @@
 - [getXRangeIndex](plot_stackedPlot.StackedPlot.md#getxrangeindex)
 - [isDataStacked](plot_stackedPlot.StackedPlot.md#isdatastacked)
 - [setSerieColor](plot_stackedPlot.StackedPlot.md#setseriecolor)
+- [step](plot_stackedPlot.StackedPlot.md#step)
 - [tooltipHandler](plot_stackedPlot.StackedPlot.md#tooltiphandler)
 - [update](plot_stackedPlot.StackedPlot.md#update)
 - [xRange](plot_stackedPlot.StackedPlot.md#xrange)
@@ -57,7 +61,7 @@
 
 #### Defined in
 
-plot/stackedPlot.ts:10
+plot/stackedPlot.ts:8
 
 ## Properties
 
@@ -72,16 +76,6 @@ plot/stackedPlot.ts:10
 #### Defined in
 
 plot/abstractPlot.ts:7
-
-___
-
-### colorScale
-
-• **colorScale**: [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
-
-#### Defined in
-
-plot/stackedPlot.ts:8
 
 ___
 
@@ -125,15 +119,37 @@ ___
 
 plot/abstractPlot.ts:10
 
+## Accessors
+
+### colorScale
+
+• `get` **colorScale**(): [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Returns
+
+[`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Inherited from
+
+AbstractPlot.colorScale
+
+#### Defined in
+
+plot/abstractPlot.ts:24
+
 ___
 
 ### opt
 
-• **opt**: [`StackedOptions`](../interfaces/types.StackedOptions.md)
+• `get` **opt**(): [`StackedOptions`](../interfaces/types.StackedOptions.md)
+
+#### Returns
+
+[`StackedOptions`](../interfaces/types.StackedOptions.md)
 
 #### Defined in
 
-plot/stackedPlot.ts:7
+plot/stackedPlot.ts:15
 
 ## Methods
 
@@ -157,7 +173,7 @@ plot/stackedPlot.ts:7
 
 #### Defined in
 
-plot/stackedPlot.ts:51
+plot/stackedPlot.ts:54
 
 ___
 
@@ -175,7 +191,7 @@ ___
 
 #### Defined in
 
-plot/stackedPlot.ts:98
+plot/stackedPlot.ts:105
 
 ___
 
@@ -189,7 +205,7 @@ ___
 
 #### Defined in
 
-plot/stackedPlot.ts:91
+plot/stackedPlot.ts:98
 
 ___
 
@@ -207,7 +223,7 @@ ___
 
 #### Defined in
 
-plot/stackedPlot.ts:83
+plot/stackedPlot.ts:86
 
 ___
 
@@ -227,7 +243,25 @@ ___
 
 #### Defined in
 
-plot/stackedPlot.ts:107
+plot/stackedPlot.ts:114
+
+___
+
+### step
+
+▸ **step**(): `number`
+
+#### Returns
+
+`number`
+
+#### Overrides
+
+[AbstractPlot](plot_abstractPlot.AbstractPlot.md).[step](plot_abstractPlot.AbstractPlot.md#step)
+
+#### Defined in
+
+plot/stackedPlot.ts:94
 
 ___
 
@@ -270,7 +304,7 @@ ___
 
 #### Defined in
 
-plot/stackedPlot.ts:113
+plot/stackedPlot.ts:120
 
 ___
 
@@ -288,7 +322,7 @@ ___
 
 #### Defined in
 
-plot/stackedPlot.ts:87
+plot/stackedPlot.ts:90
 
 ___
 
@@ -306,7 +340,7 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:32
+plot/abstractPlot.ts:36
 
 ___
 
@@ -330,4 +364,4 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:24
+plot/abstractPlot.ts:28

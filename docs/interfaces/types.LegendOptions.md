@@ -17,38 +17,38 @@
 
 ### enabled
 
-• **enabled**: `boolean`
+• `Optional` **enabled**: `boolean`
 
 #### Defined in
 
-types.ts:118
+types.ts:126
 
 ___
 
 ### fontSize
 
-• **fontSize**: `number`
+• `Optional` **fontSize**: `number`
 
 #### Defined in
 
-types.ts:121
+types.ts:129
 
 ___
 
 ### position
 
-• **position**: ``"bottom"`` \| ``"right"``
+• `Optional` **position**: ``"bottom"`` \| ``"right"``
 
 #### Defined in
 
-types.ts:119
+types.ts:127
 
 ___
 
 ### width
 
-• **width**: `number`
+• `Optional` **width**: `number`
 
 #### Defined in
 
-types.ts:120
+types.ts:128

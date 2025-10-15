@@ -10,6 +10,7 @@
 
 - [color](types.ScatterOptions.md#color)
 - [data](types.ScatterOptions.md#data)
+- [enabled](types.ScatterOptions.md#enabled)
 - [name](types.ScatterOptions.md#name)
 - [shape](types.ScatterOptions.md#shape)
 - [tooltipFormatter](types.ScatterOptions.md#tooltipformatter)
@@ -22,17 +23,27 @@
 
 #### Defined in
 
-types.ts:82
+types.ts:92
 
 ___
 
 ### data
 
-• **data**: { `color?`: `string` ; `name`: `string` ; `x`: `number` ; `y`: `number`  }[]
+• **data**: [`ScatterPoint`](types.ScatterPoint.md)[]
 
 #### Defined in
 
-types.ts:84
+types.ts:95
+
+___
+
+### enabled
+
+• `Optional` **enabled**: `boolean`
+
+#### Defined in
+
+types.ts:94
 
 ___
 
@@ -42,7 +53,7 @@ ___
 
 #### Defined in
 
-types.ts:81
+types.ts:91
 
 ___
 
@@ -52,13 +63,13 @@ ___
 
 #### Defined in
 
-types.ts:83
+types.ts:93
 
 ___
 
 ### tooltipFormatter
 
-• `Optional` **tooltipFormatter**: (`x`: `number`) => `string`
+• `Optional` **tooltipFormatter**: (`x`: [`ScatterPoint`](types.ScatterPoint.md)) => `string`
 
 #### Type declaration
 
@@ -68,7 +79,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `x` | `number` |
+| `x` | [`ScatterPoint`](types.ScatterPoint.md) |
 
 ##### Returns
 
@@ -76,4 +87,4 @@ ___
 
 #### Defined in
 
-types.ts:90
+types.ts:96

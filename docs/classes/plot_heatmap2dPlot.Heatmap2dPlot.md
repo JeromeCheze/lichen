@@ -19,10 +19,13 @@
 ### Properties
 
 - [canvas](plot_heatmap2dPlot.Heatmap2dPlot.md#canvas)
-- [colorScale](plot_heatmap2dPlot.Heatmap2dPlot.md#colorscale)
 - [ctx](plot_heatmap2dPlot.Heatmap2dPlot.md#ctx)
 - [dataUtils](plot_heatmap2dPlot.Heatmap2dPlot.md#datautils)
 - [master](plot_heatmap2dPlot.Heatmap2dPlot.md#master)
+
+### Accessors
+
+- [colorScale](plot_heatmap2dPlot.Heatmap2dPlot.md#colorscale)
 - [opt](plot_heatmap2dPlot.Heatmap2dPlot.md#opt)
 
 ### Methods
@@ -31,6 +34,7 @@
 - [getProcessingData](plot_heatmap2dPlot.Heatmap2dPlot.md#getprocessingdata)
 - [getXRangeIndex](plot_heatmap2dPlot.Heatmap2dPlot.md#getxrangeindex)
 - [isDataStacked](plot_heatmap2dPlot.Heatmap2dPlot.md#isdatastacked)
+- [step](plot_heatmap2dPlot.Heatmap2dPlot.md#step)
 - [tooltipHandler](plot_heatmap2dPlot.Heatmap2dPlot.md#tooltiphandler)
 - [update](plot_heatmap2dPlot.Heatmap2dPlot.md#update)
 - [xRange](plot_heatmap2dPlot.Heatmap2dPlot.md#xrange)
@@ -56,7 +60,7 @@
 
 #### Defined in
 
-plot/heatmap2dPlot.ts:12
+plot/heatmap2dPlot.ts:16
 
 ## Properties
 
@@ -71,16 +75,6 @@ plot/heatmap2dPlot.ts:12
 #### Defined in
 
 plot/abstractPlot.ts:7
-
-___
-
-### colorScale
-
-• **colorScale**: [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
-
-#### Defined in
-
-plot/heatmap2dPlot.ts:10
 
 ___
 
@@ -124,15 +118,37 @@ ___
 
 plot/abstractPlot.ts:10
 
+## Accessors
+
+### colorScale
+
+• `get` **colorScale**(): [`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Returns
+
+[`ColorScaleOptions`](../interfaces/types.ColorScaleOptions.md)
+
+#### Inherited from
+
+AbstractPlot.colorScale
+
+#### Defined in
+
+plot/abstractPlot.ts:24
+
 ___
 
 ### opt
 
-• **opt**: [`Heatmap2dOptions`](../interfaces/types.Heatmap2dOptions.md)[]
+• `get` **opt**(): [`Heatmap2dOptions`](../interfaces/types.Heatmap2dOptions.md)[]
+
+#### Returns
+
+[`Heatmap2dOptions`](../interfaces/types.Heatmap2dOptions.md)[]
 
 #### Defined in
 
-plot/heatmap2dPlot.ts:9
+plot/heatmap2dPlot.ts:22
 
 ## Methods
 
@@ -156,7 +172,7 @@ plot/heatmap2dPlot.ts:9
 
 #### Defined in
 
-plot/heatmap2dPlot.ts:42
+plot/heatmap2dPlot.ts:51
 
 ___
 
@@ -174,7 +190,7 @@ ___
 
 #### Defined in
 
-plot/heatmap2dPlot.ts:96
+plot/heatmap2dPlot.ts:109
 
 ___
 
@@ -194,7 +210,7 @@ ___
 
 #### Defined in
 
-plot/heatmap2dPlot.ts:89
+plot/heatmap2dPlot.ts:102
 
 ___
 
@@ -212,7 +228,25 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:28
+plot/abstractPlot.ts:32
+
+___
+
+### step
+
+▸ **step**(): `number`
+
+#### Returns
+
+`number`
+
+#### Overrides
+
+[AbstractPlot](plot_abstractPlot.AbstractPlot.md).[step](plot_abstractPlot.AbstractPlot.md#step)
+
+#### Defined in
+
+plot/heatmap2dPlot.ts:98
 
 ___
 
@@ -237,7 +271,7 @@ ___
 
 #### Defined in
 
-plot/heatmap2dPlot.ts:20
+plot/heatmap2dPlot.ts:26
 
 ___
 
@@ -255,7 +289,7 @@ ___
 
 #### Defined in
 
-plot/heatmap2dPlot.ts:105
+plot/heatmap2dPlot.ts:118
 
 ___
 
@@ -273,7 +307,7 @@ ___
 
 #### Defined in
 
-plot/heatmap2dPlot.ts:78
+plot/heatmap2dPlot.ts:87
 
 ___
 
@@ -291,7 +325,7 @@ ___
 
 #### Defined in
 
-plot/abstractPlot.ts:32
+plot/abstractPlot.ts:36
 
 ___
 
@@ -315,4 +349,4 @@ ___
 
 #### Defined in
 
-plot/heatmap2dPlot.ts:74
+plot/heatmap2dPlot.ts:83

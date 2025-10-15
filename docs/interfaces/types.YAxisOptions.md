@@ -19,6 +19,7 @@
 - [gridColor](types.YAxisOptions.md#gridcolor)
 - [gridEnabled](types.YAxisOptions.md#gridenabled)
 - [lineWidth](types.YAxisOptions.md#linewidth)
+- [logarithmic](types.YAxisOptions.md#logarithmic)
 - [max](types.YAxisOptions.md#max)
 - [min](types.YAxisOptions.md#min)
 - [powerOfTen](types.YAxisOptions.md#poweroften)
@@ -32,7 +33,7 @@
 
 ### enabled
 
-• **enabled**: `boolean`
+• `Optional` **enabled**: `boolean`
 
 #### Inherited from
 
@@ -46,7 +47,7 @@ ___
 
 ### fontSize
 
-• **fontSize**: `number`
+• `Optional` **fontSize**: `number`
 
 #### Inherited from
 
@@ -60,7 +61,7 @@ ___
 
 ### gridColor
 
-• **gridColor**: `string`
+• `Optional` **gridColor**: `string`
 
 #### Inherited from
 
@@ -74,7 +75,7 @@ ___
 
 ### gridEnabled
 
-• **gridEnabled**: `boolean`
+• `Optional` **gridEnabled**: `boolean`
 
 #### Inherited from
 
@@ -88,7 +89,7 @@ ___
 
 ### lineWidth
 
-• **lineWidth**: `number`
+• `Optional` **lineWidth**: `number`
 
 #### Inherited from
 
@@ -100,13 +101,27 @@ types.ts:13
 
 ___
 
+### logarithmic
+
+• `Optional` **logarithmic**: `boolean`
+
+#### Defined in
+
+types.ts:29
+
+___
+
 ### max
 
 • `Optional` **max**: `number`
 
+#### Inherited from
+
+[GlobalAxisOptions](types.GlobalAxisOptions.md).[max](types.GlobalAxisOptions.md#max)
+
 #### Defined in
 
-types.ts:26
+types.ts:19
 
 ___
 
@@ -114,25 +129,29 @@ ___
 
 • `Optional` **min**: `number`
 
+#### Inherited from
+
+[GlobalAxisOptions](types.GlobalAxisOptions.md).[min](types.GlobalAxisOptions.md#min)
+
 #### Defined in
 
-types.ts:25
+types.ts:18
 
 ___
 
 ### powerOfTen
 
-• **powerOfTen**: `boolean`
+• `Optional` **powerOfTen**: `boolean`
 
 #### Defined in
 
-types.ts:27
+types.ts:28
 
 ___
 
 ### textColor
 
-• **textColor**: `string`
+• `Optional` **textColor**: `string`
 
 #### Inherited from
 
@@ -146,7 +165,7 @@ ___
 
 ### tickLength
 
-• **tickLength**: `number`
+• `Optional` **tickLength**: `number`
 
 #### Inherited from
 
@@ -160,7 +179,7 @@ ___
 
 ### tickWidth
 
-• **tickWidth**: `number`
+• `Optional` **tickWidth**: `number`
 
 #### Inherited from
 
@@ -188,8 +207,8 @@ ___
 
 ### width
 
-• **width**: `number`
+• `Optional` **width**: `number`
 
 #### Defined in
 
-types.ts:28
+types.ts:30

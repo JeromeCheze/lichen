@@ -8,24 +8,37 @@
 
 ### Properties
 
+- [autoResize](types.LichenOptions.md#autoresize)
 - [colorScale](types.LichenOptions.md#colorscale)
 - [crosshair](types.LichenOptions.md#crosshair)
 - [header](types.LichenOptions.md#header)
 - [height](types.LichenOptions.md#height)
+- [hooks](types.LichenOptions.md#hooks)
 - [legend](types.LichenOptions.md#legend)
+- [selection](types.LichenOptions.md#selection)
 - [serieHeight](types.LichenOptions.md#serieheight)
 - [series](types.LichenOptions.md#series)
 - [stacked](types.LichenOptions.md#stacked)
 - [synced](types.LichenOptions.md#synced)
-- [title](types.LichenOptions.md#title)
 - [tooltip](types.LichenOptions.md#tooltip)
 - [type](types.LichenOptions.md#type)
 - [vLines](types.LichenOptions.md#vlines)
+- [width](types.LichenOptions.md#width)
 - [xAxis](types.LichenOptions.md#xaxis)
 - [yAxis](types.LichenOptions.md#yaxis)
 - [zoom](types.LichenOptions.md#zoom)
 
 ## Properties
+
+### autoResize
+
+• `Optional` **autoResize**: `boolean`
+
+#### Defined in
+
+types.ts:191
+
+___
 
 ### colorScale
 
@@ -33,17 +46,17 @@
 
 #### Defined in
 
-types.ts:172
+types.ts:196
 
 ___
 
 ### crosshair
 
-• **crosshair**: [`CrosshairOptions`](types.CrosshairOptions.md)
+• `Optional` **crosshair**: [`CrosshairOptions`](types.CrosshairOptions.md)
 
 #### Defined in
 
-types.ts:165
+types.ts:186
 
 ___
 
@@ -53,37 +66,57 @@ ___
 
 #### Defined in
 
-types.ts:162
+types.ts:183
 
 ___
 
 ### height
 
-• **height**: `number`
+• `Optional` **height**: `number`
 
 #### Defined in
 
-types.ts:168
+types.ts:189
+
+___
+
+### hooks
+
+• `Optional` **hooks**: [`HooksOptions`](types.HooksOptions.md)
+
+#### Defined in
+
+types.ts:200
 
 ___
 
 ### legend
 
-• **legend**: [`LegendOptions`](types.LegendOptions.md)
+• `Optional` **legend**: [`LegendOptions`](types.LegendOptions.md)
 
 #### Defined in
 
-types.ts:164
+types.ts:185
+
+___
+
+### selection
+
+• `Optional` **selection**: ``"xy"`` \| ``"x"`` \| ``"y"``
+
+#### Defined in
+
+types.ts:195
 
 ___
 
 ### serieHeight
 
-• **serieHeight**: `number`
+• `Optional` **serieHeight**: `number`
 
 #### Defined in
 
-types.ts:170
+types.ts:193
 
 ___
 
@@ -93,55 +126,45 @@ ___
 
 #### Defined in
 
-types.ts:175
+types.ts:199
 
 ___
 
 ### stacked
 
-• **stacked**: `boolean`
+• `Optional` **stacked**: `boolean`
 
 #### Defined in
 
-types.ts:169
+types.ts:192
 
 ___
 
 ### synced
 
-• **synced**: () => [`Lichen`](../classes/index.Lichen.md)[]
+• `Optional` **synced**: () => `Record`<`number`, [`Lichen`](../classes/index.Lichen.md)\>
 
 #### Type declaration
 
-▸ (): [`Lichen`](../classes/index.Lichen.md)[]
+▸ (): `Record`<`number`, [`Lichen`](../classes/index.Lichen.md)\>
 
 ##### Returns
 
-[`Lichen`](../classes/index.Lichen.md)[]
+`Record`<`number`, [`Lichen`](../classes/index.Lichen.md)\>
 
 #### Defined in
 
-types.ts:176
-
-___
-
-### title
-
-• `Optional` **title**: `string`
-
-#### Defined in
-
-types.ts:161
+types.ts:201
 
 ___
 
 ### tooltip
 
-• **tooltip**: `boolean`
+• `Optional` **tooltip**: `boolean`
 
 #### Defined in
 
-types.ts:167
+types.ts:188
 
 ___
 
@@ -151,44 +174,54 @@ ___
 
 #### Defined in
 
-types.ts:163
+types.ts:184
 
 ___
 
 ### vLines
 
-• **vLines**: [`VLine`](types.VLine.md)[]
+• `Optional` **vLines**: [`VLine`](types.VLine.md)[]
 
 #### Defined in
 
-types.ts:166
+types.ts:187
+
+___
+
+### width
+
+• `Optional` **width**: `number`
+
+#### Defined in
+
+types.ts:190
 
 ___
 
 ### xAxis
 
-• **xAxis**: [`XAxisOptions`](types.XAxisOptions.md)
+• `Optional` **xAxis**: [`XAxisOptions`](types.XAxisOptions.md)
 
 #### Defined in
 
-types.ts:173
+types.ts:197
 
 ___
 
 ### yAxis
 
-• **yAxis**: [`YAxisOptions`](types.YAxisOptions.md)
+• `Optional` **yAxis**: [`YAxisOptions`](types.YAxisOptions.md)
 
 #### Defined in
 
-types.ts:174
+types.ts:198
 
 ___
 
 ### zoom
 
-• **zoom**: ``"xy"`` \| ``"x"`` \| ``"y"``
+• `Optional` **zoom**: ``"xy"`` \| ``"x"`` \| ``"y"``
 
 #### Defined in
 
-types.ts:171
+types.ts:194
