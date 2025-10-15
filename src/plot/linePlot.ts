@@ -47,6 +47,11 @@ export default class LinePlot extends AbstractPlot {
       ctx.fill()
       ctx.stroke()
     }
+    yValues.sort((a, b) => {
+      const aa = a.value
+      const bb = b.value
+      return aa < bb ? -1 : aa > bb ? 1 : 0
+    })
     ctx.restore()
     return { xValue, yValues }
   }
@@ -195,9 +200,11 @@ export default class LinePlot extends AbstractPlot {
             }
             prev = minValue
           } else {
-            ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0)!, this.canvas.height))
-            ctx.closePath()
-            ctx.fill()
+            if (prev != null) {
+              ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0)!, this.canvas.height))
+              ctx.closePath()
+              ctx.fill()
+            }
             prev = null
           }
           xPos += xStep

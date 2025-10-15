@@ -41,6 +41,7 @@ export interface ColorScaleOptions {
   min: number | null
   max: number | null
   logarithmic: boolean
+  category: boolean
 }
 
 export interface LineOptions {

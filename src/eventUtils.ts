@@ -17,6 +17,7 @@ export default class EventUtils {
   constructor(master: MasterInterface, element: HTMLElement) {
     master.register('EVENT_UTILS', this)
     this.master = master
+      .on('destroy', () => this.destroy())
     this.element = element
     this.dataUtils = master.getRegistered('DATA_UTILS')
     this.handler = {

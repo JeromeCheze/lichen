@@ -153,19 +153,13 @@ export default class Lichen {
   }
 
   destroy() {
-    if (this.eventUtils) {
-      this.eventUtils.destroy()
-    }
+    this.master.send('destroy', null)
     if (this.opt.autoResize) {
       window.removeEventListener('resize', this.handleResize)
     }
-    delete this.opt.synced!()[this.id]
     this.wrapper!.remove()
-    const frontPanel = this.master.getRegistered('FRONT_PANEL')
-    if (frontPanel.tooltipDiv != null) {
-      frontPanel.tooltipDiv.remove()
-    }
     this.master.clear()
+    delete this.opt.synced!()[this.id]
   }
 
   /**
@@ -327,7 +321,7 @@ export default class Lichen {
       this.setXRange(saveBounds.start!, saveBounds.end!)
       // this.update()
     } catch (error) {
-      console.warn(`Cannot rebuild chart #${this.id}: ${error}`)
+      console.debug(`Cannot rebuild chart #${this.id}: ${error}`)
     }
   }
 

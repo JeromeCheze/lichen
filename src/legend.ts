@@ -35,7 +35,7 @@ export default class Legend {
     return this.master.getRegistered('CHART').opt.height
   }
 
-  drawHeatmap3dLegend () {
+  drawColorBar () {
     if (this.colorScale == null || this.colorScale.min == null || this.colorScale.max == null) {
       return
     }
@@ -53,8 +53,11 @@ export default class Legend {
       canvas.width = Math.min(400, this.container.getBoundingClientRect().width)
       canvas.height = 40
       const grad = ctx.createLinearGradient(20, 0, canvas.width - 20, 0)
-      for (const stop of this.colorScale!.stops) {
-        grad.addColorStop(stop[0], `rgb(${stop[1][0]},${stop[1][1]},${stop[1][2]})`)
+      for (const [i, stop] of this.colorScale!.stops.entries()) {
+        const pos = this.colorScale.category
+          ? i / (this.colorScale.stops.length - 1)
+          : stop[0]
+        grad.addColorStop(pos, `rgb(${stop[1][0]},${stop[1][1]},${stop[1][2]})`)
       }
       ctx.fillStyle = grad
       ctx.fillRect(20, 1, canvas.width - 40, 10)
@@ -64,19 +67,30 @@ export default class Legend {
       ctx.font = `${this.opt.fontSize}px sans-serif`
       ctx.textBaseline = 'top'
       ctx.textAlign = 'center'
-      for (const stop of this.colorScale!.stops) {
-        const x = 20 + (canvas.width - 40) * stop[0]
+      for (const [i, stop] of this.colorScale!.stops.entries()) {
+        const x = 20 + (canvas.width - 40) * (
+          this.colorScale.category
+            ? i / (this.colorScale.stops.length - 1)
+            : stop[0]
+        )
         const v = this.colorScale!.logarithmic ? Math.pow(2, stop[0] * max - min) : stop[0] * (max - min)
         ctx.fillRect(x, 11, 1, 4)
-        ctx.fillText(`${Math.round(v)}`, x, 18)
+        if (this.colorScale.category) {
+          ctx.fillText(stop[2], x, 18)
+        } else {
+          ctx.fillText(`${Math.round(v)}`, x, 18)
+        }
       }
     } else {
       Object.assign(this.container.style, { paddingLeft: '10px' })
       canvas.width = this.opt.width!
       canvas.height = this.height
       const grad = ctx.createLinearGradient(0, canvas.height, 0, 0)
-      for (const stop of this.colorScale!.stops) {
-        grad.addColorStop(stop[0], `rgb(${stop[1][0]},${stop[1][1]},${stop[1][2]})`)
+      for (const [i, stop] of this.colorScale!.stops.entries()) {
+        const pos = this.colorScale.category
+          ? i / (this.colorScale.stops.length - 1)
+          : stop[0]
+        grad.addColorStop(pos, `rgb(${stop[1][0]},${stop[1][1]},${stop[1][2]})`)
       }
       ctx.fillStyle = grad
       ctx.fillRect(0, 10, 10, canvas.height - 20)
@@ -87,11 +101,19 @@ export default class Legend {
       ctx.textBaseline = 'middle'
       ctx.textAlign = 'left'
       const drawHeight = canvas.height - 21
-      for (const stop of this.colorScale!.stops) {
-        const y =  11 + drawHeight - drawHeight * stop[0]
+      for (const [i, stop] of this.colorScale!.stops.entries()) {
+        const y =  11 + drawHeight - drawHeight * (
+          this.colorScale.category
+            ? i / (this.colorScale.stops.length - 1)
+            : stop[0]
+        )
         const v = this.colorScale!.logarithmic ? Math.pow(2, stop[0] * max - min) : stop[0] * (max - min)
         ctx.fillRect(11, Math.floor(y - 1), 4, 1)
-        ctx.fillText(`${Math.round(v)}`, 19, y)
+        if (this.colorScale.category) {
+          ctx.fillText(stop[2], 19, y)
+        } else {
+          ctx.fillText(`${Math.round(v)}`, 19, y)
+        }
       }
     }
     ctx.restore()
@@ -149,8 +171,8 @@ export default class Legend {
     } else if (this.type === 'scatter') {
       const series = this.series as ScatterOptions[]
       this.drawLegend(series as LegendItem[])
-    } else if (this.type === 'heatmap3d') {
-      this.drawHeatmap3dLegend()
+    } else if (this.type === 'heatmap2d' || this.type === 'heatmap3d') {
+      this.drawColorBar()
     }
   }
 }

@@ -18,6 +18,10 @@ export default class FrontPanel {
   ) {
     master.register('FRONT_PANEL', this)
     this.master = master
+      .on('click', (x) => this.handleClick(x))
+      .on('active', (x) => this.handleActive(x))
+      .on('cursor', (x) => this.state.cursorPos = x)
+      .on('destroy', () => this.destroy())
     this.selected = []
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
@@ -26,13 +30,16 @@ export default class FrontPanel {
     this.canvas.height = this.dataUtils.height
     this.tooltipDiv = document.createElement('div')
     Object.assign(this.tooltipDiv.style, {
+      position: 'absolute',
       display: 'none',
       padding: '10px',
       borderRadius: '4px',
+      border: '1px solid #ccc',
       zIndex: 3000,
       background: 'white',
       color: 'black',
-      fontSize: '10px'
+      fontSize: '10px',
+      lineHeight: '10px'
     })
     document.body.appendChild(this.tooltipDiv)
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 100 })
@@ -41,10 +48,6 @@ export default class FrontPanel {
       active: false,
       cursorPos: null
     }
-    this.master
-      .on('click', (x) => this.handleClick(x))
-      .on('active', (x) => this.handleActive(x))
-      .on('cursor', (x) => this.state.cursorPos = x)
   }
 
   get tooltip(): boolean {
@@ -63,6 +66,10 @@ export default class FrontPanel {
     return this.master.getRegistered('CHART').opt.colorScale
   }
 
+  destroy() {
+    this.tooltipDiv?.remove()
+  }
+
   handleActive(value: boolean) {
     this.state.active = value
     if (!value) {
@@ -76,11 +83,6 @@ export default class FrontPanel {
     if (content.xValue == null || content.yValues.length === 0) {
       return result
     }
-    content.yValues.sort((a, b) => {
-      const aa = a.value
-      const bb = b.value
-      return aa < bb ? -1 : aa > bb ? 1 : 0
-    })
     const xDiv = document.createElement('div')
     Object.assign(xDiv.style, { fontWeight: 'bold' })
     const xAxis = this.master.getRegistered('X_AXIS')
@@ -137,6 +139,7 @@ export default class FrontPanel {
   }
 
   drawTooltip(value: number) {
+    const content = document.createDocumentFragment()
     const dataContent = this.tooltip ? this.getDataTooltipContent(value) : []
     const vlineContent = this.getVLineTooltipContent(value)
     if (dataContent.length === 0 && vlineContent.length === 0) {
@@ -144,27 +147,27 @@ export default class FrontPanel {
       return
     }
     this.tooltipDiv.innerHTML = ''
-    if (this.state.cursorPos.pageX > (document.body.clientWidth / 2)) {
-      this.tooltipDiv.style.right = `${document.body.clientWidth - this.state.cursorPos.pageX + 20}px`
-      this.tooltipDiv.style.left = 'auto'
-    } else {
-      this.tooltipDiv.style.left = `${this.state.cursorPos.pageX + 20}px`
-      this.tooltipDiv.style.right = 'auto'
-    }
     for (const el of dataContent) {
-      this.tooltipDiv.appendChild(el)
+      content.appendChild(el)
     }
     for (const el of vlineContent) {
-      this.tooltipDiv.appendChild(el)
+      content.appendChild(el)
     }
-    Object.assign(this.tooltipDiv.style, {
-      display: 'block',
-      position: 'absolute',
-      borderRadius: '4px',
-      border: '1px solid #ccc',
-      top: `${this.state.cursorPos.pageY + 20 - this.tooltipDiv.getBoundingClientRect().height / 2}px`,
-      color: 'black'
-    })
+    this.tooltipDiv.appendChild(content)
+    Object.assign(
+      this.tooltipDiv.style,
+      {
+        display: 'block',
+        top: `${this.state.cursorPos.pageY + 20 - this.tooltipDiv.getBoundingClientRect().height / 2}px`
+      },
+      this.state.cursorPos.pageX > (document.body.clientWidth / 2) ? {
+        left: 'auto',
+        right: `${document.body.clientWidth - this.state.cursorPos.pageX + 20}px`
+      } : {
+        left: `${this.state.cursorPos.pageX + 20}px`,
+        right: 'auto'
+      }
+    )
   }
 
   drawVLines() {
