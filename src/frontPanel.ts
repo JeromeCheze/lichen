@@ -11,6 +11,7 @@ export default class FrontPanel {
   selected: VLine[];
   tooltipDiv: HTMLElement;
   state: Record<string, any>;
+  tooltipDebounce: number | null;
 
   constructor(
     container: HTMLElement,
@@ -29,6 +30,7 @@ export default class FrontPanel {
     this.canvas.width = this.dataUtils.width
     this.canvas.height = this.dataUtils.height
     this.tooltipDiv = document.createElement('div')
+    this.tooltipDebounce = null
     Object.assign(this.tooltipDiv.style, {
       position: 'absolute',
       display: 'none',
@@ -139,35 +141,44 @@ export default class FrontPanel {
   }
 
   drawTooltip(value: number) {
-    const content = document.createDocumentFragment()
-    const dataContent = this.tooltip ? this.getDataTooltipContent(value) : []
-    const vlineContent = this.getVLineTooltipContent(value)
-    if (dataContent.length === 0 && vlineContent.length === 0) {
-      this.tooltipDiv.style.display = 'none'
-      return
+    if (this.tooltipDebounce != null) {
+      clearTimeout(this.tooltipDebounce)
     }
-    this.tooltipDiv.innerHTML = ''
-    for (const el of dataContent) {
-      content.appendChild(el)
-    }
-    for (const el of vlineContent) {
-      content.appendChild(el)
-    }
-    this.tooltipDiv.appendChild(content)
-    Object.assign(
-      this.tooltipDiv.style,
-      {
-        display: 'block',
-        top: `${this.state.cursorPos.pageY + 20 - this.tooltipDiv.getBoundingClientRect().height / 2}px`
-      },
-      this.state.cursorPos.pageX > (document.body.clientWidth / 2) ? {
-        left: 'auto',
-        right: `${document.body.clientWidth - this.state.cursorPos.pageX + 20}px`
-      } : {
-        left: `${this.state.cursorPos.pageX + 20}px`,
-        right: 'auto'
+    this.tooltipDebounce = setTimeout(() => {
+      if (this.state.active === false || this.tooltip === false) {
+        this.tooltipDiv.style.display = 'none'
+        return
       }
-    )
+      const content = document.createDocumentFragment()
+      const dataContent = this.tooltip ? this.getDataTooltipContent(value) : []
+      const vlineContent = this.getVLineTooltipContent(value)
+      if (dataContent.length === 0 && vlineContent.length === 0) {
+        this.tooltipDiv.style.display = 'none'
+        return
+      }
+      this.tooltipDiv.innerHTML = ''
+      for (const el of dataContent) {
+        content.appendChild(el)
+      }
+      for (const el of vlineContent) {
+        content.appendChild(el)
+      }
+      this.tooltipDiv.appendChild(content)
+      Object.assign(
+        this.tooltipDiv.style,
+        {
+          display: 'block',
+          top: `${this.state.cursorPos.pageY + 20 - this.tooltipDiv.getBoundingClientRect().height / 2}px`
+        },
+        this.state.cursorPos.pageX > (document.body.clientWidth / 2) ? {
+          left: 'auto',
+          right: `${document.body.clientWidth - this.state.cursorPos.pageX + 20}px`
+        } : {
+          left: `${this.state.cursorPos.pageX + 20}px`,
+          right: 'auto'
+        }
+      )
+    }, 10)
   }
 
   drawVLines() {
@@ -306,14 +317,8 @@ export default class FrontPanel {
       if (this.crosshair.enabled) {
         this.drawCrosshair(value)
       }
-      if (this.state.active) {
-        this.drawTooltip(value)
-      }
-    } else {
-      if (this.tooltip) {
-        this.tooltipDiv.style.display = 'none'
-      }
     }
+    this.drawTooltip(value)
   }
 
 }
