@@ -146,7 +146,7 @@ export default class XAxis {
       ctx.fillStyle = this.opt.textColor as string
       ctx.fillRect(0, yPos, axisLength, this.opt.lineWidth!)
     }
-    const tickAmount = axisLength / 80
+    const tickAmount = Math.max(4, axisLength / 80)
     const tickInterval = range === 0 ? 1 : range / tickAmount
     const getTickPositions = this.opt.datetime
       ? this.getDatetimeTickPositions

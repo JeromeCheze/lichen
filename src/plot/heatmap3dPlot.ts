@@ -74,11 +74,14 @@ export default class Heatmap3dPlot extends AbstractPlot {
     for (let y = firstNotNull.length - 1; y >= 0; y--) {
       for (let x = 0; x < o.data.length; x++) {
         if (o.data[x] != null) {
-          const [r, g, b] = DataUtils.getColor(o.data[x]![y]!, this.colorScale, false) as [number, number, number]
-          img.data[i + 0] = r
-          img.data[i + 1] = g
-          img.data[i + 2] = b
-          img.data[i + 3] = 255
+          const value = o.data[x]![y]
+          if (value != null) {
+            const [r, g, b] = DataUtils.getColor(value, this.colorScale, false) as [number, number, number]
+            img.data[i + 0] = r
+            img.data[i + 1] = g
+            img.data[i + 2] = b
+            img.data[i + 3] = 255
+          }
         }
         i += 4
       }

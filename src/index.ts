@@ -422,13 +422,15 @@ export default class Lichen {
     const dataUtils = this.master.getRegistered('DATA_UTILS')
     dataUtils.processData()
     if (dataUtils.yMin == null || dataUtils.yMax == null || (this.opt.zoom != null && this.opt.zoom.indexOf('y') < 0)) {
-      const [yMin, yMax] = this.master.getRegistered('PLOT').yRange()
+      let range = this.master.getRegistered('PLOT').yRange()
+      const yMin = this.opt.yAxis!.min != null ? this.opt.yAxis!.min : range[0]
+      const yMax = this.opt.yAxis!.max != null ? this.opt.yAxis!.max : range[1]
       let amplitude = yMax - yMin
       if (amplitude === 0) {
         amplitude = 0.1
       }
-      dataUtils.yMin = this.opt.yAxis!.min != null ? this.opt.yAxis!.min : yMin - 0.1 * amplitude
-      dataUtils.yMax = this.opt.yAxis!.max != null ? this.opt.yAxis!.max : yMax + 0.1 * amplitude
+      dataUtils.yMin = yMin - 0.1 * amplitude
+      dataUtils.yMax = yMax + 0.1 * amplitude
     }
     if (draw) {
       this.draw()

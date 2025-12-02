@@ -169,7 +169,7 @@ export default class LinePlot extends AbstractPlot {
       if (xPos == null) {
         throw new Error('xPos should not be null')
       }
-      const xRatio = (this.dataUtils.end! - this.dataUtils.start!) / (serie.step * this.dataUtils.width)
+      const xRatio = (this.dataUtils.end! - this.dataUtils.start!) / (serie.step * (this.dataUtils.width - 1))
       let xStep = 1
       let indexStep = xRatio
       if (xRatio <= 1) {
@@ -201,7 +201,9 @@ export default class LinePlot extends AbstractPlot {
             prev = minValue
           } else {
             if (prev != null) {
-              ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0)!, this.canvas.height))
+              ctx.lineTo(xPos -xStep + 1, Math.min(this.dataUtils.yPosFromValue(prev)!, this.canvas.height))
+              ctx.lineTo(xPos -xStep + 1, Math.min(this.dataUtils.yPosFromValue(0)!, this.canvas.height))
+              // ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0)!, this.canvas.height))
               ctx.closePath()
               ctx.fill()
             }
@@ -210,7 +212,9 @@ export default class LinePlot extends AbstractPlot {
           xPos += xStep
         }
         if (prev != null) {
-          ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0)!, this.canvas.height))
+          ctx.lineTo(xPos - xStep + 1, Math.min(this.dataUtils.yPosFromValue(prev)!, this.canvas.height))
+          ctx.lineTo(xPos - xStep + 1, Math.min(this.dataUtils.yPosFromValue(0)!, this.canvas.height))
+          // ctx.lineTo(xPos - xStep, Math.min(this.dataUtils.yPosFromValue(0)!, this.canvas.height))
           ctx.closePath()
           ctx.fill()
         }
@@ -240,9 +244,15 @@ export default class LinePlot extends AbstractPlot {
           }
           prev = minValue
         } else {
+          if (prev != null) {
+            ctx.lineTo(xPos - xStep + 1, this.dataUtils.yPosFromValue(prev)!)
+          }
           prev = null
         }
         xPos += xStep
+      }
+      if (prev != null) {
+        ctx.lineTo(xPos - xStep + 1, this.dataUtils.yPosFromValue(prev)!)
       }
       ctx.stroke()
     }
