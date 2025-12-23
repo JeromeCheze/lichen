@@ -21,7 +21,7 @@ export default class EventUtils {
     this.element = element
     this.dataUtils = master.getRegistered('DATA_UTILS')
     this.handler = {
-      'mouseenter': { el: element, callback: (e: MouseEvent) => this.handleMouseEnter() },
+      'mouseenter': { el: element, callback: () => this.handleMouseEnter() },
       'mouseleave': { el: element, callback: (e: MouseEvent) => this.handleMouseLeave(e) },
       'mousemove': { el: document.body, callback: (e: MouseEvent) => this.handleMouseMove(e) },
       'mousedown': { el: element, callback: (e: MouseEvent) => this.handleMouseDown(e) },
@@ -29,8 +29,8 @@ export default class EventUtils {
       'dblclick': { el: element, callback: (e: MouseEvent) => this.handleDblClick(e) },
       'wheel': { el: element, callback: (e: WheelEvent) => this.handleWheel(e), passive: false },
       'touchstart': { el: element, callback: (e: TouchEvent) => this.handleTouchStart(e), passive: false },
-      'touchend': { el: element, callback: (e: TouchEvent) => this.handleTouchEnd(e) },
-      'touchcancel': { el: element, callback: (e: TouchEvent) => this.handleTouchEnd(e) },
+      'touchend': { el: element, callback: () => this.handleTouchEnd() },
+      'touchcancel': { el: element, callback: () => this.handleTouchEnd() },
       'touchmove': { el: element, callback: (e: TouchEvent) => this.handleTouchMove(e), passive: false },
       'keydown': { el: document.body, callback: (e: KeyboardEvent) => this.handleKeyDown(e) },
       'keyup': { el: document.body, callback: (e: KeyboardEvent) => this.handleKeyUp(e) }
@@ -191,7 +191,7 @@ export default class EventUtils {
     e.preventDefault()
     e.stopPropagation()
     const ev = e instanceof MouseEvent ? e : e.touches[0]
-    const [x, y] = this.getRelativePosition(ev)
+    const [x, _] = this.getRelativePosition(ev)
     this.master.send('dblclick', this.dataUtils.xValueFromPos(x))
     this.master.send('resetDisplay', null)
     this.clearSelection()
@@ -209,13 +209,13 @@ export default class EventUtils {
           this.dataUtils.yMax! + sign * ratio
         ])
       } else {
-        const [x, y] = this.getRelativePosition(e)
+        const [x, _] = this.getRelativePosition(e)
         const xRef = this.dataUtils.xValueFromPos(x) as number
         const ratio = 0.2 * (this.dataUtils.end! - this.dataUtils.start!)
         const amount = DataUtils.getRatio(xRef, this.dataUtils.start!, this.dataUtils.end!)
         this.master.send('xRangeChange', [
           this.dataUtils.start! - sign * ratio * amount,
-          this.dataUtils.end! + sign * ratio *  (1 - amount)
+          this.dataUtils.end! + sign * ratio * (1 - amount)
         ])
       }
     }
@@ -273,13 +273,13 @@ export default class EventUtils {
       this.state.lastDistance = this.getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y)
     }
   }
-  
-  handleTouchEnd(e: TouchEvent) {
+
+  handleTouchEnd() {
     this.state.touches = []
     this.state.lastDistance = null
     this.handleMouseLeave()
   }
-  
+
   handleTouchMove(e: TouchEvent) {
     e.preventDefault()
     if (this.state.active === false) {

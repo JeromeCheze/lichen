@@ -106,7 +106,7 @@ export default class FrontPanel {
       const serieRow = document.createElement('tr')
       const serieName = document.createElement('th')
       // Object.assign(serieName.style, { color: serie.color, fontWeight: 'bold' })
-      Object.assign(serieName.style, { fontWeight: 'bold' })
+      Object.assign(serieName.style, { fontWeight: 'bold', textAlign: 'left' })
       serieName.innerHTML = `${serie.name}:`
       const serieValue = document.createElement('td')
       serieValue.innerHTML = serie.textValue
@@ -144,7 +144,7 @@ export default class FrontPanel {
     if (this.tooltipDebounce != null) {
       clearTimeout(this.tooltipDebounce)
     }
-    this.tooltipDebounce = setTimeout(() => {
+    this.tooltipDebounce = window.setTimeout(() => {
       if (this.state.active === false || this.tooltip === false) {
         this.tooltipDiv.style.display = 'none'
         return
@@ -186,7 +186,6 @@ export default class FrontPanel {
     ctx.save()
     for (const vline of this.vLines) {
       if (vline.range) {
-        let c = ''
         if (vline.color[0] === '#') {
           ctx.fillStyle = `${vline.color}${(0.2 * 255).toString(16)}`
         } else if (vline.color.indexOf('rgb(') === 0) {
@@ -206,7 +205,7 @@ export default class FrontPanel {
       }
       if (vline.arrow != null) {
         ctx.beginPath()
-        if (vline.arrow === 'top') { 
+        if (vline.arrow === 'top') {
           ctx.moveTo(xPos, 0)
           ctx.lineTo(xPos + 4.5, 10)
           ctx.lineTo(xPos - 4.5, 10)
@@ -317,8 +316,8 @@ export default class FrontPanel {
       if (this.crosshair.enabled) {
         this.drawCrosshair(value)
       }
+      this.drawTooltip(value)
     }
-    this.drawTooltip(value)
   }
 
 }

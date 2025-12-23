@@ -1,6 +1,4 @@
 // import type { LichenOptions } from  './types'
-import Lichen from './index'
-
 const AXIS_ENABLED = true
 const GRID_ENABLED = true
 const LINE_WIDTH = 1
@@ -54,8 +52,8 @@ export default {
     text: ''
   },
   hooks: {
-    beforeDraw: (chart: Lichen) => true,
-    beforeSelection: (x: number, y: number) => true,
+    beforeDraw: () => true,
+    beforeSelection: () => true,
     beforeResetDisplay: () => true
   },
   vLines: [],

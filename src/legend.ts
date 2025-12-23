@@ -2,11 +2,11 @@ import MasterInterface from './masterInterface'
 import type { ColorScaleOptions, Heatmap2dOptions, Heatmap3dOptions, LegendItem, LegendOptions, LineOptions, SequenceOptions, StackedOptions, ScatterOptions } from './types'
 
 export default class Legend {
-  
+
   master: MasterInterface
   container: HTMLElement
 
-  constructor (
+  constructor(
     container: HTMLElement,
     master: MasterInterface
   ) {
@@ -35,7 +35,7 @@ export default class Legend {
     return this.master.getRegistered('CHART').opt.height
   }
 
-  drawColorBar () {
+  drawColorBar() {
     if (this.colorScale == null || this.colorScale.min == null || this.colorScale.max == null) {
       return
     }
@@ -76,7 +76,7 @@ export default class Legend {
         const v = this.colorScale!.logarithmic ? Math.pow(2, stop[0] * max - min) : stop[0] * (max - min)
         ctx.fillRect(x, 11, 1, 4)
         if (this.colorScale.category) {
-          ctx.fillText(stop[2], x, 18)
+          ctx.fillText(stop[2] || '', x, 18)
         } else {
           ctx.fillText(`${Math.round(v)}`, x, 18)
         }
@@ -102,7 +102,7 @@ export default class Legend {
       ctx.textAlign = 'left'
       const drawHeight = canvas.height - 21
       for (const [i, stop] of this.colorScale!.stops.entries()) {
-        const y =  11 + drawHeight - drawHeight * (
+        const y = 11 + drawHeight - drawHeight * (
           this.colorScale.category
             ? i / (this.colorScale.stops.length - 1)
             : stop[0]
@@ -110,7 +110,7 @@ export default class Legend {
         const v = this.colorScale!.logarithmic ? Math.pow(2, stop[0] * max - min) : stop[0] * (max - min)
         ctx.fillRect(11, Math.floor(y - 1), 4, 1)
         if (this.colorScale.category) {
-          ctx.fillText(stop[2], 19, y)
+          ctx.fillText(stop[2] || '', 19, y)
         } else {
           ctx.fillText(`${Math.round(v)}`, 19, y)
         }
@@ -119,7 +119,7 @@ export default class Legend {
     ctx.restore()
   }
 
-  drawLegend (items: LegendItem[]) {
+  drawLegend(items: LegendItem[]) {
     this.container.innerHTML = ''
     Object.assign(this.container.style, {
       textAlign: this.opt.position === 'bottom' ? 'center' : 'left',
@@ -158,7 +158,7 @@ export default class Legend {
     }
   }
 
-  update () {
+  update() {
     if (!this.opt.enabled) {
       return
     }

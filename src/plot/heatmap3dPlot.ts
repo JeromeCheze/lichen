@@ -34,11 +34,11 @@ export default class Heatmap3dPlot extends AbstractPlot {
     return this.master.getRegistered('CHART').opt.series
   }
 
-  tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
+  tooltipHandler(x: number, _: CanvasRenderingContext2D): TooltipHandlerResponse {
     return { xValue: x, yValues: [] }
   }
 
-  dataFromXPos(xPos: number): (DataFromPos | null)[] {
+  dataFromXPos(_: number): (DataFromPos | null)[] {
     return []
   }
 
@@ -98,9 +98,9 @@ export default class Heatmap3dPlot extends AbstractPlot {
     let delay = false
     if (this.image == null || forceRedraw) {
       delay = true
-      const t1 = new Date().getTime()
+      // const t1 = new Date().getTime()
       this.createImage()
-      const t2 = new Date().getTime()
+      // const t2 = new Date().getTime()
       // console.log(t2 - t1)
     }
     const ctx = this.ctx

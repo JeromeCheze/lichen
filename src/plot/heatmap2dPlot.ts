@@ -23,7 +23,7 @@ export default class Heatmap2dPlot extends AbstractPlot {
     return this.master.getRegistered('CHART').opt.series
   }
 
-  tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
+  tooltipHandler(x: number, _: CanvasRenderingContext2D): TooltipHandlerResponse {
     const xPos = this.dataUtils.xPosFromValue(x)!
     const data = this.dataFromXPos(xPos)
     let xValue = x
@@ -108,7 +108,7 @@ export default class Heatmap2dPlot extends AbstractPlot {
 
   getProcessingData() {
     const result = []
-    for (const serie of this.opt) { 
+    for (const serie of this.opt) {
       const [i1, i2] = this.getXRangeIndex(serie)
       result.push(serie.data.slice(i1, i2))
     }

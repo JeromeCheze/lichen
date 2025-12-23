@@ -16,7 +16,7 @@ export default class SequencePlot extends AbstractPlot {
     return this.master.getRegistered('CHART').opt.series
   }
 
-  tooltipHandler(x: number, ctx: CanvasRenderingContext2D): TooltipHandlerResponse {
+  tooltipHandler(x: number, _: CanvasRenderingContext2D): TooltipHandlerResponse {
     const xPos = this.dataUtils.xPosFromValue(x)!
     const data = this.dataFromXPos(xPos)
     if (data.length === 0 || data[0].yDataValue == null) {

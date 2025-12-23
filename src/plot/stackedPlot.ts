@@ -119,7 +119,7 @@ export default class StackedPlot extends AbstractPlot {
 
   update() {
     // prepare data
-    const stackedValues: (null | (null | [number, number])[])[] = this.opt.data.map(x => [])
+    const stackedValues: (null | (null | [number, number])[])[] = this.opt.data.map(() => [])
     let prevSerieIndex = null
     const [i1, i2] = this.getXRangeIndex()
     const xRatio = (this.dataUtils.end! - this.dataUtils.start!) / (this.opt.step * this.dataUtils.width)
@@ -181,7 +181,7 @@ export default class StackedPlot extends AbstractPlot {
       let prev = null
       if (this.opt.area) {
         // draw area
-        for (let i = 0; i < serieStacked.length; i ++) {
+        for (let i = 0; i < serieStacked.length; i++) {
           if (serieStacked[i] != null) {
             const [minValue, maxValue] = serieStacked[i] as [number, number]
             if (prev == null) {
