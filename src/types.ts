@@ -30,7 +30,7 @@ export interface YAxisOptions extends GlobalAxisOptions {
   width?: number
 }
 
-export type ColorScaleObject  = [
+export type ColorScaleObject = [
   number,
   [number, number, number],
   string?
@@ -78,6 +78,7 @@ export interface StackedOptions {
   area?: boolean
   linewidth?: number
   data: StackedDataOptions[]
+  tooltipFormatter?: (x: number) => string
 }
 
 export interface ScatterPoint {

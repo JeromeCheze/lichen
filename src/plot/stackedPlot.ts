@@ -38,7 +38,7 @@ export default class StackedPlot extends AbstractPlot {
         color,
         value,
         name: s.name,
-        textValue: `${value}`
+        textValue: this.opt.tooltipFormatter != null && value != null ? this.opt.tooltipFormatter(value) : `${value}`
       })
       ctx.strokeStyle = color
       ctx.beginPath()
