@@ -94,6 +94,7 @@ export default class EventUtils {
   handleMouseMove(e: MouseEvent) {
     const [x, y] = this.getRelativePosition(e)
     if (this.state.mouseDownPos != null) {
+      this.master.send('active', false)
       if (this.state.shiftKey) {
         let x1 = null
         let x2 = null
@@ -151,6 +152,7 @@ export default class EventUtils {
   handleMouseUp(e: MouseEvent) {
     const [x, y] = this.getRelativePosition(e)
     if (this.state.mouseDownPos != null) {
+      this.master.send('active', true)
       if (this.state.shiftKey) {
         let xRange: (number | null)[] = [null, null]
         let yRange: (number | null)[] = [null, null]
