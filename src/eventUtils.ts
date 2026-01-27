@@ -79,16 +79,14 @@ export default class EventUtils {
   }
 
   handleMouseLeave(e?: MouseEvent) {
-    if (this.state.mouseDownPos == null) {
-      if (e != null) {
-        this.handleMouseUp(e)
-      }
-      this.state.active = false
-      this.state.shiftKey = false
-      this.state.ctrlKey = false
-      this.state.cursorPos = null
-      this.master.send('active', false)
+    if (e != null) {
+      this.handleMouseUp(e)
     }
+    this.state.active = false
+    this.state.shiftKey = false
+    this.state.ctrlKey = false
+    this.state.cursorPos = null
+    this.master.send('active', false)
   }
 
   handleMouseMove(e: MouseEvent) {

@@ -1,4 +1,4 @@
-import type{ ColorScaleOptions, LichenOptions, VLine } from './types.js'
+import type { ColorScaleOptions, LichenOptions, VLine } from './types.js'
 import defaultOptions from './defaultOptions.js'
 import DataUtils from './dataUtils.js'
 import EventUtils from './eventUtils.js'
@@ -99,7 +99,7 @@ export default class Lichen {
    * @param src 
    * @param dest 
    */
-  deepCopy(src: any, dest: Record<string, any>={}): any {
+  deepCopy(src: any, dest: Record<string, any> = {}): any {
     if (src instanceof Function) {
       return src
     } else if (src instanceof Array) {
@@ -166,7 +166,7 @@ export default class Lichen {
    * Create all the structure and instantiate all charts components
    * @param container - The HTML element container 
    */
-  buildStructure(container: HTMLElement, reuseWrapper=false) {
+  buildStructure(container: HTMLElement, reuseWrapper = false) {
     const header = document.createElement('div')
     const title = document.createElement('div')
     const legend = document.createElement('div')
@@ -214,12 +214,16 @@ export default class Lichen {
    * Initialize the chart construction
    * @param container - The HTML element container 
    */
-  init(container: HTMLElement, reuseWrapper=false) {
+  init(container: HTMLElement, reuseWrapper = false) {
     this.buildStructure(container, reuseWrapper)
     this.eventUtils = new EventUtils(this.master, this.master.getRegistered('FRONT_PANEL').canvas)
     this.master
       .on('active', (value: boolean) => {
-        if (value === false) {
+        if (value === true) {
+          if (this.opt.hooks!.onActive != null) {
+            this.opt.hooks!.onActive(this)
+          }
+        } else {
           for (const chart of Object.values(this.opt.synced!())) {
             const chartFrontPanel = chart.master.getRegistered('FRONT_PANEL')
             chartFrontPanel.update(null)
@@ -285,11 +289,6 @@ export default class Lichen {
           this.opt.hooks!.onDblClick(x)
         }
       })
-      .on('active', (value: boolean) => {
-        if (value === true && this.opt.hooks!.onActive != null) {
-          this.opt.hooks!.onActive(this)
-        }
-      })
       .on('click', () => {
         if (this.opt.hooks!.onClick != null) {
           this.opt.hooks!.onClick(this)
@@ -303,9 +302,9 @@ export default class Lichen {
       return
     }
     try {
+      this.master.send('destroy', null)
       this.ready = false
       const dataUtils = this.master.getRegistered('DATA_UTILS')
-      this.master.getRegistered('FRONT_PANEL').tooltipDiv?.remove()
       this.master = new MasterInterface()
       this.master.register('CHART', this)
       const saveBounds = {
