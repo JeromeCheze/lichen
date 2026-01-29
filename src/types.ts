@@ -8,8 +8,8 @@ export interface Coordinates {
 export interface GlobalAxisOptions {
   enabled?: boolean
   gridEnabled?: boolean
-  fontSize?: number
   textColor?: string
+  fontSize?: number
   lineWidth?: number
   tickLength?: number
   tickWidth?: number
@@ -17,6 +17,11 @@ export interface GlobalAxisOptions {
   title?: string
   min?: number
   max?: number
+}
+
+export interface TooltipOptions {
+  enabled?: boolean
+  fontSize?: number
 }
 
 export interface XAxisOptions extends GlobalAxisOptions {
@@ -184,12 +189,13 @@ export interface HooksOptions {
 export interface LichenOptions {
   header: HeaderOptions
   type: 'line' | 'heatmap2d' | 'heatmap3d' | 'stacked' | 'sequence' | 'scatter'
+  tooltip?: TooltipOptions
   legend?: LegendOptions
   crosshair?: CrosshairOptions
   vLines?: VLine[]
-  tooltip?: boolean
   height?: number
   width?: number
+  fontSize?: number
   autoResize?: boolean
   stacked?: boolean
   serieHeight?: number

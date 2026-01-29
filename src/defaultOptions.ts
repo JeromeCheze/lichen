@@ -9,10 +9,13 @@ const AXIS_TEXT_COLOR = '#888'
 const GRID_COLOR = 'rgba(136, 136, 136, 0.1)'
 
 export default {
-  tooltip: true,
   header: {
     position: 'top',
     width: 80
+  },
+  tooltip: {
+    enabled: true,
+    fontSize: FONT_SIZE
   },
   zoom: 'xy',
   selection: 'xy',

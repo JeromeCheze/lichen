@@ -1,4 +1,4 @@
-import type { ColorScaleOptions, CrosshairOptions, VLine, TooltipHandlerResponse } from "./types"
+import type { ColorScaleOptions, CrosshairOptions, VLine, TooltipHandlerResponse, TooltipOptions } from "./types"
 import MasterInterface from "./masterInterface"
 import DataUtils from "./dataUtils"
 
@@ -40,8 +40,8 @@ export default class FrontPanel {
       zIndex: 3000,
       background: 'white',
       color: 'black',
-      fontSize: '10px',
-      lineHeight: '10px'
+      fontSize: `${this.opt.fontSize}px`,
+      lineHeight: `${this.opt.fontSize}px`
     })
     document.body.appendChild(this.tooltipDiv)
     Object.assign(this.canvas.style, { position: 'absolute', top: 0, right: 0, zIndex: 100 })
@@ -52,7 +52,7 @@ export default class FrontPanel {
     }
   }
 
-  get tooltip(): boolean {
+  get opt(): TooltipOptions {
     return this.master.getRegistered('CHART').opt.tooltip
   }
 
@@ -145,12 +145,12 @@ export default class FrontPanel {
       clearTimeout(this.tooltipDebounce)
     }
     this.tooltipDebounce = window.setTimeout(() => {
-      if (this.state.active === false || this.tooltip === false) {
+      if (this.state.active === false || this.opt.enabled === false) {
         this.tooltipDiv.style.display = 'none'
         return
       }
       const content = document.createDocumentFragment()
-      const dataContent = this.tooltip ? this.getDataTooltipContent(value) : []
+      const dataContent = this.opt.enabled ? this.getDataTooltipContent(value) : []
       const vlineContent = this.getVLineTooltipContent(value)
       if (dataContent.length === 0 && vlineContent.length === 0) {
         this.tooltipDiv.style.display = 'none'
