@@ -52,13 +52,15 @@ export default class EventUtils {
     // }
     this.state = {
       active: false,
-      cursorPos: null,
+      // cursorPos: null,
+      touchMoveJitter: false,
       mouseDownPos: null,
       shiftKey: false,
       ctrlKey: false,
       touches: [],
       lastDistance: null,
-      lastTouchTime: null
+      lastTouchTime: null,
+      lastTouchMovePos: null
     }
   }
 
@@ -70,7 +72,7 @@ export default class EventUtils {
 
   getRelativePosition(e: MouseEvent | Touch) {
     const bcr = this.element.getBoundingClientRect()
-    return [e.clientX - bcr.x, e.clientY - bcr.y]
+    return [Math.floor(e.clientX - bcr.x), Math.floor(e.clientY - bcr.y)]
   }
 
   handleMouseEnter() {
@@ -85,7 +87,7 @@ export default class EventUtils {
     this.state.active = false
     this.state.shiftKey = false
     this.state.ctrlKey = false
-    this.state.cursorPos = null
+    // this.state.cursorPos = null
     this.master.send('active', false)
   }
 
@@ -133,7 +135,7 @@ export default class EventUtils {
       }
     } else {
       if (this.state.active) {
-        this.state.cursorPos = e
+        // this.state.cursorPos = e
         this.master.send('cursor', e)
         this.master.send('move', [
           this.dataUtils.xValueFromPos(x),
@@ -277,23 +279,33 @@ export default class EventUtils {
   handleTouchEnd() {
     this.state.touches = []
     this.state.lastDistance = null
+    this.state.lastTouchMovePos = null
     this.handleMouseLeave()
   }
 
   handleTouchMove(e: TouchEvent) {
     e.preventDefault()
+    if (this.state.touchMoveJitter) {
+      return
+    }
+    this.state.touchMoveJitter = true
+    setTimeout(() => this.state.touchMoveJitter = false, 20)
     if (this.state.active === false) {
       this.state.active = true
       this.master.send('active', true)
     }
     if (e.touches.length === 1) {
-      this.state.cursorPos = e.touches[0]
-      this.master.send('cursor', this.state.cursorPos)
+      // this.state.cursorPos = e.touches[0]
       const [x, y] = this.getRelativePosition(e.touches[0])
-      this.master.send('move', [
-        this.dataUtils.xValueFromPos(x),
-        this.dataUtils.yValueFromPos(y)
-      ])
+      const p = this.state.lastTouchMovePos
+      if (p == null || p[0] != x || p[1] != y) {
+        this.state.lastTouchMovePos = [x, y]
+        this.master.send('cursor', e.touches[0])
+        this.master.send('move', [
+          this.dataUtils.xValueFromPos(x),
+          this.dataUtils.yValueFromPos(y)
+        ])
+      }
     } else if (e.touches.length === 2) {
       const touches = this.state.touches
       const cur = []
