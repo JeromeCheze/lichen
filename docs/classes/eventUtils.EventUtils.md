@@ -120,7 +120,7 @@ eventUtils.ts:14
 
 #### Defined in
 
-eventUtils.ts:363
+eventUtils.ts:376
 
 ___
 
@@ -134,7 +134,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:64
+eventUtils.ts:67
 
 ___
 
@@ -157,7 +157,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:223
+eventUtils.ts:226
 
 ___
 
@@ -180,7 +180,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:237
+eventUtils.ts:240
 
 ___
 
@@ -207,7 +207,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:241
+eventUtils.ts:244
 
 ___
 
@@ -227,7 +227,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:70
+eventUtils.ts:73
 
 ___
 
@@ -247,7 +247,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:189
+eventUtils.ts:192
 
 ___
 
@@ -267,7 +267,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:353
+eventUtils.ts:366
 
 ___
 
@@ -287,7 +287,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:358
+eventUtils.ts:371
 
 ___
 
@@ -307,7 +307,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:146
+eventUtils.ts:148
 
 ___
 
@@ -321,7 +321,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:75
+eventUtils.ts:78
 
 ___
 
@@ -341,7 +341,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:80
+eventUtils.ts:83
 
 ___
 
@@ -361,7 +361,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:93
+eventUtils.ts:94
 
 ___
 
@@ -381,19 +381,13 @@ ___
 
 #### Defined in
 
-eventUtils.ts:150
+eventUtils.ts:152
 
 ___
 
 ### handleTouchEnd
 
-▸ **handleTouchEnd**(`e`): `void`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `e` | `TouchEvent` |
+▸ **handleTouchEnd**(): `void`
 
 #### Returns
 
@@ -401,7 +395,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:276
+eventUtils.ts:279
 
 ___
 
@@ -421,7 +415,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:282
+eventUtils.ts:286
 
 ___
 
@@ -441,7 +435,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:252
+eventUtils.ts:255
 
 ___
 
@@ -461,7 +455,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:199
+eventUtils.ts:202
 
 ___
 
@@ -481,7 +475,7 @@ ___
 
 #### Defined in
 
-eventUtils.ts:335
+eventUtils.ts:348
 
 ___
 
@@ -501,4 +495,4 @@ ___
 
 #### Defined in
 
-eventUtils.ts:344
+eventUtils.ts:357

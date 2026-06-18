@@ -25,7 +25,7 @@
 
 ### Methods
 
-- [drawHeatmap3dLegend](legend.Legend.md#drawheatmap3dlegend)
+- [drawColorBar](legend.Legend.md#drawcolorbar)
 - [drawLegend](legend.Legend.md#drawlegend)
 - [update](legend.Legend.md#update)
 
@@ -138,9 +138,9 @@ legend.ts:22
 
 ## Methods
 
-### drawHeatmap3dLegend
+### drawColorBar
 
-▸ **drawHeatmap3dLegend**(): `void`
+▸ **drawColorBar**(): `void`
 
 #### Returns
 
@@ -168,7 +168,7 @@ ___
 
 #### Defined in
 
-legend.ts:100
+legend.ts:122
 
 ___
 
@@ -182,4 +182,4 @@ ___
 
 #### Defined in
 
-legend.ts:139
+legend.ts:161

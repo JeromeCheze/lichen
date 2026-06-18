@@ -1,14 +1,14 @@
 {
-    "compilerOptions": {
-      "noImplicitAny": false,
-      "noEmitOnError": true,
-      "removeComments": false,
-      "sourceMap": true,
-      "target": "ESNext",
-      "outDir": "./dist",
-      "module": "ESNext"
-    },
-    "include": [
-      "./src"
-    ]
-  }
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "ESNext",
+    "outDir": "./dist",
+    "module": "ESNext"
+  },
+  "include": [
+    "./src"
+  ]
+}

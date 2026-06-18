@@ -26,7 +26,7 @@
 
 #### Defined in
 
-types.ts:52
+types.ts:58
 
 ___
 
@@ -36,7 +36,7 @@ ___
 
 #### Defined in
 
-types.ts:51
+types.ts:57
 
 ___
 
@@ -46,7 +46,7 @@ ___
 
 #### Defined in
 
-types.ts:50
+types.ts:56
 
 ___
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-types.ts:54
+types.ts:60
 
 ___
 
@@ -66,7 +66,7 @@ ___
 
 #### Defined in
 
-types.ts:53
+types.ts:59
 
 ___
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-types.ts:47
+types.ts:53
 
 ___
 
@@ -86,7 +86,7 @@ ___
 
 #### Defined in
 
-types.ts:48
+types.ts:54
 
 ___
 
@@ -96,7 +96,7 @@ ___
 
 #### Defined in
 
-types.ts:49
+types.ts:55
 
 ___
 
@@ -120,4 +120,4 @@ ___
 
 #### Defined in
 
-types.ts:55
+types.ts:61

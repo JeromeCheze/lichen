@@ -25,7 +25,7 @@
 
 #### Defined in
 
-types.ts:111
+types.ts:118
 
 ___
 
@@ -35,7 +35,7 @@ ___
 
 #### Defined in
 
-types.ts:116
+types.ts:123
 
 ___
 
@@ -45,7 +45,7 @@ ___
 
 #### Defined in
 
-types.ts:109
+types.ts:116
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-types.ts:110
+types.ts:117
 
 ___
 
@@ -65,7 +65,7 @@ ___
 
 #### Defined in
 
-types.ts:113
+types.ts:120
 
 ___
 
@@ -75,7 +75,7 @@ ___
 
 #### Defined in
 
-types.ts:112
+types.ts:119
 
 ___
 
@@ -85,7 +85,7 @@ ___
 
 #### Defined in
 
-types.ts:115
+types.ts:122
 
 ___
 
@@ -95,4 +95,4 @@ ___
 
 #### Defined in
 
-types.ts:114
+types.ts:121

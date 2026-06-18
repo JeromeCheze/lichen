@@ -29,6 +29,7 @@
 - [StackedDataOptions](../interfaces/types.StackedDataOptions.md)
 - [StackedOptions](../interfaces/types.StackedOptions.md)
 - [TooltipHandlerResponse](../interfaces/types.TooltipHandlerResponse.md)
+- [TooltipOptions](../interfaces/types.TooltipOptions.md)
 - [VLine](../interfaces/types.VLine.md)
 - [XAxisOptions](../interfaces/types.XAxisOptions.md)
 - [YAxisOptions](../interfaces/types.YAxisOptions.md)
@@ -45,4 +46,4 @@
 
 #### Defined in
 
-types.ts:33
+types.ts:38

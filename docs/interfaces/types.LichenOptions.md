@@ -11,6 +11,7 @@
 - [autoResize](types.LichenOptions.md#autoresize)
 - [colorScale](types.LichenOptions.md#colorscale)
 - [crosshair](types.LichenOptions.md#crosshair)
+- [fontSize](types.LichenOptions.md#fontsize)
 - [header](types.LichenOptions.md#header)
 - [height](types.LichenOptions.md#height)
 - [hooks](types.LichenOptions.md#hooks)
@@ -36,7 +37,7 @@
 
 #### Defined in
 
-types.ts:191
+types.ts:199
 
 ___
 
@@ -46,7 +47,7 @@ ___
 
 #### Defined in
 
-types.ts:196
+types.ts:204
 
 ___
 
@@ -56,7 +57,17 @@ ___
 
 #### Defined in
 
-types.ts:186
+types.ts:194
+
+___
+
+### fontSize
+
+• `Optional` **fontSize**: `number`
+
+#### Defined in
+
+types.ts:198
 
 ___
 
@@ -66,7 +77,7 @@ ___
 
 #### Defined in
 
-types.ts:183
+types.ts:190
 
 ___
 
@@ -76,7 +87,7 @@ ___
 
 #### Defined in
 
-types.ts:189
+types.ts:196
 
 ___
 
@@ -86,7 +97,7 @@ ___
 
 #### Defined in
 
-types.ts:200
+types.ts:208
 
 ___
 
@@ -96,7 +107,7 @@ ___
 
 #### Defined in
 
-types.ts:185
+types.ts:193
 
 ___
 
@@ -106,7 +117,7 @@ ___
 
 #### Defined in
 
-types.ts:195
+types.ts:203
 
 ___
 
@@ -116,7 +127,7 @@ ___
 
 #### Defined in
 
-types.ts:193
+types.ts:201
 
 ___
 
@@ -126,7 +137,7 @@ ___
 
 #### Defined in
 
-types.ts:199
+types.ts:207
 
 ___
 
@@ -136,7 +147,7 @@ ___
 
 #### Defined in
 
-types.ts:192
+types.ts:200
 
 ___
 
@@ -154,17 +165,17 @@ ___
 
 #### Defined in
 
-types.ts:201
+types.ts:209
 
 ___
 
 ### tooltip
 
-• `Optional` **tooltip**: `boolean`
+• `Optional` **tooltip**: [`TooltipOptions`](types.TooltipOptions.md)
 
 #### Defined in
 
-types.ts:188
+types.ts:192
 
 ___
 
@@ -174,7 +185,7 @@ ___
 
 #### Defined in
 
-types.ts:184
+types.ts:191
 
 ___
 
@@ -184,7 +195,7 @@ ___
 
 #### Defined in
 
-types.ts:187
+types.ts:195
 
 ___
 
@@ -194,7 +205,7 @@ ___
 
 #### Defined in
 
-types.ts:190
+types.ts:197
 
 ___
 
@@ -204,7 +215,7 @@ ___
 
 #### Defined in
 
-types.ts:197
+types.ts:205
 
 ___
 
@@ -214,7 +225,7 @@ ___
 
 #### Defined in
 
-types.ts:198
+types.ts:206
 
 ___
 
@@ -224,4 +235,4 @@ ___
 
 #### Defined in
 
-types.ts:194
+types.ts:202

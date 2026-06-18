@@ -13,6 +13,7 @@
 - [linewidth](types.StackedOptions.md#linewidth)
 - [start](types.StackedOptions.md#start)
 - [step](types.StackedOptions.md#step)
+- [tooltipFormatter](types.StackedOptions.md#tooltipformatter)
 
 ## Properties
 
@@ -22,7 +23,7 @@
 
 #### Defined in
 
-types.ts:77
+types.ts:83
 
 ___
 
@@ -32,7 +33,7 @@ ___
 
 #### Defined in
 
-types.ts:79
+types.ts:85
 
 ___
 
@@ -42,7 +43,7 @@ ___
 
 #### Defined in
 
-types.ts:78
+types.ts:84
 
 ___
 
@@ -52,7 +53,7 @@ ___
 
 #### Defined in
 
-types.ts:75
+types.ts:81
 
 ___
 
@@ -62,4 +63,28 @@ ___
 
 #### Defined in
 
-types.ts:76
+types.ts:82
+
+___
+
+### tooltipFormatter
+
+• `Optional` **tooltipFormatter**: (`x`: `number`) => `string`
+
+#### Type declaration
+
+▸ (`x`): `string`
+
+##### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `x` | `number` |
+
+##### Returns
+
+`string`
+
+#### Defined in
+
+types.ts:86

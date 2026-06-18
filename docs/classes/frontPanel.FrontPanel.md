@@ -18,17 +18,19 @@
 - [master](frontPanel.FrontPanel.md#master)
 - [selected](frontPanel.FrontPanel.md#selected)
 - [state](frontPanel.FrontPanel.md#state)
+- [tooltipDebounce](frontPanel.FrontPanel.md#tooltipdebounce)
 - [tooltipDiv](frontPanel.FrontPanel.md#tooltipdiv)
 
 ### Accessors
 
 - [colorScale](frontPanel.FrontPanel.md#colorscale)
 - [crosshair](frontPanel.FrontPanel.md#crosshair)
-- [tooltip](frontPanel.FrontPanel.md#tooltip)
+- [opt](frontPanel.FrontPanel.md#opt)
 - [vLines](frontPanel.FrontPanel.md#vlines)
 
 ### Methods
 
+- [destroy](frontPanel.FrontPanel.md#destroy)
 - [drawCrosshair](frontPanel.FrontPanel.md#drawcrosshair)
 - [drawTooltip](frontPanel.FrontPanel.md#drawtooltip)
 - [drawVLines](frontPanel.FrontPanel.md#drawvlines)
@@ -54,7 +56,7 @@
 
 #### Defined in
 
-frontPanel.ts:15
+frontPanel.ts:16
 
 ## Properties
 
@@ -118,6 +120,16 @@ frontPanel.ts:13
 
 ___
 
+### tooltipDebounce
+
+• **tooltipDebounce**: `number`
+
+#### Defined in
+
+frontPanel.ts:14
+
+___
+
 ### tooltipDiv
 
 • **tooltipDiv**: `HTMLElement`
@@ -138,7 +150,7 @@ frontPanel.ts:12
 
 #### Defined in
 
-frontPanel.ts:62
+frontPanel.ts:67
 
 ___
 
@@ -152,21 +164,21 @@ ___
 
 #### Defined in
 
-frontPanel.ts:58
+frontPanel.ts:63
 
 ___
 
-### tooltip
+### opt
 
-• `get` **tooltip**(): `boolean`
+• `get` **opt**(): [`TooltipOptions`](../interfaces/types.TooltipOptions.md)
 
 #### Returns
 
-`boolean`
+[`TooltipOptions`](../interfaces/types.TooltipOptions.md)
 
 #### Defined in
 
-frontPanel.ts:50
+frontPanel.ts:55
 
 ___
 
@@ -180,9 +192,23 @@ ___
 
 #### Defined in
 
-frontPanel.ts:54
+frontPanel.ts:59
 
 ## Methods
+
+### destroy
+
+▸ **destroy**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+frontPanel.ts:71
+
+___
 
 ### drawCrosshair
 
@@ -200,7 +226,7 @@ frontPanel.ts:54
 
 #### Defined in
 
-frontPanel.ts:236
+frontPanel.ts:249
 
 ___
 
@@ -220,7 +246,7 @@ ___
 
 #### Defined in
 
-frontPanel.ts:139
+frontPanel.ts:143
 
 ___
 
@@ -234,7 +260,7 @@ ___
 
 #### Defined in
 
-frontPanel.ts:170
+frontPanel.ts:184
 
 ___
 
@@ -254,7 +280,7 @@ ___
 
 #### Defined in
 
-frontPanel.ts:73
+frontPanel.ts:82
 
 ___
 
@@ -274,7 +300,7 @@ ___
 
 #### Defined in
 
-frontPanel.ts:120
+frontPanel.ts:124
 
 ___
 
@@ -294,7 +320,7 @@ ___
 
 #### Defined in
 
-frontPanel.ts:66
+frontPanel.ts:75
 
 ___
 
@@ -318,7 +344,7 @@ ___
 
 #### Defined in
 
-frontPanel.ts:224
+frontPanel.ts:237
 
 ___
 
@@ -339,7 +365,7 @@ ___
 
 #### Defined in
 
-frontPanel.ts:262
+frontPanel.ts:275
 
 ___
 
@@ -359,4 +385,4 @@ ___
 
 #### Defined in
 
-frontPanel.ts:299
+frontPanel.ts:312

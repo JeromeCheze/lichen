@@ -8,6 +8,7 @@
 
 ### Properties
 
+- [category](types.ColorScaleOptions.md#category)
 - [logarithmic](types.ColorScaleOptions.md#logarithmic)
 - [max](types.ColorScaleOptions.md#max)
 - [min](types.ColorScaleOptions.md#min)
@@ -15,13 +16,23 @@
 
 ## Properties
 
+### category
+
+• **category**: `boolean`
+
+#### Defined in
+
+types.ts:49
+
+___
+
 ### logarithmic
 
 • **logarithmic**: `boolean`
 
 #### Defined in
 
-types.ts:43
+types.ts:48
 
 ___
 
@@ -31,7 +42,7 @@ ___
 
 #### Defined in
 
-types.ts:42
+types.ts:47
 
 ___
 
@@ -41,7 +52,7 @@ ___
 
 #### Defined in
 
-types.ts:41
+types.ts:46
 
 ___
 
@@ -51,4 +62,4 @@ ___
 
 #### Defined in
 
-types.ts:40
+types.ts:45

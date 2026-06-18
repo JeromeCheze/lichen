@@ -166,7 +166,7 @@ Create all the structure and instantiate all charts components
 
 #### Defined in
 
-index.ts:175
+index.ts:169
 
 ___
 
@@ -217,7 +217,7 @@ The main draw method of Lichen
 
 #### Defined in
 
-index.ts:418
+index.ts:411
 
 ___
 
@@ -231,7 +231,7 @@ ___
 
 #### Defined in
 
-index.ts:334
+index.ts:327
 
 ___
 
@@ -254,7 +254,7 @@ Initialize the chart construction
 
 #### Defined in
 
-index.ts:223
+index.ts:217
 
 ___
 
@@ -292,7 +292,7 @@ ___
 
 #### Defined in
 
-index.ts:307
+index.ts:300
 
 ___
 
@@ -306,7 +306,7 @@ ___
 
 #### Defined in
 
-index.ts:343
+index.ts:336
 
 ___
 
@@ -328,7 +328,7 @@ Set the given color scale object to use and updates the plot and the legend
 
 #### Defined in
 
-index.ts:360
+index.ts:353
 
 ___
 
@@ -351,7 +351,7 @@ Set the selection to draw on front panel
 
 #### Defined in
 
-index.ts:403
+index.ts:396
 
 ___
 
@@ -375,7 +375,7 @@ Set the X range for next draw
 
 #### Defined in
 
-index.ts:372
+index.ts:365
 
 ___
 
@@ -399,7 +399,7 @@ Set the X range for next draw
 
 #### Defined in
 
-index.ts:391
+index.ts:384
 
 ___
 
@@ -419,7 +419,7 @@ ___
 
 #### Defined in
 
-index.ts:427
+index.ts:420
 
 ___
 

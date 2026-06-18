@@ -20,7 +20,7 @@
 
 #### Defined in
 
-types.ts:139
+types.ts:146
 
 ___
 
@@ -30,7 +30,7 @@ ___
 
 #### Defined in
 
-types.ts:140
+types.ts:147
 
 ___
 
@@ -40,4 +40,4 @@ ___
 
 #### Defined in
 
-types.ts:141
+types.ts:148

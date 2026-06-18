@@ -252,14 +252,14 @@ ___
 
 ### tooltipHandler
 
-▸ **tooltipHandler**(`x`, `ctx`): [`TooltipHandlerResponse`](../interfaces/types.TooltipHandlerResponse.md)
+▸ **tooltipHandler**(`x`, `_`): [`TooltipHandlerResponse`](../interfaces/types.TooltipHandlerResponse.md)
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `x` | `number` |
-| `ctx` | `CanvasRenderingContext2D` |
+| `_` | `CanvasRenderingContext2D` |
 
 #### Returns
 

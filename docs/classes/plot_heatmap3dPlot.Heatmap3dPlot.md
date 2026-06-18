@@ -201,13 +201,13 @@ ___
 
 ### dataFromXPos
 
-▸ **dataFromXPos**(`xPos`): [`DataFromPos`](../interfaces/types.DataFromPos.md)[]
+▸ **dataFromXPos**(`_`): [`DataFromPos`](../interfaces/types.DataFromPos.md)[]
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `xPos` | `number` |
+| `_` | `number` |
 
 #### Returns
 
@@ -279,14 +279,14 @@ ___
 
 ### tooltipHandler
 
-▸ **tooltipHandler**(`x`, `ctx`): [`TooltipHandlerResponse`](../interfaces/types.TooltipHandlerResponse.md)
+▸ **tooltipHandler**(`x`, `_`): [`TooltipHandlerResponse`](../interfaces/types.TooltipHandlerResponse.md)
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `x` | `number` |
-| `ctx` | `CanvasRenderingContext2D` |
+| `_` | `CanvasRenderingContext2D` |
 
 #### Returns
 
@@ -322,7 +322,7 @@ ___
 
 #### Defined in
 
-plot/heatmap3dPlot.ts:93
+plot/heatmap3dPlot.ts:96
 
 ___
 

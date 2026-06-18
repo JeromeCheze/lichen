@@ -27,10 +27,10 @@
 | `header.position` | `string` |
 | `header.width` | `number` |
 | `height` | `number` |
-| `hooks` | { `beforeDraw`: (`chart`: [`Lichen`](../classes/index.Lichen.md)) => `boolean` ; `beforeResetDisplay`: () => `boolean` ; `beforeSelection`: (`x`: `number`, `y`: `number`) => `boolean`  } |
-| `hooks.beforeDraw` | (`chart`: [`Lichen`](../classes/index.Lichen.md)) => `boolean` |
+| `hooks` | { `beforeDraw`: () => `boolean` ; `beforeResetDisplay`: () => `boolean` ; `beforeSelection`: () => `boolean`  } |
+| `hooks.beforeDraw` | () => `boolean` |
 | `hooks.beforeResetDisplay` | () => `boolean` |
-| `hooks.beforeSelection` | (`x`: `number`, `y`: `number`) => `boolean` |
+| `hooks.beforeSelection` | () => `boolean` |
 | `legend` | { `enabled`: `boolean` = true; `fontSize`: `number` = 10; `position`: `string` = 'bottom'; `width`: `number` = 80 } |
 | `legend.enabled` | `boolean` |
 | `legend.fontSize` | `number` |
@@ -39,7 +39,9 @@
 | `selection` | `string` |
 | `serieHeight` | `number` |
 | `stacked` | `boolean` |
-| `tooltip` | `boolean` |
+| `tooltip` | { `enabled`: `boolean` = true; `fontSize`: `number` = FONT\_SIZE } |
+| `tooltip.enabled` | `boolean` |
+| `tooltip.fontSize` | `number` |
 | `vLines` | `any`[] |
 | `xAxis` | { `datetime`: `boolean` = true; `enabled`: `boolean` = AXIS\_ENABLED; `fontSize`: `number` = FONT\_SIZE; `gridColor`: `string` = GRID\_COLOR; `gridEnabled`: `boolean` = GRID\_ENABLED; `lineWidth`: `number` = LINE\_WIDTH; `textColor`: `string` = AXIS\_TEXT\_COLOR; `tickLength`: `number` = TICK\_LENGTH; `tickWidth`: `number` = TICK\_WIDTH } |
 | `xAxis.datetime` | `boolean` |
@@ -67,4 +69,4 @@
 
 #### Defined in
 
-defaultOptions.ts:13
+defaultOptions.ts:11

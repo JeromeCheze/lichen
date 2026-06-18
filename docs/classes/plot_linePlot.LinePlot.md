@@ -173,7 +173,7 @@ plot/linePlot.ts:17
 
 #### Defined in
 
-plot/linePlot.ts:54
+plot/linePlot.ts:59
 
 ___
 
@@ -191,7 +191,7 @@ ___
 
 #### Defined in
 
-plot/linePlot.ts:108
+plot/linePlot.ts:113
 
 ___
 
@@ -211,7 +211,7 @@ ___
 
 #### Defined in
 
-plot/linePlot.ts:101
+plot/linePlot.ts:106
 
 ___
 
@@ -249,7 +249,7 @@ ___
 
 #### Defined in
 
-plot/linePlot.ts:117
+plot/linePlot.ts:122
 
 ___
 
@@ -267,7 +267,7 @@ ___
 
 #### Defined in
 
-plot/linePlot.ts:97
+plot/linePlot.ts:102
 
 ___
 
@@ -310,7 +310,7 @@ ___
 
 #### Defined in
 
-plot/linePlot.ts:150
+plot/linePlot.ts:155
 
 ___
 
@@ -328,7 +328,7 @@ ___
 
 #### Defined in
 
-plot/linePlot.ts:86
+plot/linePlot.ts:91
 
 ___
 
