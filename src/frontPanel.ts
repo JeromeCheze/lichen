@@ -70,6 +70,9 @@ export default class FrontPanel {
 
   destroy() {
     this.tooltipDiv?.remove()
+    if (this.tooltipDebounce != null) {
+      window.clearTimeout(this.tooltipDebounce)
+    }
   }
 
   handleActive(value: boolean) {

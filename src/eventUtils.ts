@@ -96,10 +96,10 @@ export default class EventUtils {
     if (this.state.mouseDownPos != null) {
       this.master.send('active', false)
       if (this.state.shiftKey) {
-        let x1 = null
-        let x2 = null
-        let y1 = null
-        let y2 = null
+        let x1: number | null = null
+        let x2: number | null = null
+        let y1: number | null = null
+        let y2: number | null = null
         if (Math.abs(x - this.state.mouseDownPos[0]) > SELECT_THRESHOLD) {
           x1 = this.dataUtils.xValueFromPos(this.state.mouseDownPos[0])!
           x2 = this.dataUtils.xValueFromPos(x)!
@@ -308,7 +308,7 @@ export default class EventUtils {
       }
     } else if (e.touches.length === 2) {
       const touches = this.state.touches
-      const cur = []
+      const cur: { identifier: number; x: number; y: number; }[] = []
       for (const t of e.touches) {
         const [x, y] = this.getRelativePosition(t)
         cur.push({ identifier: t.identifier, x, y })

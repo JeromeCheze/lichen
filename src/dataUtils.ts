@@ -145,7 +145,7 @@ export default class DataUtils {
       let valueSum = 0
       let valueSqSum = 0
       let valueCount = 0
-      let values = []
+      let values: number[] = []
       for (const v of data) {
         if (v == null) { 
           continue
@@ -245,7 +245,7 @@ export default class DataUtils {
     while (cs[i][0] < v) {
       i++
     }
-    const color = []
+    const color: number[] = []
     const r = this.getRatio(v, cs[i - 1][0], cs[i][0])
     for (let j = 0; j < cs[0][1].length; j++) {
       color.push(cs[i - 1][1][j] + r * (cs[i][1][j] - cs[i - 1][1][j]))

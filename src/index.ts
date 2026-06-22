@@ -15,7 +15,7 @@ import Legend from './legend.js'
 import MasterInterface from './masterInterface.js'
 import * as COLORMAPS from './colormaps.js'
 
-const PADDING = 10
+const PADDING = 0
 const PLOT_MAP = {
   line: LinePlot,
   heatmap2d: Heatmap2dPlot,
@@ -47,6 +47,7 @@ export default class Lichen {
   eventUtils: EventUtils | null
   debounceResize: number | null
   resizeHandler: () => void
+  resizeObserver: ResizeObserver
   /**
    * @param container - The HTML element container
    * @param opt - Charts options object
@@ -80,9 +81,8 @@ export default class Lichen {
       this.update()
     }
     this.resizeHandler = () => this.handleResize()
-    if (this.opt.autoResize) {
-      window.addEventListener('resize', this.resizeHandler)
-    }
+    this.resizeObserver = new ResizeObserver(this.resizeHandler)
+    this.resizeObserver.observe(container)
   }
 
   /**
@@ -155,7 +155,7 @@ export default class Lichen {
   destroy() {
     this.master.send('destroy', null)
     if (this.opt.autoResize) {
-      window.removeEventListener('resize', this.handleResize)
+      this.resizeObserver.disconnect()
     }
     this.wrapper!.remove()
     this.master.clear()
@@ -188,7 +188,7 @@ export default class Lichen {
     this.wrapper!.appendChild(canvasWrapperContainer)
     this.wrapper!.appendChild(legend)
     canvasWrapperContainer.appendChild(canvasWrapper)
-    let canvasWrapperContainerWidth = this.opt.width != null ? this.opt.width : this.wrapper!.getBoundingClientRect().width - 20
+    let canvasWrapperContainerWidth = this.opt.width != null ? this.opt.width : this.wrapper!.getBoundingClientRect().width - (2 * PADDING)
     if (this.opt.header.position === 'left') {
       canvasWrapperContainerWidth -= this.opt.header.width! + 2 * PADDING
       Object.assign(header.style, { display: 'inline-block', width: `${this.opt.header.width}px`, verticalAlign: 'middle', padding: `0 ${PADDING}px` })
